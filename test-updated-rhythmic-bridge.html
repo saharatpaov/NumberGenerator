@@ -81,6 +81,7 @@
               <option value="abc???abc?" data-type="The Rhythmic Bridge">abc-???-abc? (New)</option>
               <option value="abcabc????" data-type="The Rhythmic Bridge">abc-abc-???? (New)</option>
               <option value="???abcabc?" data-type="The Rhythmic Bridge">???-abc-abc? (New)</option>
+              <option value="abcabcabc?" data-type="The Rhythmic Bridge">abc-abc-abc? (New)</option>
             </optgroup>
           </select>
           <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
@@ -111,7 +112,8 @@
       const patternPairs = [
         { old: 'abcefgabcd', new: 'abc???abc?', name: 'Repeating pattern 2-3 block' },
         { old: 'abcabcdefg', new: 'abcabc????', name: 'Repeating pattern front-middle' },
-        { old: 'efgabcabcd', new: '???abcabc?', name: 'Repeating pattern middle-end' }
+        { old: 'efgabcabcd', new: '???abcabc?', name: 'Repeating pattern middle-end' },
+        { old: 'abcabcabcd', new: 'abcabcabc?', name: 'Fully linked on 3 blocks' }
       ];
       
       // Comparison Test
@@ -180,7 +182,7 @@
         try {
           const analyzer = new PatternAnalyzer();
           const generator = new PatternGenerator();
-          const newPatterns = ['abc???abc?', 'abcabc????', '???abcabc?'];
+          const newPatterns = ['abc???abc?', 'abcabc????', '???abcabc?', 'abcabcabc?'];
           
           let html = '';
           let allPassed = true;

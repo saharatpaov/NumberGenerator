@@ -94,6 +94,8 @@ npx serve .
 ### The Rhythmic Bridge
 - Repeating patterns: `abc???abc?` → 123-456-1237, etc.
 - Front-middle repeat: `abcabc????` → 123-123-4567, etc.
+- Middle-end repeat: `???abcabc?` → 456-123-1237, etc.
+- Fully linked: `abcabcabc?` → 123-123-1234, etc.
 
 ## 🎨 Customization
 

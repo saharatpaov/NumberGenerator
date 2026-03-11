@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test New Rhythmic Bridge Pattern</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+    .numbers { font-size: 12px; max-height: 200px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test New Rhythmic Bridge Pattern</h1>
+        <p>ทดสอบ pattern ใหม่: abcabcabc? (Fully linked on 3 blocks)</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- Test New Pattern -->
+      <div class="test-section">
+        <h2>🧪 Test: abcabcabc? Pattern</h2>
+        <p>Pattern ใหม่ที่เพิ่มเข้ามา: abc-abc-abc? (Fully linked on 3 blocks)</p>
+        <button id="test-new-pattern-btn" class="btn btn-primary">Test abcabcabc?</button>
+        <div id="new-pattern-results"></div>
+      </div>
+
+      <!-- Compare All Rhythmic Bridge Patterns -->
+      <div class="test-section">
+        <h2>🔄 Compare All Rhythmic Bridge Patterns</h2>
+        <button id="compare-all-btn" class="btn btn-primary">Compare All 4 Patterns</button>
+        <div id="comparison-results"></div>
+      </div>
+
+      <!-- Manual Test Area -->
+      <div class="test-section">
+        <h2>🎯 Manual Test Area</h2>
+        <p>ทดสอบ patterns ทั้งหมดด้วยตนเอง</p>
+        
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern:</label>
+          <select id="pattern-select">
+            <option value="">-- เลือก Pattern --</option>
+            <optgroup label="The Rhythmic Bridge (All 4 Patterns)">
+              <option value="abc???abc?" data-type="The Rhythmic Bridge">abc-???-abc? (Repeating pattern 2-3 block)</option>
+              <option value="abcabc????" data-type="The Rhythmic Bridge">abc-abc-???? (Repeating pattern front-middle)</option>
+              <option value="???abcabc?" data-type="The Rhythmic Bridge">???-abc-abc? (Repeating pattern middle-end)</option>
+              <option value="abcabcabc?" data-type="The Rhythmic Bridge">abc-abc-abc? (Fully linked on 3 blocks)</option>
+            </optgroup>
+          </select>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+        
+        <div id="pattern-list" class="pattern-list"></div>
+        
+        <div id="results-display" class="results-display"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the application
+      init();
+      
+      const testNewPatternBtn = document.getElementById('test-new-pattern-btn');
+      const newPatternResults = document.getElementById('new-pattern-results');
+      const compareAllBtn = document.getElementById('compare-all-btn');
+      const comparisonResults = document.getElementById('comparison-results');
+      
+      // Test new pattern
+      testNewPatternBtn.addEventListener('click', function() {
+        newPatternResults.innerHTML = '<p>Testing abcabcabc? pattern...</p>';
+        
+        try {
+          const analyzer = new PatternAnalyzer();
+          const generator = new PatternGenerator();
+          
+          const pattern = 'abcabcabc?';
+          const patternType = analyzer.identifyPatternType(pattern);
+          const results = generator.generate(pattern, patternType);
+          
+          let html = '<div class="test-result ' + (results.length > 0 ? 'success' : 'error') + '">';
+          html += '<h4>abcabcabc? Test Results</h4>';
+          html += `<p><strong>Pattern:</strong> ${pattern}</p>`;
+          html += `<p><strong>Classified as:</strong> ${patternType}</p>`;
+          html += `<p><strong>Generated numbers:</strong> ${results.length}</p>`;
+          html += `<p><strong>Status:</strong> ${results.length > 0 ? '✅ SUCCESS' : '❌ FAILED'}</p>`;
+          html += '</div>';
+          
+          if (results.length > 0) {
+            html += '<div class="test-result info">';
+            html += '<h4>Sample Numbers (first 10)</h4>';
+            html += '<div class="numbers">' + results.slice(0, 10).join('<br>') + '</div>';
+            html += '</div>';
+            
+            // Pattern analysis
+            html += '<div class="test-result info">';
+            html += '<h4>Pattern Analysis</h4>';
+            html += '<p><strong>Expected behavior:</strong> abc positions should use same digits across all 3 blocks</p>';
+            html += '<p><strong>Wildcard position:</strong> Last position (index 9)</p>';
+            html += '<p><strong>Pattern structure:</strong> abc-abc-abc? (fully linked)</p>';
+            html += '</div>';
+          }
+          
+          newPatternResults.innerHTML = html;
+          
+        } catch (error) {
+          newPatternResults.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+        }
+      });
+      
+      // Compare all patterns
+      compareAllBtn.addEventListener('click', function() {
+        comparisonResults.innerHTML = '<p>Comparing all Rhythmic Bridge patterns...</p>';
+        
+        try {
+          const analyzer = new PatternAnalyzer();
+          const generator = new PatternGenerator();
+          
+          const patterns = [
+            { pattern: 'abc???abc?', name: 'Repeating pattern 2-3 block' },
+            { pattern: 'abcabc????', name: 'Repeating pattern front-middle' },
+            { pattern: '???abcabc?', name: 'Repeating pattern middle-end' },
+            { pattern: 'abcabcabc?', name: 'Fully linked on 3 blocks' }
+          ];
+          
+          let html = '<div class="test-result info">';
+          html += '<h4>All Rhythmic Bridge Patterns Comparison</h4>';
+          html += '<table style="width: 100%; border-collapse: collapse;">';
+          html += '<tr style="background-color: #f0f0f0;"><th style="border: 1px solid #ddd; padding: 8px;">Pattern</th><th style="border: 1px solid #ddd; padding: 8px;">Description</th><th style="border: 1px solid #ddd; padding: 8px;">Count</th><th style="border: 1px solid #ddd; padding: 8px;">Status</th></tr>';
+          
+          let allPassed = true;
+          
+          patterns.forEach(patternInfo => {
+            try {
+              const patternType = analyzer.identifyPatternType(patternInfo.pattern);
+              const results = generator.generate(patternInfo.pattern, patternType);
+              const passed = results.length > 0 && patternType === 'The Rhythmic Bridge';
+              
+              if (!passed) allPassed = false;
+              
+              html += '<tr>';
+              html += `<td style="border: 1px solid #ddd; padding: 8px; font-family: monospace;">${patternInfo.pattern}</td>`;
+              html += `<td style="border: 1px solid #ddd; padding: 8px;">${patternInfo.name}</td>`;
+              html += `<td style="border: 1px solid #ddd; padding: 8px;">${results.length.toLocaleString()}</td>`;
+              html += `<td style="border: 1px solid #ddd; padding: 8px;">${passed ? '✅ PASS' : '❌ FAIL'}</td>`;
+              html += '</tr>';
+              
+            } catch (error) {
+              allPassed = false;
+              html += '<tr>';
+              html += `<td style="border: 1px solid #ddd; padding: 8px; font-family: monospace;">${patternInfo.pattern}</td>`;
+              html += `<td colspan="3" style="border: 1px solid #ddd; padding: 8px;">❌ Error: ${error.message}</td>`;
+              html += '</tr>';
+            }
+          });
+          
+          html += '</table>';
+          html += `<p style="margin-top: 10px;"><strong>Overall Result: ${allPassed ? '✅ ALL PATTERNS WORKING' : '❌ SOME PATTERNS FAILED'}</strong></p>`;
+          html += '</div>';
+          
+          comparisonResults.innerHTML = html;
+          
+        } catch (error) {
+          comparisonResults.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+        }
+      });
+      
+      // Manual test area
+      const patternSelect = document.getElementById('pattern-select');
+      const addPatternBtn = document.getElementById('add-pattern-btn');
+      
+      addPatternBtn.addEventListener('click', function() {
+        const selectedPattern = patternSelect.value;
+        if (selectedPattern) {
+          try {
+            state.patternManager.addPattern(selectedPattern);
+            uiController.updateUI();
+            patternSelect.value = '';
+            document.getElementById('error-message').textContent = '';
+          } catch (error) {
+            document.getElementById('error-message').textContent = error.message;
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

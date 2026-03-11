@@ -56,6 +56,13 @@
         <div id="pattern3-results"></div>
       </div>
 
+      <!-- Test 4: abcabcabc? -->
+      <div class="test-section">
+        <h2>🧪 Test 4: abcabcabc? Pattern</h2>
+        <button id="test-pattern4-btn" class="btn btn-primary">Test abcabcabc?</button>
+        <div id="pattern4-results"></div>
+      </div>
+
       <!-- Manual Test Area -->
       <div class="test-section">
         <h2>🎯 Manual Test Area</h2>
@@ -68,6 +75,7 @@
             <option value="abc???abc?" data-type="The Rhythmic Bridge">abc-???-abc? (Repeating pattern 2-3 block)</option>
             <option value="abcabc????" data-type="The Rhythmic Bridge">abc-abc-???? (Repeating pattern front-middle)</option>
             <option value="???abcabc?" data-type="The Rhythmic Bridge">???-abc-abc? (Repeating pattern middle-end)</option>
+            <option value="abcabcabc?" data-type="The Rhythmic Bridge">abc-abc-abc? (Fully linked on 3 blocks)</option>
           </select>
           <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
         </div>
@@ -167,6 +175,10 @@
       
       document.getElementById('test-pattern3-btn').addEventListener('click', function() {
         testPattern('???abcabc?', 'pattern3-results', '???abcabc?');
+      });
+      
+      document.getElementById('test-pattern4-btn').addEventListener('click', function() {
+        testPattern('abcabcabc?', 'pattern4-results', 'abcabcabc?');
       });
       
       // Manual test area
