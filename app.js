@@ -1983,7 +1983,7 @@ function updateUI() {
 class CSVExporter {
   /**
    * Exports all pattern-number combinations to CSV file
-   * Format: pattern, pattern_type, phone_number (one row per number)
+   * Format: account_number, pattern, pattern_type (one row per number)
    * @param {Array<{pattern: string, patternType: string, numbers: string[]}>} data
    * @returns {void} Triggers browser download
    */
@@ -1998,7 +1998,7 @@ class CSVExporter {
       
       // Create filename with timestamp
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-      const filename = `pattern-numbers-${timestamp}.csv`;
+      const filename = `account-numbers-${timestamp}.csv`;
       
       // Trigger download
       this.downloadFile(csvContent, filename);
@@ -2031,10 +2031,10 @@ class CSVExporter {
       const rows = new Array(totalRows);
       let rowIndex = 0;
 
-      // Add header row
-      rows[rowIndex++] = 'pattern,pattern_type,phone_number';
+      // Add header row with new column order
+      rows[rowIndex++] = 'pattern_type,pattern,account_number';
 
-      // Track seen phone numbers to remove duplicates (first occurrence wins)
+      // Track seen account numbers to remove duplicates (first occurrence wins)
       const seenNumbers = new Set();
 
       // Performance optimization: Batch process data to avoid memory pressure
@@ -2051,17 +2051,17 @@ class CSVExporter {
         for (let i = 0; i < numbers.length; i += batchSize) {
           const batch = numbers.slice(i, i + batchSize);
 
-          batch.forEach(phoneNumber => {
-            // Skip if we've already seen this phone number
-            if (seenNumbers.has(phoneNumber)) {
+          batch.forEach(accountNumber => {
+            // Skip if we've already seen this account number
+            if (seenNumbers.has(accountNumber)) {
               return;
             }
 
             // Mark this number as seen
-            seenNumbers.add(phoneNumber);
+            seenNumbers.add(accountNumber);
 
-            // Direct string concatenation is faster than array join for small strings
-            rows[rowIndex++] = escapedPattern + ',' + escapedPatternType + ',' + this.escapeCSVValue(phoneNumber);
+            // New column order: pattern_type, pattern, account_number
+            rows[rowIndex++] = escapedPatternType + ',' + escapedPattern + ',' + this.escapeCSVValue(accountNumber);
           });
 
           // Yield control for very large datasets (prevent UI blocking)
@@ -2356,69 +2356,144 @@ class UIController {
    * PERFORMANCE OPTIMIZED: Implements virtual scrolling for large result sets
    */
   updateResultsDisplay() {
-    const patternGroups = state.patternManager.getAllPatternGroups();
+      const patternGroups = state.patternManager.getAllPatternGroups();
 
-    if (patternGroups.length === 0) {
-      this.elements.resultsDisplay.innerHTML = '<p style="color: #666; text-align: center;">ยังไม่มีผลลัพธ์</p>';
-    } else {
-      // Sort pattern groups by number count (ascending - fewest numbers first)
-      const sortedPatternGroups = patternGroups.sort((a, b) => a.numbers.length - b.numbers.length);
-      
-      // Use DocumentFragment for batch DOM updates (performance optimization)
-      const fragment = document.createDocumentFragment();
-      
-      sortedPatternGroups.forEach((group, sortedIndex) => {
-        const resultGroup = document.createElement('div');
-        resultGroup.className = 'result-group';
-        
-        // Create header with formatted number count
-        const header = document.createElement('h3');
-        header.textContent = `${group.pattern} (${group.patternType}) - ${group.numbers.length.toLocaleString()} numbers`;
-        resultGroup.appendChild(header);
-        
-        // Sort numbers within each group (ascending order for better readability)
-        const sortedNumbers = [...group.numbers].sort((a, b) => {
-          // Remove dashes and compare as numbers
-          const numA = parseInt(a.replace(/-/g, ''));
-          const numB = parseInt(b.replace(/-/g, ''));
-          return numA - numB; // Ascending order
+      if (patternGroups.length === 0) {
+        this.elements.resultsDisplay.innerHTML = '<p style="color: #666; text-align: center;">ยังไม่มีผลลัพธ์</p>';
+      } else {
+        // Display patterns in selection order (by timestamp) instead of sorting by number count
+        const orderedPatternGroups = patternGroups.sort((a, b) => a.timestamp - b.timestamp);
+
+        // Use DocumentFragment for batch DOM updates (performance optimization)
+        const fragment = document.createDocumentFragment();
+
+        orderedPatternGroups.forEach((group, groupIndex) => {
+          const resultGroup = document.createElement('div');
+          resultGroup.className = 'result-group';
+
+          // Create header with formatted number count
+          const header = document.createElement('h3');
+          header.textContent = `${group.pattern} (${group.patternType}) - ${group.numbers.length.toLocaleString()} numbers`;
+          resultGroup.appendChild(header);
+
+          // Cache sorted numbers to avoid re-sorting on pagination
+          if (!group._sortedNumbers) {
+            group._sortedNumbers = [...group.numbers].sort((a, b) => {
+              // Remove dashes and compare as numbers
+              const numA = parseInt(a.replace(/-/g, ''));
+              const numB = parseInt(b.replace(/-/g, ''));
+              return numA - numB; // Ascending order
+            });
+          }
+
+          const sortedNumbers = group._sortedNumbers;
+
+          // Pagination setup
+          const itemsPerPage = 1000;
+          const totalPages = Math.ceil(sortedNumbers.length / itemsPerPage);
+          const currentPage = this.currentPages?.[groupIndex] || 1;
+
+          // Initialize currentPages if not exists
+          if (!this.currentPages) {
+            this.currentPages = {};
+          }
+          this.currentPages[groupIndex] = currentPage;
+
+          // Get current page numbers
+          const startIndex = (currentPage - 1) * itemsPerPage;
+          const endIndex = Math.min(startIndex + itemsPerPage, sortedNumbers.length);
+          const numbersToShow = sortedNumbers.slice(startIndex, endIndex);
+
+          // Create numbers grid with click to copy (optimized)
+          const numbersGrid = document.createElement('div');
+          numbersGrid.className = 'numbers-grid';
+
+          // Use innerHTML for better performance with large datasets
+          let gridHTML = '';
+          numbersToShow.forEach(number => {
+            gridHTML += `<span class="number-item clickable" title="คลิกเพื่อ copy เลขบัญชี" onclick="uiController.copyAccountNumber('${number}', this)">${number}</span>`;
+          });
+          numbersGrid.innerHTML = gridHTML;
+
+          resultGroup.appendChild(numbersGrid);
+
+          // Create combined pagination section (moved to bottom)
+          if (totalPages > 1) {
+            const paginationSection = document.createElement('div');
+            paginationSection.className = 'pagination-section';
+
+            // 1. แสดงรายการที่ (range info)
+            const rangeInfo = document.createElement('div');
+            rangeInfo.className = 'pagination-range-info';
+            rangeInfo.innerHTML = `แสดงรายการที่ ${(startIndex + 1).toLocaleString()} - ${endIndex.toLocaleString()} จากทั้งหมด ${sortedNumbers.length.toLocaleString()} รายการ`;
+            paginationSection.appendChild(rangeInfo);
+
+            // 2. ไปหน้า (page input)
+            const pageInputContainer = document.createElement('div');
+            pageInputContainer.className = 'page-input-container';
+            pageInputContainer.innerHTML = `
+              <span>ไปหน้า: </span>
+              <input type="number" class="page-input" min="1" max="${totalPages}" value="${currentPage}" 
+                     onchange="uiController.goToPage(${groupIndex}, this.value)" 
+                     onkeypress="if(event.key==='Enter') uiController.goToPage(${groupIndex}, this.value)">
+              <span> จาก ${totalPages}</span>
+            `;
+            paginationSection.appendChild(pageInputContainer);
+
+            // 3. Pagination controls
+            const paginationControls = document.createElement('div');
+            paginationControls.className = 'pagination-controls';
+
+            let paginationHTML = '';
+
+            // Previous button
+            if (currentPage > 1) {
+              paginationHTML += `<button class="btn btn-pagination" onclick="uiController.changePage(${groupIndex}, ${currentPage - 1})">« ก่อนหน้า</button>`;
+            }
+
+            // Smart page number display (show fewer pages for better performance)
+            const maxVisiblePages = 7; // Reduced from 10 to 7
+            const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (startPage > 1) {
+              paginationHTML += `<button class="btn btn-pagination" onclick="uiController.changePage(${groupIndex}, 1)">1</button>`;
+              if (startPage > 2) {
+                paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+              }
+            }
+
+            for (let page = startPage; page <= endPage; page++) {
+              const isActive = page === currentPage ? ' active' : '';
+              paginationHTML += `<button class="btn btn-pagination${isActive}" onclick="uiController.changePage(${groupIndex}, ${page})">${page}</button>`;
+            }
+
+            if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+              }
+              paginationHTML += `<button class="btn btn-pagination" onclick="uiController.changePage(${groupIndex}, ${totalPages})">${totalPages}</button>`;
+            }
+
+            // Next button
+            if (currentPage < totalPages) {
+              paginationHTML += `<button class="btn btn-pagination" onclick="uiController.changePage(${groupIndex}, ${currentPage + 1})">ถัดไป »</button>`;
+            }
+
+            paginationControls.innerHTML = paginationHTML;
+            paginationSection.appendChild(paginationControls);
+
+            resultGroup.appendChild(paginationSection);
+          }
+
+          fragment.appendChild(resultGroup);
         });
-        
-        // Performance optimization: Limit display for very large result sets
-        const displayLimit = 1000;
-        const numbersToShow = sortedNumbers.slice(0, displayLimit);
-        const hasMore = sortedNumbers.length > displayLimit;
-        
-        // Create numbers grid
-        const numbersGrid = document.createElement('div');
-        numbersGrid.className = 'numbers-grid';
-        
-        // Batch create number elements
-        numbersToShow.forEach(number => {
-          const numberItem = document.createElement('span');
-          numberItem.className = 'number-item';
-          numberItem.textContent = number;
-          numbersGrid.appendChild(numberItem);
-        });
-        
-        resultGroup.appendChild(numbersGrid);
-        
-        // Show truncation message if needed
-        if (hasMore) {
-          const truncationMsg = document.createElement('p');
-          truncationMsg.className = 'truncation-message';
-          truncationMsg.innerHTML = `<em>Showing first ${displayLimit.toLocaleString()} of ${sortedNumbers.length.toLocaleString()} numbers (sorted low to high). <a href="#" onclick="uiController.showAllNumbers(${sortedIndex})">Show all</a> | All numbers available in CSV export.</em>`;
-          resultGroup.appendChild(truncationMsg);
-        }
-        
-        fragment.appendChild(resultGroup);
-      });
-      
-      // Single DOM update (performance optimization)
-      this.elements.resultsDisplay.innerHTML = '';
-      this.elements.resultsDisplay.appendChild(fragment);
+
+        // Single DOM update (performance optimization)
+        this.elements.resultsDisplay.innerHTML = '';
+        this.elements.resultsDisplay.appendChild(fragment);
+      }
     }
-  }
 
   /**
    * Show all numbers for a specific pattern group (on-demand loading)
@@ -2592,6 +2667,239 @@ class UIController {
         console.error('Invalid displayIndex for removal:', displayIndex);
       }
     }
+  /**
+   * Change page for a specific pattern group
+   * @param {number} groupIndex - Index of the pattern group
+   * @param {number} newPage - New page number
+   */
+  /**
+     * Change page for a specific pattern group (optimized)
+     * @param {number} groupIndex - Index of the pattern group
+     * @param {number} newPage - New page number
+     */
+    changePage(groupIndex, newPage) {
+      if (!this.currentPages) {
+        this.currentPages = {};
+      }
+      this.currentPages[groupIndex] = newPage;
+
+      // Instead of re-rendering everything, just update the specific group
+      this.updateSingleGroupDisplay(groupIndex);
+
+      // Scroll to the pattern group
+      const resultGroups = document.querySelectorAll('.result-group');
+      if (resultGroups[groupIndex]) {
+        resultGroups[groupIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    /**
+     * Update display for a single pattern group (performance optimization)
+     * @param {number} groupIndex - Index of the pattern group to update
+     */
+    /**
+       * Update display for a single pattern group (performance optimization)
+       * @param {number} groupIndex - Index of the pattern group to update
+       */
+      updateSingleGroupDisplay(groupIndex) {
+        const patternGroups = state.patternManager.getAllPatternGroups();
+        const orderedPatternGroups = patternGroups.sort((a, b) => a.timestamp - b.timestamp);
+
+        if (groupIndex >= orderedPatternGroups.length) {
+          return;
+        }
+
+        const group = orderedPatternGroups[groupIndex];
+        const resultGroups = document.querySelectorAll('.result-group');
+        const targetGroup = resultGroups[groupIndex];
+
+        if (!targetGroup) {
+          // Fallback to full update if group not found
+          this.updateResultsDisplay();
+          return;
+        }
+
+        // Use cached sorted numbers
+        if (!group._sortedNumbers) {
+          group._sortedNumbers = [...group.numbers].sort((a, b) => {
+            const numA = parseInt(a.replace(/-/g, ''));
+            const numB = parseInt(b.replace(/-/g, ''));
+            return numA - numB;
+          });
+        }
+
+        const sortedNumbers = group._sortedNumbers;
+        const itemsPerPage = 1000;
+        const totalPages = Math.ceil(sortedNumbers.length / itemsPerPage);
+        const currentPage = this.currentPages[groupIndex] || 1;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, sortedNumbers.length);
+        const numbersToShow = sortedNumbers.slice(startIndex, endIndex);
+
+        // Update numbers grid
+        const numbersGrid = targetGroup.querySelector('.numbers-grid');
+        if (numbersGrid) {
+          let gridHTML = '';
+          numbersToShow.forEach(number => {
+            gridHTML += `<span class="number-item clickable" title="คลิกเพื่อ copy เลขบัญชี" onclick="uiController.copyAccountNumber('${number}', this)">${number}</span>`;
+          });
+          numbersGrid.innerHTML = gridHTML;
+        }
+
+        // Update pagination section
+        const paginationSection = targetGroup.querySelector('.pagination-section');
+        if (paginationSection && totalPages > 1) {
+          // Update range info
+          const rangeInfo = paginationSection.querySelector('.pagination-range-info');
+          if (rangeInfo) {
+            rangeInfo.innerHTML = `แสดงรายการที่ ${(startIndex + 1).toLocaleString()} - ${endIndex.toLocaleString()} จากทั้งหมด ${sortedNumbers.length.toLocaleString()} รายการ`;
+          }
+
+          // Update page input
+          const pageInputContainer = paginationSection.querySelector('.page-input-container');
+          if (pageInputContainer) {
+            pageInputContainer.innerHTML = `
+              <span>ไปหน้า: </span>
+              <input type="number" class="page-input" min="1" max="${totalPages}" value="${currentPage}" 
+                     onchange="uiController.goToPage(${groupIndex}, this.value)" 
+                     onkeypress="if(event.key==='Enter') uiController.goToPage(${groupIndex}, this.value)">
+              <span> จาก ${totalPages}</span>
+            `;
+          }
+
+          // Update pagination controls
+          const paginationControls = paginationSection.querySelector('.pagination-controls');
+          if (paginationControls) {
+            let paginationHTML = '';
+
+            // Previous button
+            if (currentPage > 1) {
+              paginationHTML += `<button class="btn btn-pagination" onclick="uiController.changePage(${groupIndex}, ${currentPage - 1})">« ก่อนหน้า</button>`;
+            }
+
+            // Smart page number display
+            const maxVisiblePages = 7;
+            const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (startPage > 1) {
+              paginationHTML += `<button class="btn btn-pagination" onclick="uiController.changePage(${groupIndex}, 1)">1</button>`;
+              if (startPage > 2) {
+                paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+              }
+            }
+
+            for (let page = startPage; page <= endPage; page++) {
+              const isActive = page === currentPage ? ' active' : '';
+              paginationHTML += `<button class="btn btn-pagination${isActive}" onclick="uiController.changePage(${groupIndex}, ${page})">${page}</button>`;
+            }
+
+            if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+              }
+              paginationHTML += `<button class="btn btn-pagination" onclick="uiController.changePage(${groupIndex}, ${totalPages})">${totalPages}</button>`;
+            }
+
+            // Next button
+            if (currentPage < totalPages) {
+              paginationHTML += `<button class="btn btn-pagination" onclick="uiController.changePage(${groupIndex}, ${currentPage + 1})">ถัดไป »</button>`;
+            }
+
+            paginationControls.innerHTML = paginationHTML;
+          }
+        }
+      }
+  /**
+   * Go to specific page for a pattern group
+   * @param {number} groupIndex - Index of the pattern group
+   * @param {string|number} pageInput - Page number input
+   */
+  goToPage(groupIndex, pageInput) {
+    const pageNumber = parseInt(pageInput);
+
+    if (isNaN(pageNumber) || pageNumber < 1) {
+      alert('กรุณาใส่เลขหน้าที่ถูกต้อง');
+      return;
+    }
+
+    const patternGroups = state.patternManager.getAllPatternGroups();
+    const orderedPatternGroups = patternGroups.sort((a, b) => a.timestamp - b.timestamp);
+
+    if (groupIndex >= orderedPatternGroups.length) {
+      return;
+    }
+
+    const group = orderedPatternGroups[groupIndex];
+    const totalPages = Math.ceil(group.numbers.length / 1000);
+
+    if (pageNumber > totalPages) {
+      alert(`หน้าที่ ${pageNumber} ไม่มีอยู่ (มีทั้งหมด ${totalPages} หน้า)`);
+      return;
+    }
+
+    this.changePage(groupIndex, pageNumber);
+  }
+
+  /**
+   * Copy account number to clipboard and show feedback
+   * @param {string} accountNumber - Account number to copy
+   * @param {HTMLElement} element - Element that was clicked
+   */
+  async copyAccountNumber(accountNumber, element) {
+    try {
+      // Remove dashes for copying (clean account number)
+      const cleanAccountNumber = accountNumber.replace(/-/g, '');
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(cleanAccountNumber);
+
+      // Show visual feedback
+      const originalText = element.textContent;
+      const originalClass = element.className;
+
+      element.textContent = 'Copied!';
+      element.className = originalClass + ' copied';
+
+      // Reset after 1.5 seconds
+      setTimeout(() => {
+        element.textContent = originalText;
+        element.className = originalClass;
+      }, 1500);
+
+    } catch (error) {
+      console.error('Failed to copy account number:', error);
+
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = accountNumber.replace(/-/g, '');
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
+
+        // Show visual feedback
+        const originalText = element.textContent;
+        const originalClass = element.className;
+
+        element.textContent = 'Copied!';
+        element.className = originalClass + ' copied';
+
+        setTimeout(() => {
+          element.textContent = originalText;
+          element.className = originalClass;
+        }, 1500);
+
+      } catch (fallbackError) {
+        console.error('Fallback copy failed:', fallbackError);
+        alert('ไม่สามารถ copy ได้ กรุณา copy ด้วยตนเอง: ' + accountNumber.replace(/-/g, ''));
+      }
+
+      document.body.removeChild(textArea);
+    }
+  }
 }
 
 /**
