@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Pattern Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; }
+    .pass { color: green; }
+    .fail { color: red; }
+    .info { color: blue; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Pattern Validation Test</h1>
+  <button onclick="runTests()" style="padding: 10px 20px; font-size: 16px;">Run Tests</button>
+  <div id="results" style="margin-top: 20px;"></div>
+
+  <script src="app.js"></script>
+  <script src="validate-patterns.js"></script>
+  
+  <script>
+    function runTests() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<p>Running tests...</p>';
+      
+      // Capture console output
+      const originalLog = console.log;
+      let output = '';
+      console.log = function(...args) {
+        output += args.join(' ') + '\n';
+        originalLog.apply(console, args);
+      };
+      
+      try {
+        const results = runValidationTests();
+        
+        // Restore console.log
+        console.log = originalLog;
+        
+        // Display results
+        resultsDiv.innerHTML = `<pre>${output}</pre>`;
+        
+      } catch (error) {
+        console.log = originalLog;
+        resultsDiv.innerHTML = `<p class="fail">Error: ${error.message}</p><pre>${output}</pre>`;
+      }
+    }
+  </script>
+</body>
+</html>

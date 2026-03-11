@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Pattern abcaxxabcd</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .pattern-analysis {
+            background: #f9f9f9;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+        }
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 5px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .number-item {
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 4px;
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Pattern: abcaxxabcd</h1>
+    
+    <div class="test-section">
+        <h2>Pattern Analysis</h2>
+        <div id="analysis-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Generated Numbers</h2>
+        <div id="generation-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Pattern Structure Verification</h2>
+        <div id="structure-results"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            element.appendChild(div);
+            console.log(message.replace(/<[^>]*>/g, ''));
+        }
+
+        function runTest() {
+            const pattern = 'abcaxxabcd';
+            
+            try {
+                log('analysis-results', '<h3>🔍 Pattern Analysis</h3>');
+                
+                // Step 1: Validate pattern
+                const validator = new PatternValidator();
+                const validation = validator.validate(pattern);
+                
+                if (!validation.isValid) {
+                    log('analysis-results', `❌ Pattern validation failed: ${validation.errorMessage}`, 'error');
+                    return;
+                }
+                
+                log('analysis-results', '✅ Pattern validation passed', 'success');
+                
+                // Step 2: Identify pattern type
+                const analyzer = new PatternAnalyzer();
+                const patternType = analyzer.identifyPatternType(pattern);
+                
+                log('analysis-results', `<strong>Pattern Type:</strong> ${patternType}`, 'info');
+                
+                // Step 3: Analyze structure
+                if (patternType === 'The Rhythmic Bridge') {
+                    const structure = analyzer.analyzeRhythmicStructure(pattern);
+                    
+                    log('analysis-results', '<div class="pattern-analysis">');
+                    log('analysis-results', '<strong>Rhythmic Bridge Structure:</strong>');
+                    log('analysis-results', `• Unique Letters: ${structure.uniqueLetters.join(', ')}`);
+                    log('analysis-results', `• Expected Combinations: ${structure.expectedCombinations.toLocaleString()}`);
+                    
+                    log('analysis-results', '<strong>Letter Positions:</strong>');
+                    for (const [letter, positions] of structure.letterPositions) {
+                        log('analysis-results', `• ${letter}: positions ${positions.join(', ')}`);
+                    }
+                    
+                    log('analysis-results', '<strong>Repeat Groups:</strong>');
+                    structure.repeatGroups.forEach((group, index) => {
+                        log('analysis-results', `• Group ${index + 1}: positions ${group.join(', ')}`);
+                    });
+                    
+                    log('analysis-results', `<strong>Independent Positions:</strong> ${structure.independentPositions.join(', ')}`);
+                    log('analysis-results', '</div>');
+                }
+                
+                // Step 4: Generate numbers
+                log('generation-results', '<h3>🔢 Number Generation</h3>');
+                
+                const generator = new PatternGenerator();
+                const startTime = performance.now();
+                const numbers = generator.generate(pattern, patternType);
+                const endTime = performance.now();
+                
+                log('generation-results', `<strong>Generation Time:</strong> ${(endTime - startTime).toFixed(2)}ms`, 'info');
+                log('generation-results', `<strong>Generated Count:</strong> ${numbers.length.toLocaleString()} numbers`, 'success');
+                
+                // Show first 20 numbers
+                log('generation-results', '<strong>First 20 Numbers:</strong>');
+                const first20 = numbers.slice(0, 20);
+                log('generation-results', `<div class="number-grid">${first20.map(num => `<div class="number-item">${num}</div>`).join('')}</div>`);
+                
+                if (numbers.length > 20) {
+                    log('generation-results', '<strong>Last 20 Numbers:</strong>');
+                    const last20 = numbers.slice(-20);
+                    log('generation-results', `<div class="number-grid">${last20.map(num => `<div class="number-item">${num}</div>`).join('')}</div>`);
+                }
+                
+                // Step 5: Verify structure
+                log('structure-results', '<h3>🔍 Structure Verification</h3>');
+                
+                // Check if numbers follow the pattern structure
+                const sampleNumbers = numbers.slice(0, 100); // Check first 100 numbers
+                const patternPositions = {
+                    'a': [0, 3, 7],    // positions where 'a' appears
+                    'b': [1, 8],       // positions where 'b' appears  
+                    'c': [2, 9],       // positions where 'c' appears
+                    'x': [4, 5],       // positions where 'x' appears (independent)
+                    'd': [6]           // position where 'd' appears
+                };
+                
+                log('structure-results', '<strong>Pattern Structure Analysis:</strong>');
+                log('structure-results', `Pattern: ${pattern}`);
+                log('structure-results', 'Expected structure:');
+                log('structure-results', '• a appears at positions: 0, 3, 7 (must use same digit)');
+                log('structure-results', '• b appears at positions: 1, 8 (must use same digit)');
+                log('structure-results', '• c appears at positions: 2, 9 (must use same digit)');
+                log('structure-results', '• x appears at positions: 4, 5 (independent digits)');
+                log('structure-results', '• d appears at position: 6 (independent digit)');
+                
+                // Verify some sample numbers
+                log('structure-results', '<strong>Sample Verification:</strong>');
+                let validCount = 0;
+                let invalidCount = 0;
+                
+                sampleNumbers.slice(0, 10).forEach((number, index) => {
+                    const digits = number.replace(/-/g, ''); // Remove dashes
+                    let isValid = true;
+                    let issues = [];
+                    
+                    // Check 'a' positions (0, 3, 7)
+                    const aDigits = [digits[0], digits[3], digits[7]];
+                    if (!(aDigits[0] === aDigits[1] && aDigits[1] === aDigits[2])) {
+                        isValid = false;
+                        issues.push(`'a' positions have different digits: ${aDigits.join(',')}`);
+                    }
+                    
+                    // Check 'b' positions (1, 8)
+                    const bDigits = [digits[1], digits[8]];
+                    if (bDigits[0] !== bDigits[1]) {
+                        isValid = false;
+                        issues.push(`'b' positions have different digits: ${bDigits.join(',')}`);
+                    }
+                    
+                    // Check 'c' positions (2, 9)
+                    const cDigits = [digits[2], digits[9]];
+                    if (cDigits[0] !== cDigits[1]) {
+                        isValid = false;
+                        issues.push(`'c' positions have different digits: ${cDigits.join(',')}`);
+                    }
+                    
+                    if (isValid) {
+                        validCount++;
+                        log('structure-results', `✅ ${number}: Valid (a=${aDigits[0]}, b=${bDigits[0]}, c=${cDigits[0]}, x=${digits[4]}${digits[5]}, d=${digits[6]})`, 'success');
+                    } else {
+                        invalidCount++;
+                        log('structure-results', `❌ ${number}: Invalid - ${issues.join('; ')}`, 'error');
+                    }
+                });
+                
+                log('structure-results', `<strong>Verification Summary:</strong> ${validCount} valid, ${invalidCount} invalid out of ${Math.min(10, sampleNumbers.length)} checked`, 
+                    invalidCount === 0 ? 'success' : 'error');
+                
+                // Calculate expected vs actual
+                const expectedCount = Math.pow(10, 5); // 5 unique letters: a, b, c, x, d (but x appears twice independently)
+                // Actually: a, b, c, d are unique letters, x appears twice but independently
+                // So we have: 10 choices for 'a' × 10 for 'b' × 10 for 'c' × 10 for 'd' × 10 for first 'x' × 10 for second 'x'
+                // But wait, that would be 10^6 = 1,000,000
+                // Let me recalculate: unique letters are a, b, c, x, d = 5 letters
+                // But x appears in 2 positions independently, so it's like having x1 and x2
+                // So really we have 6 independent choices: a, b, c, x1, x2, d = 10^6 = 1,000,000
+                
+                const actualExpected = 1000000; // 10^6 for 6 independent digit choices
+                log('structure-results', `<strong>Expected Count:</strong> ${actualExpected.toLocaleString()} (10^6 for 6 independent digit choices)`, 'info');
+                log('structure-results', `<strong>Actual Count:</strong> ${numbers.length.toLocaleString()}`, numbers.length === actualExpected ? 'success' : 'warning');
+                
+                if (numbers.length !== actualExpected) {
+                    log('structure-results', `⚠️ Count mismatch! Expected ${actualExpected.toLocaleString()}, got ${numbers.length.toLocaleString()}`, 'warning');
+                    
+                    // Let's analyze why
+                    const uniqueLetters = [...new Set(pattern.split(''))];
+                    log('structure-results', `Unique letters in pattern: ${uniqueLetters.join(', ')} (${uniqueLetters.length} letters)`, 'info');
+                    log('structure-results', `Current algorithm calculates: 10^${uniqueLetters.length} = ${Math.pow(10, uniqueLetters.length).toLocaleString()}`, 'info');
+                    log('structure-results', 'Issue: Algorithm treats repeated letters as single choice, but they should be independent', 'warning');
+                }
+                
+            } catch (error) {
+                log('analysis-results', `❌ Test failed: ${error.message}`, 'error');
+                console.error('Test error:', error);
+            }
+        }
+
+        // Run test when page loads
+        window.addEventListener('load', runTest);
+    </script>
+</body>
+</html>

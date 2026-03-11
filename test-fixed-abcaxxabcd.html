@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fixed Pattern abcaxxabcd</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .pattern-analysis {
+            background: #f9f9f9;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+        }
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 5px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .number-item {
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 4px;
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+        .progress {
+            background: #e0e0e0;
+            border-radius: 10px;
+            padding: 3px;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            background: #007bff;
+            height: 20px;
+            border-radius: 7px;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Fixed Pattern: abcaxxabcd</h1>
+    
+    <div class="test-section">
+        <h2>Pattern Analysis</h2>
+        <div id="analysis-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Generation Progress</h2>
+        <div id="progress-container">
+            <div class="progress">
+                <div id="progress-bar" class="progress-bar" style="width: 0%">0%</div>
+            </div>
+            <div id="progress-text">Ready to start...</div>
+        </div>
+        <button id="start-generation" onclick="startGeneration()">Start Generation</button>
+        <button id="stop-generation" onclick="stopGeneration()" disabled>Stop Generation</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Results</h2>
+        <div id="generation-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Sample Numbers Verification</h2>
+        <div id="verification-results"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let generationInProgress = false;
+        let generatedNumbers = [];
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            element.appendChild(div);
+            console.log(message.replace(/<[^>]*>/g, ''));
+        }
+
+        function updateProgress(current, total, message = '') {
+            const percentage = Math.round((current / total) * 100);
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+            progressText.textContent = message || `${current.toLocaleString()} / ${total.toLocaleString()}`;
+        }
+
+        function analyzePattern() {
+            const pattern = 'abcaxxabcd';
+            
+            try {
+                log('analysis-results', '<h3>🔍 Pattern Analysis</h3>');
+                
+                // Step 1: Validate pattern
+                const validator = new PatternValidator();
+                const validation = validator.validate(pattern);
+                
+                if (!validation.isValid) {
+                    log('analysis-results', `❌ Pattern validation failed: ${validation.errorMessage}`, 'error');
+                    return null;
+                }
+                
+                log('analysis-results', '✅ Pattern validation passed', 'success');
+                
+                // Step 2: Identify pattern type
+                const analyzer = new PatternAnalyzer();
+                const patternType = analyzer.identifyPatternType(pattern);
+                
+                log('analysis-results', `<strong>Pattern Type:</strong> ${patternType}`, 'info');
+                
+                // Step 3: Analyze structure
+                if (patternType === 'The Rhythmic Bridge') {
+                    const structure = analyzer.analyzeRhythmicStructure(pattern);
+                    
+                    log('analysis-results', '<div class="pattern-analysis">');
+                    log('analysis-results', '<strong>Fixed Rhythmic Bridge Structure:</strong>');
+                    log('analysis-results', `• Pattern: ${pattern}`);
+                    log('analysis-results', `• Expected Combinations: ${structure.expectedCombinations.toLocaleString()}`);
+                    
+                    log('analysis-results', '<strong>Position Groups (same digit):</strong>');
+                    structure.positionGroups.forEach((group, index) => {
+                        const letter = pattern[group[0]];
+                        log('analysis-results', `• Group ${index + 1}: positions ${group.join(', ')} (letter '${letter}')`);
+                    });
+                    
+                    log('analysis-results', '<strong>Letter Analysis:</strong>');
+                    log('analysis-results', '• a: positions 0, 3, 7 (must use same digit)');
+                    log('analysis-results', '• b: positions 1, 8 (must use same digit)');
+                    log('analysis-results', '• c: positions 2, 9 (must use same digit)');
+                    log('analysis-results', '• x: position 4 (independent digit)');
+                    log('analysis-results', '• x: position 5 (independent digit)');
+                    log('analysis-results', '• d: position 6 (independent digit)');
+                    log('analysis-results', '</div>');
+                    
+                    return { pattern, patternType, structure };
+                }
+                
+            } catch (error) {
+                log('analysis-results', `❌ Analysis failed: ${error.message}`, 'error');
+                console.error('Analysis error:', error);
+                return null;
+            }
+        }
+
+        function startGeneration() {
+            if (generationInProgress) return;
+            
+            const analysisResult = analyzePattern();
+            if (!analysisResult) return;
+            
+            generationInProgress = true;
+            document.getElementById('start-generation').disabled = true;
+            document.getElementById('stop-generation').disabled = false;
+            
+            const { pattern, patternType, structure } = analysisResult;
+            
+            log('generation-results', '<h3>🔢 Starting Number Generation</h3>');
+            log('generation-results', `Expected to generate: ${structure.expectedCombinations.toLocaleString()} numbers`, 'info');
+            
+            // Start generation with progress tracking
+            const generator = new PatternGenerator();
+            const startTime = performance.now();
+            
+            try {
+                // For large datasets, we'll simulate progress
+                // Since the actual generation is synchronous, we'll show progress afterwards
+                updateProgress(0, structure.expectedCombinations, 'Starting generation...');
+                
+                setTimeout(() => {
+                    try {
+                        const numbers = generator.generate(pattern, patternType);
+                        const endTime = performance.now();
+                        
+                        generatedNumbers = numbers;
+                        
+                        updateProgress(numbers.length, structure.expectedCombinations, 'Generation complete!');
+                        
+                        log('generation-results', `<strong>✅ Generation Complete!</strong>`, 'success');
+                        log('generation-results', `<strong>Generation Time:</strong> ${(endTime - startTime).toFixed(2)}ms`, 'info');
+                        log('generation-results', `<strong>Generated Count:</strong> ${numbers.length.toLocaleString()} numbers`, 'success');
+                        
+                        if (numbers.length === structure.expectedCombinations) {
+                            log('generation-results', '✅ Generated count matches expected count!', 'success');
+                        } else {
+                            log('generation-results', `⚠️ Count mismatch! Expected ${structure.expectedCombinations.toLocaleString()}, got ${numbers.length.toLocaleString()}`, 'warning');
+                        }
+                        
+                        // Show sample numbers
+                        showSampleNumbers(numbers);
+                        verifyNumbers(numbers, pattern);
+                        
+                        generationInProgress = false;
+                        document.getElementById('start-generation').disabled = false;
+                        document.getElementById('stop-generation').disabled = true;
+                        
+                    } catch (error) {
+                        log('generation-results', `❌ Generation failed: ${error.message}`, 'error');
+                        generationInProgress = false;
+                        document.getElementById('start-generation').disabled = false;
+                        document.getElementById('stop-generation').disabled = true;
+                    }
+                }, 100);
+                
+            } catch (error) {
+                log('generation-results', `❌ Generation failed: ${error.message}`, 'error');
+                generationInProgress = false;
+                document.getElementById('start-generation').disabled = false;
+                document.getElementById('stop-generation').disabled = true;
+            }
+        }
+
+        function stopGeneration() {
+            generationInProgress = false;
+            document.getElementById('start-generation').disabled = false;
+            document.getElementById('stop-generation').disabled = true;
+            log('generation-results', '⏹️ Generation stopped by user', 'warning');
+        }
+
+        function showSampleNumbers(numbers) {
+            log('generation-results', '<strong>First 20 Numbers:</strong>');
+            const first20 = numbers.slice(0, 20);
+            log('generation-results', `<div class="number-grid">${first20.map(num => `<div class="number-item">${num}</div>`).join('')}</div>`);
+            
+            if (numbers.length > 20) {
+                log('generation-results', '<strong>Last 20 Numbers:</strong>');
+                const last20 = numbers.slice(-20);
+                log('generation-results', `<div class="number-grid">${last20.map(num => `<div class="number-item">${num}</div>`).join('')}</div>`);
+            }
+        }
+
+        function verifyNumbers(numbers, pattern) {
+            log('verification-results', '<h3>🔍 Number Verification</h3>');
+            
+            // Check pattern structure for sample numbers
+            const sampleSize = Math.min(100, numbers.length);
+            const sampleNumbers = numbers.slice(0, sampleSize);
+            
+            log('verification-results', `<strong>Verifying ${sampleSize} sample numbers...</strong>`);
+            
+            let validCount = 0;
+            let invalidCount = 0;
+            
+            sampleNumbers.forEach((number, index) => {
+                const digits = number.replace(/-/g, ''); // Remove dashes
+                let isValid = true;
+                let issues = [];
+                
+                // Check 'a' positions (0, 3, 7)
+                const aDigits = [digits[0], digits[3], digits[7]];
+                if (!(aDigits[0] === aDigits[1] && aDigits[1] === aDigits[2])) {
+                    isValid = false;
+                    issues.push(`'a' positions have different digits: ${aDigits.join(',')}`);
+                }
+                
+                // Check 'b' positions (1, 8)
+                const bDigits = [digits[1], digits[8]];
+                if (bDigits[0] !== bDigits[1]) {
+                    isValid = false;
+                    issues.push(`'b' positions have different digits: ${bDigits.join(',')}`);
+                }
+                
+                // Check 'c' positions (2, 9)
+                const cDigits = [digits[2], digits[9]];
+                if (cDigits[0] !== cDigits[1]) {
+                    isValid = false;
+                    issues.push(`'c' positions have different digits: ${cDigits.join(',')}`);
+                }
+                
+                if (isValid) {
+                    validCount++;
+                    if (index < 10) { // Show details for first 10
+                        log('verification-results', `✅ ${number}: Valid (a=${aDigits[0]}, b=${bDigits[0]}, c=${cDigits[0]}, x=${digits[4]}${digits[5]}, d=${digits[6]})`, 'success');
+                    }
+                } else {
+                    invalidCount++;
+                    if (index < 10) { // Show details for first 10
+                        log('verification-results', `❌ ${number}: Invalid - ${issues.join('; ')}`, 'error');
+                    }
+                }
+            });
+            
+            log('verification-results', `<strong>Verification Summary:</strong>`, 'info');
+            log('verification-results', `✅ Valid: ${validCount} numbers`, 'success');
+            log('verification-results', `❌ Invalid: ${invalidCount} numbers`, invalidCount > 0 ? 'error' : 'success');
+            log('verification-results', `📊 Success Rate: ${((validCount / sampleSize) * 100).toFixed(1)}%`, invalidCount === 0 ? 'success' : 'warning');
+            
+            if (invalidCount === 0) {
+                log('verification-results', '🎉 All sample numbers follow the correct pattern structure!', 'success');
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            log('analysis-results', 'Ready to analyze pattern abcaxxabcd with fixed algorithm...', 'info');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Rhythmic Bridge Wildcard Patterns</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+    .numbers { font-size: 12px; max-height: 200px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Rhythmic Bridge Wildcard Patterns</h1>
+        <p>ทดสอบ patterns ใหม่ในกลุ่ม The Rhythmic Bridge ที่ใช้ "?" แทนตัวอักษร</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- Test 1: abc???abc? -->
+      <div class="test-section">
+        <h2>🧪 Test 1: abc???abc? Pattern</h2>
+        <button id="test-pattern1-btn" class="btn btn-primary">Test abc???abc?</button>
+        <div id="pattern1-results"></div>
+      </div>
+
+      <!-- Test 2: abcabc???? -->
+      <div class="test-section">
+        <h2>🧪 Test 2: abcabc???? Pattern</h2>
+        <button id="test-pattern2-btn" class="btn btn-primary">Test abcabc????</button>
+        <div id="pattern2-results"></div>
+      </div>
+
+      <!-- Test 3: ???abcabc? -->
+      <div class="test-section">
+        <h2>🧪 Test 3: ???abcabc? Pattern</h2>
+        <button id="test-pattern3-btn" class="btn btn-primary">Test ???abcabc?</button>
+        <div id="pattern3-results"></div>
+      </div>
+
+      <!-- Manual Test Area -->
+      <div class="test-section">
+        <h2>🎯 Manual Test Area</h2>
+        <p>ทดสอบ patterns ใหม่ด้วยตนเอง</p>
+        
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern:</label>
+          <select id="pattern-select">
+            <option value="">-- เลือก Pattern --</option>
+            <option value="abc???abc?" data-type="The Rhythmic Bridge">abc-???-abc? (Repeating pattern 2-3 block)</option>
+            <option value="abcabc????" data-type="The Rhythmic Bridge">abc-abc-???? (Repeating pattern front-middle)</option>
+            <option value="???abcabc?" data-type="The Rhythmic Bridge">???-abc-abc? (Repeating pattern middle-end)</option>
+          </select>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+        
+        <div id="pattern-list" class="pattern-list"></div>
+        
+        <div id="results-display" class="results-display"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the application
+      init();
+      
+      // Test functions
+      function testPattern(pattern, resultElementId, patternName) {
+        const resultElement = document.getElementById(resultElementId);
+        resultElement.innerHTML = `<p>Testing ${patternName}...</p>`;
+        
+        try {
+          const analyzer = new PatternAnalyzer();
+          const generator = new PatternGenerator();
+          
+          // Test pattern classification
+          const patternType = analyzer.identifyPatternType(pattern);
+          
+          // Test pattern generation
+          const results = generator.generate(pattern, patternType);
+          
+          let html = '<div class="test-result ' + (results.length > 0 ? 'success' : 'error') + '">';
+          html += `<h4>${patternName} Test Results</h4>`;
+          html += `<p><strong>Pattern:</strong> ${pattern}</p>`;
+          html += `<p><strong>Classified as:</strong> ${patternType}</p>`;
+          html += `<p><strong>Generated numbers:</strong> ${results.length}</p>`;
+          html += `<p><strong>Status:</strong> ${results.length > 0 ? '✅ SUCCESS' : '❌ FAILED'}</p>`;
+          html += '</div>';
+          
+          if (results.length > 0) {
+            html += '<div class="test-result info">';
+            html += '<h4>Sample Numbers (first 10)</h4>';
+            html += '<div class="numbers">' + results.slice(0, 10).join('<br>') + '</div>';
+            html += '</div>';
+            
+            // Analyze pattern structure
+            html += '<div class="test-result info">';
+            html += '<h4>Pattern Analysis</h4>';
+            
+            // Check for wildcard positions
+            const wildcardPositions = [];
+            for (let i = 0; i < pattern.length; i++) {
+              if (pattern[i] === '?') {
+                wildcardPositions.push(i);
+              }
+            }
+            
+            html += `<p><strong>Wildcard positions:</strong> ${wildcardPositions.join(', ')}</p>`;
+            
+            // Check letter groupings
+            const letterGroups = {};
+            for (let i = 0; i < pattern.length; i++) {
+              const char = pattern[i];
+              if (char !== '?') {
+                if (!letterGroups[char]) letterGroups[char] = [];
+                letterGroups[char].push(i);
+              }
+            }
+            
+            html += '<p><strong>Letter groups:</strong></p>';
+            for (const [letter, positions] of Object.entries(letterGroups)) {
+              html += `<p>&nbsp;&nbsp;${letter}: positions ${positions.join(', ')}</p>`;
+            }
+            
+            html += '</div>';
+          }
+          
+          resultElement.innerHTML = html;
+          
+        } catch (error) {
+          resultElement.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+        }
+      }
+      
+      // Test button event listeners
+      document.getElementById('test-pattern1-btn').addEventListener('click', function() {
+        testPattern('abc???abc?', 'pattern1-results', 'abc???abc?');
+      });
+      
+      document.getElementById('test-pattern2-btn').addEventListener('click', function() {
+        testPattern('abcabc????', 'pattern2-results', 'abcabc????');
+      });
+      
+      document.getElementById('test-pattern3-btn').addEventListener('click', function() {
+        testPattern('???abcabc?', 'pattern3-results', '???abcabc?');
+      });
+      
+      // Manual test area
+      const patternSelect = document.getElementById('pattern-select');
+      const addPatternBtn = document.getElementById('add-pattern-btn');
+      
+      addPatternBtn.addEventListener('click', function() {
+        const selectedPattern = patternSelect.value;
+        if (selectedPattern) {
+          try {
+            state.patternManager.addPattern(selectedPattern);
+            uiController.updateUI();
+            patternSelect.value = '';
+            document.getElementById('error-message').textContent = '';
+          } catch (error) {
+            document.getElementById('error-message').textContent = error.message;
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

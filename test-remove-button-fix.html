@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Remove Button Fix</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Remove Button Fix</h1>
+        <p>ทดสอบการแก้ไขปุ่มลบและการแสดงผลตามลำดับการเลือก</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="test-section">
+        <h2>🧪 Automated Test</h2>
+        <button id="run-test" class="btn btn-primary">Run Test</button>
+        <div id="test-results"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>🎯 Manual Test</h2>
+        <p>เพิ่ม patterns และทดสอบการลบด้วยตนเอง</p>
+        
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern:</label>
+          <select id="pattern-select">
+            <option value="">-- เลือก Pattern --</option>
+            <option value="aaaaaaaaaa" data-type="The Soloist">aaa-aaa-aaaa</option>
+            <option value="?bbbbbbbbb" data-type="The Soloist">?bb-bbb-bbbb</option>
+            <option value="zabcdefghi" data-type="Cyclic Straight">zab-cde-fghi</option>
+            <option value="ihgfedcbaz" data-type="Cyclic Straight">ihg-fed-cbaz</option>
+            <option value="bbbaaaaaaa" data-type="Hyphen-separated">bbb-aaa-aaaa</option>
+          </select>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+        
+        <div id="pattern-list" class="pattern-list"></div>
+        
+        <div id="results-display" class="results-display"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the application
+      init();
+      
+      const runTestBtn = document.getElementById('run-test');
+      const testResults = document.getElementById('test-results');
+      
+      runTestBtn.addEventListener('click', function() {
+        testResults.innerHTML = '<p>Running automated test...</p>';
+        
+        try {
+          // Clear existing patterns
+          state.patternManager.clearAll();
+          
+          let results = '<div class="test-result info">';
+          results += '<h4>Test: Remove Button and Display Order</h4>';
+          results += '</div>';
+          
+          // Add patterns in specific order with delays to ensure different timestamps
+          const patterns = ['aaaaaaaaaa', '?bbbbbbbbb', 'zabcdefghi'];
+          
+          patterns.forEach((pattern, index) => {
+            // Add small delay to ensure different timestamps
+            setTimeout(() => {
+              state.patternManager.addPattern(pattern);
+              
+              if (index === patterns.length - 1) {
+                // After all patterns are added, run the test
+                setTimeout(() => runRemovalTest(), 100);
+              }
+            }, index * 50);
+          });
+          
+          function runRemovalTest() {
+            // Update UI to show patterns
+            uiController.updateUI();
+            
+            const initialCount = state.patternManager.getCount();
+            const patternGroups = state.patternManager.getAllPatternGroups();
+            const orderedGroups = patternGroups.sort((a, b) => a.timestamp - b.timestamp);
+            
+            results += '<div class="test-result info">';
+            results += '<h4>Initial State (Selection Order)</h4>';
+            results += `<p>Total patterns: ${initialCount}</p>`;
+            orderedGroups.forEach((group, index) => {
+              results += `<p>${index}: ${group.pattern} (${group.numbers.length} numbers)</p>`;
+            });
+            results += '</div>';
+            
+            // Test removing the middle pattern (index 1)
+            const patternToRemove = orderedGroups[1];
+            const patternToRemoveName = patternToRemove.pattern;
+            
+            // Remove pattern at display index 1
+            uiController.removePattern(1);
+            
+            const afterCount = state.patternManager.getCount();
+            const remainingGroups = state.patternManager.getAllPatternGroups();
+            const stillExists = remainingGroups.some(p => p.pattern === patternToRemoveName);
+            
+            results += '<div class="test-result ' + (!stillExists && afterCount === 2 ? 'success' : 'error') + '">';
+            results += '<h4>After Removing Index 1</h4>';
+            results += `<p>Attempted to remove: ${patternToRemoveName}</p>`;
+            results += `<p>Pattern count: ${afterCount}</p>`;
+            results += `<p>Pattern still exists: ${stillExists ? 'YES ❌' : 'NO ✅'}</p>`;
+            results += `<p>Result: ${!stillExists && afterCount === 2 ? '✅ SUCCESS' : '❌ FAILED'}</p>`;
+            results += '</div>';
+            
+            results += '<div class="test-result info">';
+            results += '<h4>Remaining Patterns</h4>';
+            const finalOrdered = remainingGroups.sort((a, b) => a.timestamp - b.timestamp);
+            finalOrdered.forEach((group, index) => {
+              results += `<p>${index}: ${group.pattern}</p>`;
+            });
+            results += '</div>';
+            
+            testResults.innerHTML = results;
+          }
+          
+        } catch (error) {
+          testResults.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+        }
+      });
+      
+      // Manual test area
+      const patternSelect = document.getElementById('pattern-select');
+      const addPatternBtn = document.getElementById('add-pattern-btn');
+      
+      addPatternBtn.addEventListener('click', function() {
+        const selectedPattern = patternSelect.value;
+        if (selectedPattern) {
+          try {
+            state.patternManager.addPattern(selectedPattern);
+            uiController.updateUI();
+            patternSelect.value = '';
+          } catch (error) {
+            document.getElementById('error-message').textContent = error.message;
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

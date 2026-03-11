@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 11.1 Integration Test</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .test-step {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border-left: 4px solid #007bff;
+      background: #f8f9fa;
+    }
+    .test-result {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .test-pass {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .test-fail {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    .demo-section {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Task 11.1 Integration Test</h1>
+      <p class="subtitle">Complete end-to-end testing of main application initialization</p>
+    </header>
+
+    <main>
+      <!-- Integration Test Section -->
+      <section class="test-section">
+        <h2>Integration Test Results</h2>
+        <div id="integration-results"></div>
+        <button id="run-integration-test" class="btn btn-primary">Run Integration Test</button>
+      </section>
+
+      <!-- Demo Section -->
+      <section class="demo-section">
+        <h2>Live Demo - Try the Application</h2>
+        <p>Use the application below to verify all functionality works correctly:</p>
+      </section>
+
+      <!-- Disclaimer Section -->
+      <section class="disclaimer" role="alert" aria-live="polite">
+        <h2>คำเตือน / Disclaimer</h2>
+        <p><strong>เครื่องมือนี้สร้างตัวเลขตามรูปแบบที่กำหนด โปรดใช้อย่างรับผิดชอบและเป็นไปตามกฎหมาย</strong></p>
+        <p>This tool generates numbers based on specified patterns. Please use responsibly and in accordance with applicable laws.</p>
+      </section>
+
+      <!-- Input Area -->
+      <section class="input-section">
+        <h2>ป้อน Pattern</h2>
+        <div class="input-group">
+          <label for="pattern-input">Pattern (10 ตัวอักษร a-j):</label>
+          <input 
+            type="text" 
+            id="pattern-input" 
+            placeholder="เช่น: abcdefghij" 
+            maxlength="10"
+            aria-describedby="pattern-help"
+          >
+          <small id="pattern-help">ใช้ตัวอักษรพิมพ์เล็ก a-j เท่านั้น ความยาว 10 ตัวอักษร</small>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+      </section>
+
+      <!-- Pattern List Section -->
+      <section class="pattern-list-section">
+        <h2>Patterns ที่เพิ่มแล้ว</h2>
+        <div id="pattern-list" class="pattern-list"></div>
+      </section>
+
+      <!-- Results Area -->
+      <section class="results-section">
+        <div class="results-header">
+          <h2>ผลลัพธ์</h2>
+          <button id="export-btn" class="btn btn-secondary" style="display: none;">Export เป็น CSV</button>
+        </div>
+        <div id="results-display" class="results-display"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Task 11.1 Integration Test Suite
+    function runIntegrationTest() {
+      const steps = [];
+      let currentStep = 0;
+      
+      function addStep(name, testFn) {
+        steps.push({ name, testFn, result: null });
+      }
+      
+      function runNextStep() {
+        if (currentStep >= steps.length) {
+          displayIntegrationResults();
+          return;
+        }
+        
+        const step = steps[currentStep];
+        try {
+          step.result = step.testFn();
+          console.log(`✅ Step ${currentStep + 1}: ${step.name} - ${step.result.pass ? 'PASS' : 'FAIL'}`);
+        } catch (e) {
+          step.result = { pass: false, details: `Error: ${e.message}` };
+          console.log(`❌ Step ${currentStep + 1}: ${step.name} - ERROR: ${e.message}`);
+        }
+        
+        currentStep++;
+        setTimeout(runNextStep, 100); // Small delay between steps
+      }
+
+      // Define integration test steps
+      addStep("1. Verify application initialization", () => {
+        const hasState = typeof state !== 'undefined' && state.patternManager;
+        const hasUIController = typeof window.uiController !== 'undefined';
+        const hasDisclaimer = document.querySelector('.disclaimer') !== null;
+        
+        return {
+          pass: hasState && hasUIController && hasDisclaimer,
+          details: `State: ${!!hasState}, UIController: ${!!hasUIController}, Disclaimer: ${!!hasDisclaimer}`
+        };
+      });
+
+      addStep("2. Test invalid pattern validation", () => {
+        const patternInput = document.getElementById('pattern-input');
+        const errorMessage = document.getElementById('error-message');
+        
+        // Clear any existing state
+        window.uiController.clearError();
+        patternInput.value = 'invalid123';
+        
+        // Trigger validation
+        window.uiController.handleAddPattern();
+        
+        const hasError = errorMessage.textContent.length > 0;
+        const errorText = errorMessage.textContent;
+        
+        return {
+          pass: hasError && errorText.includes('invalid characters'),
+          details: `Error shown: ${hasError}, Message: "${errorText}"`
+        };
+      });
+
+      addStep("3. Test valid pattern addition - The Soloist", () => {
+        const patternInput = document.getElementById('pattern-input');
+        const patternList = document.getElementById('pattern-list');
+        
+        // Clear previous state
+        state.patternManager.clearAll();
+        window.uiController.clearError();
+        
+        // Add valid Soloist pattern
+        patternInput.value = 'aaaaaaaaaa';
+        window.uiController.handleAddPattern();
+        
+        const patternGroups = state.patternManager.getAllPatternGroups();
+        const hasPattern = patternGroups.length === 1;
+        const correctType = hasPattern && patternGroups[0].patternType === 'The Soloist';
+        const correctCount = hasPattern && patternGroups[0].numbers.length === 10;
+        const uiUpdated = patternList.innerHTML.includes('aaaaaaaaaa');
+        
+        return {
+          pass: hasPattern && correctType && correctCount && uiUpdated,
+          details: `Pattern added: ${hasPattern}, Type: ${correctType ? 'The Soloist' : 'Wrong'}, Count: ${correctCount ? '10' : patternGroups[0]?.numbers.length || 0}, UI updated: ${uiUpdated}`
+        };
+      });
+
+      addStep("4. Test pattern type display", () => {
+        const patternList = document.getElementById('pattern-list');
+        const resultsDisplay = document.getElementById('results-display');
+        
+        const typeInList = patternList.innerHTML.includes('The Soloist');
+        const typeInResults = resultsDisplay.innerHTML.includes('The Soloist');
+        const countInList = patternList.innerHTML.includes('10 numbers');
+        
+        return {
+          pass: typeInList && typeInResults && countInList,
+          details: `Type in list: ${typeInList}, Type in results: ${typeInResults}, Count shown: ${countInList}`
+        };
+      });
+
+      addStep("5. Test export button visibility", () => {
+        const exportBtn = document.getElementById('export-btn');
+        const isVisible = exportBtn.style.display !== 'none';
+        
+        return {
+          pass: isVisible,
+          details: `Export button visible: ${isVisible}`
+        };
+      });
+
+      addStep("6. Test multiple pattern types", () => {
+        const patternInput = document.getElementById('pattern-input');
+        
+        // Add Full Straight pattern
+        patternInput.value = 'abcdefghij';
+        window.uiController.handleAddPattern();
+        
+        const patternGroups = state.patternManager.getAllPatternGroups();
+        const hasTwoPatterns = patternGroups.length === 2;
+        const hasFullStraight = patternGroups.some(p => p.patternType === 'The Full Straight');
+        const correctFullStraightCount = patternGroups.find(p => p.patternType === 'The Full Straight')?.numbers.length === 2;
+        
+        return {
+          pass: hasTwoPatterns && hasFullStraight && correctFullStraightCount,
+          details: `Two patterns: ${hasTwoPatterns}, Full Straight added: ${hasFullStraight}, Correct count (2): ${correctFullStraightCount}`
+        };
+      });
+
+      addStep("7. Test pattern removal", () => {
+        // Remove first pattern
+        window.uiController.removePattern(0);
+        
+        const patternGroups = state.patternManager.getAllPatternGroups();
+        const hasOnePattern = patternGroups.length === 1;
+        const remainingIsFullStraight = hasOnePattern && patternGroups[0].patternType === 'The Full Straight';
+        
+        return {
+          pass: hasOnePattern && remainingIsFullStraight,
+          details: `One pattern remaining: ${hasOnePattern}, Is Full Straight: ${remainingIsFullStraight}`
+        };
+      });
+
+      addStep("8. Test CSV export functionality", () => {
+        try {
+          // Mock the CSV export to avoid actual file download in test
+          const originalExport = CSVExporter.prototype.downloadFile;
+          let exportCalled = false;
+          let exportContent = '';
+          
+          CSVExporter.prototype.downloadFile = function(content, filename) {
+            exportCalled = true;
+            exportContent = content;
+          };
+          
+          // Trigger export
+          window.uiController.handleExport();
+          
+          // Restore original method
+          CSVExporter.prototype.downloadFile = originalExport;
+          
+          const hasHeader = exportContent.includes('pattern,pattern_type,phone_number');
+          const hasData = exportContent.includes('abcdefghij,The Full Straight');
+          const hasTwoRows = (exportContent.match(/\n/g) || []).length >= 2; // Header + at least 2 data rows
+          
+          return {
+            pass: exportCalled && hasHeader && hasData && hasTwoRows,
+            details: `Export called: ${exportCalled}, Has header: ${hasHeader}, Has data: ${hasData}, Multiple rows: ${hasTwoRows}`
+          };
+        } catch (e) {
+          return {
+            pass: false,
+            details: `Export test failed: ${e.message}`
+          };
+        }
+      });
+
+      // Start running steps
+      currentStep = 0;
+      runNextStep();
+    }
+
+    function displayIntegrationResults() {
+      const container = document.getElementById('integration-results');
+      let html = '';
+      
+      let passCount = 0;
+      steps.forEach((step, index) => {
+        if (step.result && step.result.pass) passCount++;
+        
+        html += `
+          <div class="test-step">
+            <strong>Step ${index + 1}: ${step.name}</strong>
+          </div>
+          <div class="test-result ${step.result && step.result.pass ? 'test-pass' : 'test-fail'}">
+            ${step.result && step.result.pass ? '✅ PASS' : '❌ FAIL'}<br>
+            <small>${step.result ? step.result.details : 'Not executed'}</small>
+          </div>
+        `;
+      });
+      
+      const overallPass = passCount === steps.length;
+      html = `
+        <div class="test-result ${overallPass ? 'test-pass' : 'test-fail'}">
+          <h3>${overallPass ? '✅' : '❌'} Integration Test Results: ${passCount}/${steps.length} steps passed</h3>
+          <p><strong>Task 11.1 Status: ${overallPass ? 'COMPLETED SUCCESSFULLY' : 'NEEDS ATTENTION'}</strong></p>
+        </div>
+      ` + html;
+      
+      container.innerHTML = html;
+    }
+
+    // Set up test button
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('run-integration-test').addEventListener('click', runIntegrationTest);
+      
+      // Run integration test automatically after initialization
+      setTimeout(runIntegrationTest, 1500);
+    });
+  </script>
+</body>
+</html>

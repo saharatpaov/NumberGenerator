@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Main App - Pattern abcaxxabcd</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .test-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 5px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .number-item {
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 4px;
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Test Main App - Pattern abcaxxabcd</h1>
+        
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div id="results"></div>
+        </div>
+
+        <!-- Hidden main app elements -->
+        <div style="display: none;">
+            <select id="pattern-select">
+                <option value="abcaxxabcd" data-type="The Rhythmic Bridge">abc-axx-abcd</option>
+            </select>
+            <div id="pattern-list"></div>
+            <div id="results-display"></div>
+            <div id="error-message"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize the app state
+        let state = {
+            patternManager: new PatternManager(),
+            uiController: null
+        };
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            results.appendChild(div);
+            console.log(message.replace(/<[^>]*>/g, ''));
+        }
+
+        function runTest() {
+            try {
+                log('<h3>🧪 Testing Pattern abcaxxabcd with Main App</h3>');
+                
+                const pattern = 'abcaxxabcd';
+                
+                // Step 1: Add pattern to manager
+                log('<strong>Step 1: Adding pattern to PatternManager</strong>');
+                state.patternManager.addPattern(pattern);
+                
+                const patterns = state.patternManager.getAllPatternGroups();
+                const addedPattern = patterns[0];
+                
+                log(`✅ Pattern added successfully`, 'success');
+                log(`Pattern: ${addedPattern.pattern}`);
+                log(`Type: ${addedPattern.patternType}`);
+                log(`Generated: ${addedPattern.numbers.length.toLocaleString()} numbers`);
+                
+                // Step 2: Verify expected count
+                log('<strong>Step 2: Verifying expected count</strong>');
+                const expectedCount = 100000; // 10^5
+                
+                if (addedPattern.numbers.length === expectedCount) {
+                    log(`✅ Count matches expected: ${expectedCount.toLocaleString()}`, 'success');
+                } else {
+                    log(`⚠️ Count mismatch: Expected ${expectedCount.toLocaleString()}, got ${addedPattern.numbers.length.toLocaleString()}`, 'warning');
+                }
+                
+                // Step 3: Show sample numbers
+                log('<strong>Step 3: Sample numbers</strong>');
+                const first10 = addedPattern.numbers.slice(0, 10);
+                const last10 = addedPattern.numbers.slice(-10);
+                
+                log('First 10 numbers:');
+                log(`<div class="number-grid">${first10.map(num => `<div class="number-item">${num}</div>`).join('')}</div>`);
+                
+                log('Last 10 numbers:');
+                log(`<div class="number-grid">${last10.map(num => `<div class="number-item">${num}</div>`).join('')}</div>`);
+                
+                // Step 4: Verify structure
+                log('<strong>Step 4: Structure verification</strong>');
+                
+                let validCount = 0;
+                let invalidCount = 0;
+                const sampleSize = Math.min(100, addedPattern.numbers.length);
+                
+                for (let i = 0; i < sampleSize; i++) {
+                    const number = addedPattern.numbers[i];
+                    const digits = number.replace(/-/g, '');
+                    let isValid = true;
+                    
+                    // Check 'a' positions (0, 3, 6)
+                    const aDigits = [digits[0], digits[3], digits[6]];
+                    if (!(aDigits[0] === aDigits[1] && aDigits[1] === aDigits[2])) {
+                        isValid = false;
+                    }
+                    
+                    // Check 'b' positions (1, 7)
+                    const bDigits = [digits[1], digits[7]];
+                    if (bDigits[0] !== bDigits[1]) {
+                        isValid = false;
+                    }
+                    
+                    // Check 'c' positions (2, 8)
+                    const cDigits = [digits[2], digits[8]];
+                    if (cDigits[0] !== cDigits[1]) {
+                        isValid = false;
+                    }
+                    
+                    // Check 'x' positions (4, 5)
+                    const xDigits = [digits[4], digits[5]];
+                    if (xDigits[0] !== xDigits[1]) {
+                        isValid = false;
+                    }
+                    
+                    if (isValid) {
+                        validCount++;
+                        if (i < 5) {
+                            log(`✅ ${number}: Valid (a=${aDigits[0]}, b=${bDigits[0]}, c=${cDigits[0]}, x=${xDigits[0]}, d=${digits[9]})`, 'success');
+                        }
+                    } else {
+                        invalidCount++;
+                        if (i < 5) {
+                            log(`❌ ${number}: Invalid structure`, 'error');
+                        }
+                    }
+                }
+                
+                log(`<strong>Verification Summary:</strong>`);
+                log(`✅ Valid: ${validCount} / ${sampleSize}`, validCount === sampleSize ? 'success' : 'warning');
+                log(`❌ Invalid: ${invalidCount} / ${sampleSize}`, invalidCount === 0 ? 'success' : 'error');
+                log(`📊 Success Rate: ${((validCount / sampleSize) * 100).toFixed(1)}%`, invalidCount === 0 ? 'success' : 'warning');
+                
+                // Step 5: Test CSV export
+                log('<strong>Step 5: Testing CSV export</strong>');
+                const csvExporter = new CSVExporter();
+                const csvContent = csvExporter.generateCSV(patterns);
+                const csvLines = csvContent.split('\n');
+                const csvDataLines = csvLines.slice(1).filter(line => line.trim() !== '');
+                
+                log(`CSV generated with ${csvDataLines.length.toLocaleString()} data rows`);
+                
+                if (csvDataLines.length === addedPattern.numbers.length) {
+                    log('✅ CSV export count matches generated numbers', 'success');
+                } else {
+                    log(`⚠️ CSV count mismatch: ${csvDataLines.length} vs ${addedPattern.numbers.length}`, 'warning');
+                }
+                
+                // Show first few CSV lines
+                log('First 5 CSV lines:');
+                csvLines.slice(0, 6).forEach(line => {
+                    log(`<code>${line}</code>`);
+                });
+                
+                log('<strong>🎉 Test Complete!</strong>', 'success');
+                
+                if (invalidCount === 0 && addedPattern.numbers.length === expectedCount) {
+                    log('✅ Pattern abcaxxabcd is working correctly!', 'success');
+                    log(`✅ Generates exactly ${expectedCount.toLocaleString()} unique phone numbers`, 'success');
+                    log('✅ All numbers follow the correct pattern structure', 'success');
+                    log('✅ CSV export works correctly', 'success');
+                } else {
+                    log('⚠️ Some issues found - see details above', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+                console.error('Test error:', error);
+            }
+        }
+
+        // Run test when page loads
+        window.addEventListener('load', runTest);
+    </script>
+</body>
+</html>

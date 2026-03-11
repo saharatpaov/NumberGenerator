@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern Validation Test</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(233, 30, 99, 0.1);
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+    }
+    .test-pass {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .test-fail {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .test-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    .pattern-details {
+      font-size: 12px;
+      margin-top: 5px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <header style="text-align: center; margin-bottom: 30px;">
+      <h1>🧪 Pattern Validation Test</h1>
+      <p>ทดสอบ pattern ทั้งหมดตามตารางใหม่</p>
+    </header>
+
+    <div class="test-section">
+      <h2>📋 Test Results</h2>
+      <button onclick="runAllTests()" style="padding: 10px 20px; background: #e91e63; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 20px;">🚀 Run All Tests</button>
+      <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>📊 Pattern Summary</h2>
+      <div id="pattern-summary"></div>
+    </div>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  
+  <script>
+    // Test cases based on the new table - no expected counts
+    const testCases = [
+      // The Soloist patterns
+      { pattern: 'aaaaaaaaaa', expectedType: 'The Soloist', description: 'Simple Soloist (all same)' },
+      { pattern: 'abbbbbbbbb', expectedType: 'The Soloist', description: 'Soloist (9 same, 1 different)' },
+      { pattern: 'andddddddd', expectedType: 'The Soloist', description: 'Soloist (8 same, 2 different)' },
+      { pattern: 'abeccccccc', expectedType: 'The Soloist', description: 'Soloist (7 same, 3 different)' },
+      { pattern: 'abefcccccc', expectedType: 'The Soloist', description: 'Soloist (6 same, 4 different)' },
+      { pattern: 'abefuccccc', expectedType: 'The Soloist', description: 'Soloist (5 same, 5 different)' },
+      { pattern: 'axytrubbbb', expectedType: 'The Soloist', description: 'Soloist (4 same, 6 different)' },
+      
+      // Hyphen-separated patterns
+      { pattern: 'bbbaaaaaaa', expectedType: 'Hyphen-separated', description: 'Hyphen-separated (3+7 blocks)' },
+      { pattern: 'bbbbbaaaaa', expectedType: 'Hyphen-separated', description: 'Hyphen-separated (5+5 blocks)' },
+      { pattern: 'aaabbbcccc', expectedType: 'Hyphen-separated', description: 'Hyphen-separated (3+3+4 blocks)' },
+      { pattern: 'bbbtnxbbbb', expectedType: 'Hyphen-separated', description: 'Hyphen-separated (first=last blocks)' },
+      
+      // The Full Straight patterns
+      { pattern: 'abcdefghij', expectedType: 'The Full Straight', description: 'Full Straight (ascending)' },
+      { pattern: 'jihgfedcba', expectedType: 'The Full Straight', description: 'Full Straight (descending)' },
+      
+      // Cyclic Straight patterns
+      { pattern: 'zabcdefghi', expectedType: 'Cyclic Straight', description: 'Cyclic Straight (z->a wraparound)' },
+      { pattern: 'ihgfedcbaz', expectedType: 'Cyclic Straight', description: 'Cyclic Straight (reverse)' },
+      
+      // The Rhythmic Bridge patterns
+      { pattern: 'abcaxxabcd', expectedType: 'The Rhythmic Bridge', description: 'Rhythmic Bridge (repeating pattern)' }
+    ];
+
+    function logResult(message, type = 'info') {
+      const resultsDiv = document.getElementById('test-results');
+      const div = document.createElement('div');
+      div.className = `test-result test-${type}`;
+      div.innerHTML = message;
+      resultsDiv.appendChild(div);
+    }
+
+    function runAllTests() {
+      const resultsDiv = document.getElementById('test-results');
+      const summaryDiv = document.getElementById('pattern-summary');
+      resultsDiv.innerHTML = '';
+      summaryDiv.innerHTML = '';
+      
+      logResult('🧪 Starting Pattern Validation Tests...', 'info');
+      
+      let passed = 0;
+      let failed = 0;
+      const results = [];
+      
+      const validator = new PatternValidator();
+      const analyzer = new PatternAnalyzer();
+      const generator = new PatternGenerator();
+      
+      testCases.forEach((testCase, index) => {
+        logResult(`<strong>Test ${index + 1}: ${testCase.description}</strong>`, 'info');
+        logResult(`Pattern: "${testCase.pattern}" (${testCase.pattern.length} chars)`, 'info');
+        
+        try {
+          // Test 1: Validation
+          const validation = validator.validate(testCase.pattern);
+          if (!validation.isValid) {
+            logResult(`❌ VALIDATION FAILED: ${validation.errorMessage}`, 'fail');
+            failed++;
+            results.push({ ...testCase, status: 'VALIDATION_FAILED', error: validation.errorMessage });
+            return;
+          }
+          
+          // Test 2: Pattern Type Identification
+          const identifiedType = analyzer.identifyPatternType(testCase.pattern);
+          if (identifiedType !== testCase.expectedType) {
+            logResult(`❌ TYPE MISMATCH: Expected "${testCase.expectedType}", got "${identifiedType}"`, 'fail');
+            failed++;
+            results.push({ ...testCase, status: 'TYPE_MISMATCH', actualType: identifiedType });
+            return;
+          }
+          
+          // Test 3: Number Generation (just check that it generates some numbers)
+          const generatedNumbers = generator.generate(testCase.pattern, identifiedType);
+          if (generatedNumbers.length === 0) {
+            logResult(`❌ NO NUMBERS GENERATED`, 'fail');
+            failed++;
+            results.push({ ...testCase, status: 'NO_NUMBERS_GENERATED' });
+            return;
+          }
+          
+          // Test 4: Format validation
+          const formatValid = generatedNumbers.every(num => /^\d{3}-\d{3}-\d{4}$/.test(num));
+          if (!formatValid) {
+            logResult(`❌ FORMAT INVALID: Some numbers don't match XXX-XXX-XXXX format`, 'fail');
+            failed++;
+            results.push({ ...testCase, status: 'FORMAT_INVALID' });
+            return;
+          }
+          
+          // Test 5: No duplicates
+          const uniqueNumbers = new Set(generatedNumbers);
+          if (uniqueNumbers.size !== generatedNumbers.length) {
+            logResult(`❌ DUPLICATES FOUND: ${generatedNumbers.length - uniqueNumbers.size} duplicates`, 'fail');
+            failed++;
+            results.push({ ...testCase, status: 'DUPLICATES_FOUND' });
+            return;
+          }
+          
+          logResult(`✅ PASS: Type="${identifiedType}", Count=${generatedNumbers.length}`, 'pass');
+          logResult(`<div class="pattern-details">Sample: ${generatedNumbers.slice(0, 3).join(', ')}${generatedNumbers.length > 3 ? '...' : ''}</div>`, 'pass');
+          passed++;
+          results.push({ ...testCase, status: 'PASSED', actualCount: generatedNumbers.length });
+          
+        } catch (error) {
+          logResult(`❌ EXCEPTION: ${error.message}`, 'fail');
+          failed++;
+          results.push({ ...testCase, status: 'EXCEPTION', error: error.message });
+        }
+        
+        logResult('', 'info'); // spacer
+      });
+      
+      // Summary
+      logResult(`<strong>📊 FINAL RESULTS:</strong>`, 'info');
+      logResult(`✅ Passed: ${passed}`, passed > 0 ? 'pass' : 'info');
+      logResult(`❌ Failed: ${failed}`, failed > 0 ? 'fail' : 'info');
+      logResult(`📊 Total: ${testCases.length}`, 'info');
+      
+      if (failed === 0) {
+        logResult('🎉 ALL TESTS PASSED! All patterns are working correctly.', 'pass');
+      } else {
+        logResult('⚠️ Some tests failed. Please review the implementation.', 'fail');
+      }
+      
+      // Generate summary table
+      generateSummaryTable(results);
+    }
+    
+    function generateSummaryTable(results) {
+      const summaryDiv = document.getElementById('pattern-summary');
+      
+      let html = '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
+      html += '<thead><tr style="background: #f8f9fa;">';
+      html += '<th style="border: 1px solid #ddd; padding: 8px;">Pattern</th>';
+      html += '<th style="border: 1px solid #ddd; padding: 8px;">Type</th>';
+      html += '<th style="border: 1px solid #ddd; padding: 8px;">Generated Count</th>';
+      html += '<th style="border: 1px solid #ddd; padding: 8px;">Status</th>';
+      html += '</tr></thead><tbody>';
+      
+      results.forEach(result => {
+        const statusColor = result.status === 'PASSED' ? '#d4edda' : '#f8d7da';
+        const statusText = result.status === 'PASSED' ? '✅ PASS' : `❌ ${result.status}`;
+        
+        html += `<tr style="background: ${statusColor};">`;
+        html += `<td style="border: 1px solid #ddd; padding: 8px; font-family: monospace;">${result.pattern}</td>`;
+        html += `<td style="border: 1px solid #ddd; padding: 8px;">${result.expectedType}</td>`;
+        html += `<td style="border: 1px solid #ddd; padding: 8px;">${result.actualCount || 'N/A'}</td>`;
+        html += `<td style="border: 1px solid #ddd; padding: 8px;">${statusText}</td>`;
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table>';
+      summaryDiv.innerHTML = html;
+    }
+    
+    // Auto-run tests when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🧪 Pattern Validation Test loaded');
+      // Uncomment to auto-run tests
+      // setTimeout(runAllTests, 1000);
+    });
+  </script>
+</body>
+</html>

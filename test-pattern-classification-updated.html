@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Updated Pattern Classification</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Updated Pattern Classification</h1>
+        <p>ทดสอบการแบ่งกลุ่ม pattern ตามตารางที่กำหนดใหม่</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="test-section">
+        <h2>🧪 Pattern Classification Tests</h2>
+        <button id="run-tests-btn" class="btn btn-primary">Run All Tests</button>
+        <div id="test-results"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const runTestsBtn = document.getElementById('run-tests-btn');
+      const testResults = document.getElementById('test-results');
+
+      runTestsBtn.addEventListener('click', function() {
+        testResults.innerHTML = '<p>Running classification tests...</p>';
+        
+        const tests = [
+          // The Soloist patterns
+          {
+            name: 'The Soloist: All 10 digits identical',
+            pattern: 'aaaaaaaaaa',
+            expectedType: 'The Soloist',
+            description: 'aaa-aaa-aaaa format'
+          },
+          {
+            name: 'The Soloist: All 9 digits identical',
+            pattern: '?bbbbbbbbb',
+            expectedType: 'The Soloist',
+            description: '?bb-bbb-bbbb format'
+          },
+          {
+            name: 'The Soloist: All 8 digits identical',
+            pattern: '??dddddddd',
+            expectedType: 'The Soloist',
+            description: '??d-ddd-dddd format'
+          },
+          {
+            name: 'The Soloist: All 7 digits identical',
+            pattern: '???ddddddd',
+            expectedType: 'The Soloist',
+            description: '???-ddd-dddd format'
+          },
+          {
+            name: 'The Soloist: All 6 digits identical',
+            pattern: '????eeeeee',
+            expectedType: 'The Soloist',
+            description: '????-ee-eeee format'
+          },
+          {
+            name: 'The Soloist: All 5 digits identical',
+            pattern: '?????fffff',
+            expectedType: 'The Soloist',
+            description: '?????-f-ffff format'
+          },
+          {
+            name: 'The Soloist: All 4 digits identical (Block-ending)',
+            pattern: '??????gggg',
+            expectedType: 'The Soloist',
+            description: '??????-gggg format'
+          },
+          
+          // Hyphen-separated patterns
+          {
+            name: 'Hyphen-separated: 2 distinct digits (3+7)',
+            pattern: 'bbbaaaaaaa',
+            expectedType: 'Hyphen-separated',
+            description: 'bbb-aaa-aaaa format'
+          },
+          {
+            name: 'Hyphen-separated: 2 distinct digits (5+5)',
+            pattern: 'bbbbbaaaaa',
+            expectedType: 'Hyphen-separated',
+            description: 'bbb-bbb-aaaa format'
+          },
+          {
+            name: 'Hyphen-separated: 2 distinct digits (3+3+4)',
+            pattern: 'bbbaaabbbb',
+            expectedType: 'Hyphen-separated',
+            description: 'bbb-aaa-bbbb format'
+          },
+          {
+            name: 'Hyphen-separated: 3 distinct digits',
+            pattern: 'aaabbbcccc',
+            expectedType: 'Hyphen-separated',
+            description: 'aaa-bbb-cccc format'
+          },
+          {
+            name: 'Hyphen-separated: First and last blocks identical',
+            pattern: 'bbb???bbbb',
+            expectedType: 'Hyphen-separated',
+            description: 'bbb-???-bbbb format'
+          },
+          
+          // The Full Straight patterns
+          {
+            name: 'The Full Straight: Ascending',
+            pattern: 'abcdefghij',
+            expectedType: 'The Full Straight',
+            description: 'abc-def-ghij format'
+          },
+          {
+            name: 'The Full Straight: Descending',
+            pattern: 'jihgfedcba',
+            expectedType: 'The Full Straight',
+            description: 'jih-gfe-dcba format'
+          },
+          
+          // Cyclic Straight patterns
+          {
+            name: 'Cyclic Straight: Ascending',
+            pattern: 'zabcdefghi',
+            expectedType: 'Cyclic Straight',
+            description: 'zab-cde-fghi format'
+          },
+          {
+            name: 'Cyclic Straight: Descending',
+            pattern: 'ihgfedcbaz',
+            expectedType: 'Cyclic Straight',
+            description: 'ihg-fed-cbaz format'
+          },
+          
+          // The Rhythmic Bridge patterns
+          {
+            name: 'The Rhythmic Bridge: 2-3 block repeating',
+            pattern: 'abcefgabcd',
+            expectedType: 'The Rhythmic Bridge',
+            description: 'abc-efg-abcd format'
+          },
+          {
+            name: 'The Rhythmic Bridge: Front-middle repeating',
+            pattern: 'abcabcdefg',
+            expectedType: 'The Rhythmic Bridge',
+            description: 'abc-abc-defg format'
+          },
+          {
+            name: 'The Rhythmic Bridge: Middle-end repeating',
+            pattern: 'efgabcabcd',
+            expectedType: 'The Rhythmic Bridge',
+            description: 'efg-abc-abcd format'
+          }
+        ];
+
+        let allResults = '';
+        let passCount = 0;
+        let totalCount = tests.length;
+        
+        tests.forEach((test, index) => {
+          try {
+            const validator = new PatternValidator();
+            const analyzer = new PatternAnalyzer();
+            
+            // Validate pattern
+            const validation = validator.validate(test.pattern);
+            if (!validation.isValid) {
+              allResults += `<div class="test-result error">
+                <h4>${test.name}</h4>
+                <p>❌ Validation failed: ${validation.errorMessage}</p>
+              </div>`;
+              return;
+            }
+            
+            // Identify pattern type
+            const actualType = analyzer.identifyPatternType(test.pattern);
+            const isCorrect = actualType === test.expectedType;
+            
+            if (isCorrect) passCount++;
+            
+            allResults += `<div class="test-result ${isCorrect ? 'success' : 'error'}">
+              <h4>${test.name}</h4>
+              <p><strong>Pattern:</strong> ${test.pattern}</p>
+              <p><strong>Expected:</strong> ${test.expectedType}</p>
+              <p><strong>Actual:</strong> ${actualType}</p>
+              <p><strong>Result:</strong> ${isCorrect ? '✅ PASS' : '❌ FAIL'}</p>
+              <p><strong>Description:</strong> ${test.description}</p>
+            </div>`;
+            
+          } catch (error) {
+            allResults += `<div class="test-result error">
+              <h4>${test.name}</h4>
+              <p>❌ Error: ${error.message}</p>
+            </div>`;
+          }
+        });
+        
+        const summaryClass = passCount === totalCount ? 'success' : 'error';
+        const summaryResult = `<div class="test-result ${summaryClass}">
+          <h3>📊 Test Summary</h3>
+          <p><strong>Passed:</strong> ${passCount}/${totalCount} tests</p>
+          <p><strong>Success Rate:</strong> ${Math.round((passCount/totalCount)*100)}%</p>
+        </div>`;
+        
+        testResults.innerHTML = summaryResult + allResults;
+      });
+    });
+  </script>
+</body>
+</html>

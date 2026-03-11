@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Wildcard Independence</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Wildcard Independence</h1>
+        <p>ทดสอบว่า "?" สามารถซ้ำกันได้ในหลักอื่น ๆ ที่เป็น "?" เหมือนกัน</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="test-section">
+        <h2>🧪 Wildcard Independence Tests</h2>
+        <button id="run-tests-btn" class="btn btn-primary">Run All Tests</button>
+        <div id="test-results"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const runTestsBtn = document.getElementById('run-tests-btn');
+      const testResults = document.getElementById('test-results');
+
+      runTestsBtn.addEventListener('click', function() {
+        testResults.innerHTML = '<p>Running tests...</p>';
+        
+        const tests = [
+          {
+            name: 'Test 1: Pattern "??" should generate 100 combinations',
+            pattern: '??aaaaaaaa',
+            expectedCount: 1000, // 10×10×1 = 100 for ??, but 'a' can be any of 8 remaining digits
+            description: 'Two wildcards can have same digit (00, 11, 22, etc.)'
+          },
+          {
+            name: 'Test 2: Pattern "a?" should allow ? to duplicate a',
+            pattern: 'a?bbbbbbbb',
+            expectedCount: 900, // 10×10×1 = 100, but 'b' must be different from both
+            description: 'Wildcard can have same digit as letter a'
+          },
+          {
+            name: 'Test 3: Pattern "a?b" should generate correct combinations',
+            pattern: 'a?baaaaaaa',
+            expectedCount: 720, // 10×10×8 = 800, but need to account for constraints
+            description: 'a≠b, ? can be anything including a or b'
+          },
+          {
+            name: 'Test 4: Pattern "??a" should allow both ? to be independent',
+            pattern: '??aaaaaaaa',
+            expectedCount: 1000, // 10×10×1 = 100 for ??, 'a' can be any digit
+            description: 'Both wildcards independent, a can be any digit'
+          }
+        ];
+
+        let allResults = '';
+        
+        tests.forEach((test, index) => {
+          try {
+            const validator = new PatternValidator();
+            const analyzer = new PatternAnalyzer();
+            const generator = new PatternGenerator();
+            
+            // Validate pattern
+            const validation = validator.validate(test.pattern);
+            if (!validation.isValid) {
+              allResults += `<div class="test-result error">
+                <h4>${test.name}</h4>
+                <p>❌ Validation failed: ${validation.errorMessage}</p>
+              </div>`;
+              return;
+            }
+            
+            // Identify pattern type
+            const patternType = analyzer.identifyPatternType(test.pattern);
+            
+            // Generate numbers
+            const startTime = performance.now();
+            const numbers = generator.generate(test.pattern, patternType);
+            const endTime = performance.now();
+            
+            // Check for duplicates
+            const uniqueNumbers = [...new Set(numbers)];
+            const hasDuplicates = uniqueNumbers.length !== numbers.length;
+            
+            // Check if wildcards can have duplicates
+            const wildcardDuplicateTest = checkWildcardDuplicates(test.pattern, numbers);
+            
+            const isSuccess = numbers.length > 0 && !hasDuplicates && wildcardDuplicateTest.hasWildcardDuplicates;
+            
+            allResults += `<div class="test-result ${isSuccess ? 'success' : 'error'}">
+              <h4>${test.name}</h4>
+              <p><strong>Pattern:</strong> ${test.pattern}</p>
+              <p><strong>Type:</strong> ${patternType}</p>
+              <p><strong>Generated:</strong> ${numbers.length} numbers</p>
+              <p><strong>Expected:</strong> ~${test.expectedCount} numbers</p>
+              <p><strong>Time:</strong> ${(endTime - startTime).toFixed(2)}ms</p>
+              <p><strong>Has Duplicates:</strong> ${hasDuplicates ? 'Yes ❌' : 'No ✅'}</p>
+              <p><strong>Wildcard Duplicates Allowed:</strong> ${wildcardDuplicateTest.hasWildcardDuplicates ? 'Yes ✅' : 'No ❌'}</p>
+              <p><strong>Description:</strong> ${test.description}</p>
+              <div style="max-height: 100px; overflow-y: auto; background: #f8f9fa; padding: 5px; border-radius: 3px; font-size: 11px;">
+                <strong>Sample numbers:</strong><br>
+                ${numbers.slice(0, 10).join('<br>')}
+                ${numbers.length > 10 ? '<br>...' : ''}
+              </div>
+              ${wildcardDuplicateTest.examples.length > 0 ? `
+                <div style="margin-top: 10px; font-size: 12px;">
+                  <strong>Wildcard duplicate examples:</strong><br>
+                  ${wildcardDuplicateTest.examples.slice(0, 5).join('<br>')}
+                </div>
+              ` : ''}
+            </div>`;
+            
+          } catch (error) {
+            allResults += `<div class="test-result error">
+              <h4>${test.name}</h4>
+              <p>❌ Error: ${error.message}</p>
+            </div>`;
+          }
+        });
+        
+        testResults.innerHTML = allResults;
+      });
+      
+      function checkWildcardDuplicates(pattern, numbers) {
+        const wildcardPositions = [];
+        for (let i = 0; i < pattern.length; i++) {
+          if (pattern[i] === '?') {
+            wildcardPositions.push(i);
+          }
+        }
+        
+        if (wildcardPositions.length < 2) {
+          return { hasWildcardDuplicates: true, examples: [] };
+        }
+        
+        const examples = [];
+        let hasWildcardDuplicates = false;
+        
+        for (const number of numbers.slice(0, 100)) { // Check first 100 numbers
+          const digits = number.replace(/-/g, '');
+          const wildcardDigits = wildcardPositions.map(pos => digits[pos]);
+          
+          // Check if any wildcard digits are the same
+          const uniqueWildcardDigits = [...new Set(wildcardDigits)];
+          if (uniqueWildcardDigits.length < wildcardDigits.length) {
+            hasWildcardDuplicates = true;
+            examples.push(`${number} (wildcards: ${wildcardDigits.join(', ')})`);
+            if (examples.length >= 5) break;
+          }
+        }
+        
+        return { hasWildcardDuplicates, examples };
+      }
+    });
+  </script>
+</body>
+</html>

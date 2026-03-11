@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Fixes - Remove Button & Cyclic Straight</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Fixes</h1>
+        <p>ทดสอบการแก้ไข: ปุ่มลบ และ Cyclic Straight</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- Test 1: Remove Button -->
+      <div class="test-section">
+        <h2>🧪 Test 1: Remove Button Functionality</h2>
+        <p>เพิ่ม patterns แล้วทดสอบการลบ</p>
+        <button id="test-remove-btn" class="btn btn-primary">Test Remove Button</button>
+        <div id="remove-test-results"></div>
+      </div>
+
+      <!-- Test 2: Cyclic Straight -->
+      <div class="test-section">
+        <h2>🧪 Test 2: Cyclic Straight Different Results</h2>
+        <p>ทดสอบว่า zabcdefghi และ ihgfedcbaz ได้ผลลัพธ์ต่างกัน</p>
+        <button id="test-cyclic-btn" class="btn btn-primary">Test Cyclic Straight</button>
+        <div id="cyclic-test-results"></div>
+      </div>
+
+      <!-- Manual Test Area -->
+      <div class="test-section">
+        <h2>🎯 Manual Test Area</h2>
+        <p>ทดสอบด้วยตนเอง - เพิ่ม patterns และลองกดปุ่มลบ</p>
+        
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern:</label>
+          <select id="pattern-select">
+            <option value="">-- เลือก Pattern --</option>
+            <option value="aaaaaaaaaa" data-type="The Soloist">aaa-aaa-aaaa</option>
+            <option value="?bbbbbbbbb" data-type="The Soloist">?bb-bbb-bbbb</option>
+            <option value="zabcdefghi" data-type="Cyclic Straight">zab-cde-fghi (Ascending)</option>
+            <option value="ihgfedcbaz" data-type="Cyclic Straight">ihg-fed-cbaz (Descending)</option>
+          </select>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+        
+        <div id="pattern-list" class="pattern-list"></div>
+        
+        <div id="results-display" class="results-display"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the application
+      init();
+      
+      const testRemoveBtn = document.getElementById('test-remove-btn');
+      const removeTestResults = document.getElementById('remove-test-results');
+      const testCyclicBtn = document.getElementById('test-cyclic-btn');
+      const cyclicTestResults = document.getElementById('cyclic-test-results');
+      
+      // Test 1: Remove Button
+      testRemoveBtn.addEventListener('click', function() {
+        removeTestResults.innerHTML = '<p>Testing remove button...</p>';
+        
+        try {
+          // Clear existing patterns
+          state.patternManager.clearAll();
+          
+          // Add some test patterns
+          state.patternManager.addPattern('aaaaaaaaaa');
+          state.patternManager.addPattern('?bbbbbbbbb');
+          state.patternManager.addPattern('zabcdefghi');
+          
+          let results = '<div class="test-result info">';
+          results += '<h4>Initial State</h4>';
+          results += `<p>Added 3 patterns: aaaaaaaaaa, ?bbbbbbbbb, zabcdefghi</p>`;
+          results += `<p>Pattern count: ${state.patternManager.getCount()}</p>`;
+          results += '</div>';
+          
+          // Update UI to show patterns
+          uiController.updateUI();
+          
+          // Test removing middle pattern (index 1 in sorted order)
+          const patternGroups = state.patternManager.getAllPatternGroups();
+          const sortedGroups = patternGroups.sort((a, b) => a.numbers.length - b.numbers.length);
+          
+          results += '<div class="test-result info">';
+          results += '<h4>Sorted Pattern Order (by number count)</h4>';
+          sortedGroups.forEach((group, index) => {
+            results += `<p>${index}: ${group.pattern} (${group.numbers.length} numbers)</p>`;
+          });
+          results += '</div>';
+          
+          // Remove pattern at sorted index 1
+          const patternToRemove = sortedGroups[1];
+          uiController.removePattern(1);
+          
+          const afterRemoval = state.patternManager.getCount();
+          
+          results += '<div class="test-result ' + (afterRemoval === 2 ? 'success' : 'error') + '">';
+          results += '<h4>After Removal</h4>';
+          results += `<p>Removed pattern: ${patternToRemove.pattern}</p>`;
+          results += `<p>Pattern count: ${afterRemoval}</p>`;
+          results += `<p>Result: ${afterRemoval === 2 ? '✅ SUCCESS' : '❌ FAILED'}</p>`;
+          results += '</div>';
+          
+          removeTestResults.innerHTML = results;
+          
+        } catch (error) {
+          removeTestResults.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+        }
+      });
+      
+      // Test 2: Cyclic Straight
+      testCyclicBtn.addEventListener('click', function() {
+        cyclicTestResults.innerHTML = '<p>Testing cyclic straight patterns...</p>';
+        
+        try {
+          const generator = new PatternGenerator();
+          
+          // Test zabcdefghi (ascending)
+          const ascendingResults = generator.generateCyclicStraight('zabcdefghi');
+          
+          // Test ihgfedcbaz (descending)
+          const descendingResults = generator.generateCyclicStraight('ihgfedcbaz');
+          
+          // Check if results are different
+          const ascendingSet = new Set(ascendingResults);
+          const descendingSet = new Set(descendingResults);
+          
+          // Find common numbers
+          const commonNumbers = ascendingResults.filter(num => descendingSet.has(num));
+          const isDifferent = commonNumbers.length < Math.min(ascendingResults.length, descendingResults.length);
+          
+          let results = '<div class="test-result ' + (isDifferent ? 'success' : 'error') + '">';
+          results += '<h4>Cyclic Straight Test Results</h4>';
+          results += `<p><strong>zabcdefghi (Ascending):</strong> ${ascendingResults.length} numbers</p>`;
+          results += `<p><strong>ihgfedcbaz (Descending):</strong> ${descendingResults.length} numbers</p>`;
+          results += `<p><strong>Common numbers:</strong> ${commonNumbers.length}</p>`;
+          results += `<p><strong>Are different:</strong> ${isDifferent ? '✅ YES' : '❌ NO'}</p>`;
+          results += '</div>';
+          
+          results += '<div class="test-result info">';
+          results += '<h4>Sample Numbers</h4>';
+          results += '<p><strong>Ascending (first 5):</strong><br>';
+          results += ascendingResults.slice(0, 5).join('<br>');
+          results += '</p>';
+          results += '<p><strong>Descending (first 5):</strong><br>';
+          results += descendingResults.slice(0, 5).join('<br>');
+          results += '</p>';
+          results += '</div>';
+          
+          if (commonNumbers.length > 0) {
+            results += '<div class="test-result error">';
+            results += '<h4>Common Numbers (Should be empty or minimal)</h4>';
+            results += commonNumbers.slice(0, 10).join('<br>');
+            results += '</div>';
+          }
+          
+          cyclicTestResults.innerHTML = results;
+          
+        } catch (error) {
+          cyclicTestResults.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+        }
+      });
+      
+      // Manual test area
+      const patternSelect = document.getElementById('pattern-select');
+      const addPatternBtn = document.getElementById('add-pattern-btn');
+      
+      addPatternBtn.addEventListener('click', function() {
+        const selectedPattern = patternSelect.value;
+        if (selectedPattern) {
+          uiController.handleAddPattern();
+        }
+      });
+      
+      // Wire up the pattern select to work with UIController
+      patternSelect.addEventListener('change', function() {
+        // Update the main pattern input (if it exists) to match our selection
+        const mainPatternInput = document.querySelector('#pattern-input');
+        if (mainPatternInput) {
+          mainPatternInput.value = this.value;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

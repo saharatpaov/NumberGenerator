@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Benchmarks - Pattern Number Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .benchmark-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .benchmark-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #c82333; }
+        .stats {
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Performance Benchmarks</h1>
+    <p>Testing performance requirements: pattern identification ≤50ms, generation ≤500ms for ≤1000 numbers, 10 patterns ≤2s, CSV export ≤1s for ≤10000 numbers</p>
+    
+    <div class="benchmark-section">
+        <h2>Benchmark 1: Pattern Type Identification (≤50ms)</h2>
+        <button onclick="runPatternIdentificationBenchmark()">Run Pattern Identification Benchmark</button>
+        <div id="identification-results"></div>
+    </div>
+
+    <div class="benchmark-section">
+        <h2>Benchmark 2: Single Pattern Generation (≤500ms for ≤1000 numbers)</h2>
+        <button onclick="runSinglePatternBenchmark()">Run Single Pattern Benchmark</button>
+        <div id="single-pattern-results"></div>
+    </div>
+
+    <div class="benchmark-section">
+        <h2>Benchmark 3: Multiple Patterns Processing (≤2s for 10 patterns)</h2>
+        <button onclick="runMultiplePatternsBenchmark()">Run Multiple Patterns Benchmark</button>
+        <div id="multiple-patterns-results"></div>
+    </div>
+
+    <div class="benchmark-section">
+        <h2>Benchmark 4: CSV Export (≤1s for ≤10000 numbers)</h2>
+        <button onclick="runCSVExportBenchmark()">Run CSV Export Benchmark</button>
+        <div id="csv-export-results"></div>
+    </div>
+
+    <div class="benchmark-section">
+        <h2>Run All Benchmarks</h2>
+        <button onclick="runAllBenchmarks()">Run All Benchmarks</button>
+        <div id="all-results"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize components
+        const validator = new PatternValidator();
+        const analyzer = new PatternAnalyzer();
+        const generator = new PatternGenerator();
+        const csvExporter = new CSVExporter();
+
+        // Test patterns for benchmarking
+        const testPatterns = {
+            soloist: ['aaaaaaaaaa', 'abbbbbbbb', 'andddddddd'],
+            hyphenSeparated: ['aaabbbcccc', 'bbbtnxbbbb'],
+            fullStraight: ['abcdefghij', 'jihgfedcba'],
+            cyclicStraight: ['zabcdefghi', 'ihgfedcbaz'],
+            rhythmicBridge: ['abcaxxabcd']
+        };
+
+        function formatTime(ms) {
+            return ms.toFixed(2) + 'ms';
+        }
+
+        function createResultDiv(text, className) {
+            const div = document.createElement('div');
+            div.className = `benchmark-result ${className}`;
+            div.textContent = text;
+            return div;
+        }
+
+        function runPatternIdentificationBenchmark() {
+            const resultsDiv = document.getElementById('identification-results');
+            resultsDiv.innerHTML = '';
+            
+            const allPatterns = Object.values(testPatterns).flat();
+            const times = [];
+            
+            // Warm up
+            for (let i = 0; i < 10; i++) {
+                analyzer.identifyPatternType(allPatterns[0]);
+            }
+            
+            // Benchmark each pattern
+            allPatterns.forEach(pattern => {
+                const start = performance.now();
+                const patternType = analyzer.identifyPatternType(pattern);
+                const end = performance.now();
+                const time = end - start;
+                times.push(time);
+                
+                const className = time <= 50 ? 'pass' : 'fail';
+                const result = `Pattern "${pattern}" → ${patternType}: ${formatTime(time)} ${time <= 50 ? '✓' : '✗'}`;
+                resultsDiv.appendChild(createResultDiv(result, className));
+            });
+            
+            const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
+            const maxTime = Math.max(...times);
+            const minTime = Math.min(...times);
+            
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'stats';
+            statsDiv.innerHTML = `
+                Average: ${formatTime(avgTime)}<br>
+                Min: ${formatTime(minTime)}<br>
+                Max: ${formatTime(maxTime)}<br>
+                Requirement: ≤50ms
+            `;
+            resultsDiv.appendChild(statsDiv);
+            
+            const overallClass = maxTime <= 50 ? 'pass' : 'fail';
+            const overallResult = `Overall: ${maxTime <= 50 ? 'PASS' : 'FAIL'} - Max time: ${formatTime(maxTime)}`;
+            resultsDiv.appendChild(createResultDiv(overallResult, overallClass));
+        }
+
+        function runSinglePatternBenchmark() {
+            const resultsDiv = document.getElementById('single-pattern-results');
+            resultsDiv.innerHTML = '';
+            
+            const allPatterns = Object.values(testPatterns).flat();
+            const times = [];
+            
+            allPatterns.forEach(pattern => {
+                const patternType = analyzer.identifyPatternType(pattern);
+                
+                const start = performance.now();
+                const numbers = generator.generate(pattern, patternType);
+                const end = performance.now();
+                const time = end - start;
+                times.push(time);
+                
+                const className = time <= 500 && numbers.length <= 1000 ? 'pass' : 'fail';
+                const result = `Pattern "${pattern}" (${numbers.length} numbers): ${formatTime(time)} ${time <= 500 && numbers.length <= 1000 ? '✓' : '✗'}`;
+                resultsDiv.appendChild(createResultDiv(result, className));
+            });
+            
+            const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
+            const maxTime = Math.max(...times);
+            
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'stats';
+            statsDiv.innerHTML = `
+                Average: ${formatTime(avgTime)}<br>
+                Max: ${formatTime(maxTime)}<br>
+                Requirement: ≤500ms for ≤1000 numbers
+            `;
+            resultsDiv.appendChild(statsDiv);
+            
+            const overallClass = maxTime <= 500 ? 'pass' : 'fail';
+            const overallResult = `Overall: ${maxTime <= 500 ? 'PASS' : 'FAIL'} - Max time: ${formatTime(maxTime)}`;
+            resultsDiv.appendChild(createResultDiv(overallResult, overallClass));
+        }
+
+        function runMultiplePatternsBenchmark() {
+            const resultsDiv = document.getElementById('multiple-patterns-results');
+            resultsDiv.innerHTML = '';
+            
+            // Select 10 patterns for testing
+            const tenPatterns = [
+                'aaaaaaaaaa', 'abbbbbbbb', 'andddddddd',
+                'aaabbbcccc', 'bbbtnxbbbb',
+                'abcdefghij', 'jihgfedcba',
+                'zabcdefghi', 'ihgfedcbaz',
+                'abcaxxabcd'
+            ];
+            
+            const start = performance.now();
+            
+            const results = [];
+            tenPatterns.forEach(pattern => {
+                const patternType = analyzer.identifyPatternType(pattern);
+                const numbers = generator.generate(pattern, patternType);
+                results.push({ pattern, patternType, numbers });
+            });
+            
+            const end = performance.now();
+            const totalTime = end - start;
+            
+            const totalNumbers = results.reduce((sum, result) => sum + result.numbers.length, 0);
+            
+            const className = totalTime <= 2000 ? 'pass' : 'fail';
+            const result = `Processed ${tenPatterns.length} patterns (${totalNumbers} total numbers): ${formatTime(totalTime)} ${totalTime <= 2000 ? '✓' : '✗'}`;
+            resultsDiv.appendChild(createResultDiv(result, className));
+            
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'stats';
+            statsDiv.innerHTML = `
+                Total time: ${formatTime(totalTime)}<br>
+                Average per pattern: ${formatTime(totalTime / tenPatterns.length)}<br>
+                Total numbers generated: ${totalNumbers}<br>
+                Requirement: ≤2000ms for 10 patterns
+            `;
+            resultsDiv.appendChild(statsDiv);
+        }
+
+        function runCSVExportBenchmark() {
+            const resultsDiv = document.getElementById('csv-export-results');
+            resultsDiv.innerHTML = '';
+            
+            // Generate data with ~10000 numbers
+            const largeDataset = [];
+            
+            // Use rhythmic bridge pattern which generates 9900 numbers
+            const pattern = 'abcaxxabcd';
+            const patternType = analyzer.identifyPatternType(pattern);
+            const numbers = generator.generate(pattern, patternType);
+            
+            largeDataset.push({
+                pattern: pattern,
+                patternType: patternType,
+                numbers: numbers
+            });
+            
+            const totalNumbers = numbers.length;
+            
+            const start = performance.now();
+            const csvContent = csvExporter.generateCSV(largeDataset);
+            const end = performance.now();
+            const time = end - start;
+            
+            const className = time <= 1000 && totalNumbers >= 9000 ? 'pass' : 'fail';
+            const result = `CSV export of ${totalNumbers} numbers: ${formatTime(time)} ${time <= 1000 ? '✓' : '✗'}`;
+            resultsDiv.appendChild(createResultDiv(result, className));
+            
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'stats';
+            statsDiv.innerHTML = `
+                Export time: ${formatTime(time)}<br>
+                Numbers exported: ${totalNumbers}<br>
+                CSV size: ${(csvContent.length / 1024).toFixed(2)} KB<br>
+                Requirement: ≤1000ms for ≤10000 numbers
+            `;
+            resultsDiv.appendChild(statsDiv);
+        }
+
+        function runAllBenchmarks() {
+            const resultsDiv = document.getElementById('all-results');
+            resultsDiv.innerHTML = '<p>Running all benchmarks...</p>';
+            
+            setTimeout(() => {
+                runPatternIdentificationBenchmark();
+                setTimeout(() => {
+                    runSinglePatternBenchmark();
+                    setTimeout(() => {
+                        runMultiplePatternsBenchmark();
+                        setTimeout(() => {
+                            runCSVExportBenchmark();
+                            resultsDiv.innerHTML = '<p style="color: green; font-weight: bold;">All benchmarks completed! Check individual sections above for results.</p>';
+                        }, 100);
+                    }, 100);
+                }, 100);
+            }, 100);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Main App Pattern Classification</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+  </style>
+</head>
+<body>
+  <h1>Test Main App Pattern Classification</h1>
+  <div id="results"></div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Test the problematic patterns
+    const testPatterns = [
+      { pattern: 'bbbtnxbbbb', expected: 'Hyphen-separated' },
+      { pattern: 'zabcdefghi', expected: 'Cyclic Straight' },
+      { pattern: 'ihgfedcbaz', expected: 'Cyclic Straight' }
+    ];
+
+    const validator = new PatternValidator();
+    const analyzer = new PatternAnalyzer();
+    const resultsDiv = document.getElementById('results');
+
+    console.log('Testing with main app classes:');
+    
+    testPatterns.forEach(test => {
+      console.log(`\nTesting: ${test.pattern}`);
+      console.log(`Expected: ${test.expected}`);
+      
+      const resultDiv = document.createElement('div');
+      resultDiv.className = 'test-result';
+      
+      try {
+        const validation = validator.validate(test.pattern);
+        if (!validation.isValid) {
+          console.log(`❌ Validation failed: ${validation.errorMessage}`);
+          resultDiv.className += ' fail';
+          resultDiv.innerHTML = `<strong>${test.pattern}</strong><br>❌ Validation failed: ${validation.errorMessage}`;
+          resultsDiv.appendChild(resultDiv);
+          return;
+        }
+        
+        const actualType = analyzer.identifyPatternType(test.pattern);
+        console.log(`Actual: ${actualType}`);
+        
+        if (actualType === test.expected) {
+          console.log('✅ PASS');
+          resultDiv.className += ' pass';
+          resultDiv.innerHTML = `<strong>${test.pattern}</strong><br>✅ PASS: ${actualType}`;
+        } else {
+          console.log('❌ FAIL');
+          resultDiv.className += ' fail';
+          resultDiv.innerHTML = `<strong>${test.pattern}</strong><br>❌ FAIL: Expected ${test.expected}, got ${actualType}`;
+        }
+        
+      } catch (error) {
+        console.log(`❌ Error: ${error.message}`);
+        resultDiv.className += ' fail';
+        resultDiv.innerHTML = `<strong>${test.pattern}</strong><br>❌ Error: ${error.message}`;
+      }
+      
+      resultsDiv.appendChild(resultDiv);
+    });
+  </script>
+</body>
+</html>
