@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Wildcard Patterns</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+    .numbers { 
+      max-height: 200px; 
+      overflow-y: auto; 
+      background: #f8f9fa; 
+      padding: 10px; 
+      border-radius: 3px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Wildcard Patterns (?)</h1>
+      </div>
+    </header>
+
+    <main>
+      <div class="test-section">
+        <h2>🧪 Wildcard Pattern Testing</h2>
+        <p>Testing patterns with "?" characters that can be any digit (0-9)</p>
+        <div id="test-results"></div>
+        <button id="run-tests-btn" class="btn btn-primary">Run Wildcard Tests</button>
+      </div>
+
+      <!-- Manual Testing Section -->
+      <div class="test-section">
+        <h2>🎯 Manual Testing</h2>
+        <div class="input-group">
+          <label for="pattern-input">Enter pattern with ? wildcards:</label>
+          <input type="text" id="pattern-input" placeholder="e.g., ?bb-bbb-bbbb" maxlength="10">
+          <button id="test-pattern-btn" class="btn btn-secondary">Test Pattern</button>
+        </div>
+        <div id="manual-results"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const runTestsBtn = document.getElementById('run-tests-btn');
+      const testResultsDiv = document.getElementById('test-results');
+      const testPatternBtn = document.getElementById('test-pattern-btn');
+      const patternInput = document.getElementById('pattern-input');
+      const manualResultsDiv = document.getElementById('manual-results');
+
+      // Test patterns with wildcards
+      const testPatterns = [
+        { pattern: '?bbbbbbbbb', type: 'The Soloist', description: 'All 9 digits identical with 1 wildcard' },
+        { pattern: '??dddddddd', type: 'The Soloist', description: 'All 8 digits identical with 2 wildcards' },
+        { pattern: '???ddddddd', type: 'The Soloist', description: 'All 7 digits identical with 3 wildcards' },
+        { pattern: '???-?eeeeee', type: 'The Soloist', description: 'All 6 digits identical with 4 wildcards' },
+        { pattern: '???-??fffff', type: 'The Soloist', description: 'All 5 digits identical with 5 wildcards' },
+        { pattern: '???-???gggg', type: 'The Soloist', description: 'All 4 digits identical with 6 wildcards' },
+        { pattern: 'bbb???bbbb', type: 'Hyphen-separated', description: 'First and last blocks identical with wildcard middle' }
+      ];
+
+      runTestsBtn.addEventListener('click', function() {
+        testResultsDiv.innerHTML = '<p>Running wildcard tests...</p>';
+        
+        const validator = new PatternValidator();
+        const analyzer = new PatternAnalyzer();
+        const generator = new PatternGenerator();
+        
+        let results = [];
+
+        testPatterns.forEach((test, index) => {
+          try {
+            console.log(`Testing ${test.pattern}...`);
+            
+            // Clean pattern for processing (remove hyphens)
+            const cleanPattern = test.pattern.replace(/-/g, '');
+            
+            // Validate pattern
+            const validation = validator.validate(cleanPattern);
+            if (!validation.isValid) {
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                cleanPattern: cleanPattern,
+                type: test.type,
+                description: test.description,
+                status: 'fail',
+                message: `Validation failed: ${validation.errorMessage}`,
+                numbers: []
+              });
+              return;
+            }
+            
+            // Identify pattern type
+            const actualType = analyzer.identifyPatternType(cleanPattern);
+            
+            // Generate numbers
+            const numbers = generator.generate(cleanPattern, actualType);
+            
+            // Check results
+            let status = 'pass';
+            let message = `Generated ${numbers.length} numbers`;
+            
+            if (actualType !== test.type) {
+              status = 'fail';
+              message = `Type mismatch: Expected ${test.type}, got ${actualType}`;
+            }
+            
+            // Check that wildcards generate multiple combinations
+            if (cleanPattern.includes('?') && numbers.length < 10) {
+              status = 'fail';
+              message += ` (Expected more combinations with wildcards, got ${numbers.length})`;
+            }
+            
+            results.push({
+              index: index + 1,
+              pattern: test.pattern,
+              cleanPattern: cleanPattern,
+              type: test.type,
+              actualType: actualType,
+              description: test.description,
+              status: status,
+              message: message,
+              numbers: numbers.slice(0, 10) // Show first 10 numbers
+            });
+            
+          } catch (error) {
+            results.push({
+              index: index + 1,
+              pattern: test.pattern,
+              cleanPattern: cleanPattern,
+              type: test.type,
+              description: test.description,
+              status: 'fail',
+              message: `Error: ${error.message}`,
+              numbers: []
+            });
+          }
+        });
+
+        // Display results
+        let html = '';
+        
+        results.forEach(result => {
+          html += `
+            <div class="test-result ${result.status}">
+              <strong>${result.index}. ${result.pattern}</strong> → <code>${result.cleanPattern}</code><br>
+              <small>${result.description}</small><br>
+              ${result.status === 'pass' ? '✅' : '❌'} ${result.message}
+              ${result.actualType && result.actualType !== result.type ? `<br><small>Actual type: ${result.actualType}</small>` : ''}
+              ${result.numbers.length > 0 ? `
+                <div class="numbers">
+                  <strong>Sample numbers:</strong><br>
+                  ${result.numbers.join('<br>')}
+                  ${result.numbers.length === 10 ? '<br>... (showing first 10)' : ''}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+
+        testResultsDiv.innerHTML = html;
+        
+        const passCount = results.filter(r => r.status === 'pass').length;
+        console.log(`Wildcard tests completed: ${passCount}/${results.length} passed`);
+      });
+
+      // Manual testing
+      testPatternBtn.addEventListener('click', function() {
+        const pattern = patternInput.value.trim();
+        if (!pattern) {
+          manualResultsDiv.innerHTML = '<div class="test-result fail">Please enter a pattern</div>';
+          return;
+        }
+
+        const cleanPattern = pattern.replace(/-/g, '');
+        
+        try {
+          const validator = new PatternValidator();
+          const analyzer = new PatternAnalyzer();
+          const generator = new PatternGenerator();
+          
+          const validation = validator.validate(cleanPattern);
+          if (!validation.isValid) {
+            manualResultsDiv.innerHTML = `<div class="test-result fail">❌ ${validation.errorMessage}</div>`;
+            return;
+          }
+          
+          const patternType = analyzer.identifyPatternType(cleanPattern);
+          const numbers = generator.generate(cleanPattern, patternType);
+          
+          manualResultsDiv.innerHTML = `
+            <div class="test-result pass">
+              <strong>Pattern:</strong> ${pattern} → <code>${cleanPattern}</code><br>
+              <strong>Type:</strong> ${patternType}<br>
+              <strong>Generated:</strong> ${numbers.length} numbers<br>
+              <div class="numbers">
+                <strong>Sample numbers:</strong><br>
+                ${numbers.slice(0, 20).join('<br>')}
+                ${numbers.length > 20 ? '<br>... (showing first 20)' : ''}
+              </div>
+            </div>
+          `;
+          
+        } catch (error) {
+          manualResultsDiv.innerHTML = `<div class="test-result fail">❌ Error: ${error.message}</div>`;
+        }
+      });
+
+      // Allow Enter key in input
+      patternInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          testPatternBtn.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

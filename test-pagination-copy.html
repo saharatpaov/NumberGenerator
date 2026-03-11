@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Pagination and Copy Features</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Pagination and Copy Features</h1>
+        <p>ทดสอบ pagination (1,000 รายการต่อหน้า) และ click to copy account numbers</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- Test Setup -->
+      <div class="test-section">
+        <h2>🧪 Test Setup</h2>
+        <p>เพิ่ม patterns ที่มีจำนวนมากเพื่อทดสอบ pagination</p>
+        <button id="setup-test-btn" class="btn btn-primary">Setup Test Data</button>
+        <div id="setup-results"></div>
+      </div>
+
+      <!-- Manual Test Area -->
+      <div class="test-section">
+        <h2>🎯 Manual Test Area</h2>
+        <p>เพิ่ม patterns และทดสอบ pagination + copy functionality</p>
+        
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern:</label>
+          <select id="pattern-select">
+            <option value="">-- เลือก Pattern --</option>
+            <option value="aaaaaaaaaa" data-type="The Soloist">aaa-aaa-aaaa (10 numbers)</option>
+            <option value="?bbbbbbbbb" data-type="The Soloist">?bb-bbb-bbbb (90 numbers)</option>
+            <option value="??dddddddd" data-type="The Soloist">??d-ddd-dddd (900 numbers)</option>
+            <option value="???ddddddd" data-type="The Soloist">???-ddd-dddd (7,200 numbers)</option>
+            <option value="bbbaaaaaaa" data-type="Hyphen-separated">bbb-aaa-aaaa (90 numbers)</option>
+            <option value="abc???abc?" data-type="The Rhythmic Bridge">abc-???-abc? (Rhythmic Bridge)</option>
+          </select>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+        
+        <div id="pattern-list" class="pattern-list"></div>
+        
+        <div class="results-header">
+          <h2>ผลลัพธ์</h2>
+          <button id="export-btn" class="btn btn-secondary" style="display: none;">Export เป็น CSV</button>
+        </div>
+        <div id="results-display" class="results-display"></div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="test-section">
+        <h2>📋 Testing Instructions</h2>
+        <div class="test-result info">
+          <h4>How to Test:</h4>
+          <ol>
+            <li><strong>Setup Test Data:</strong> คลิก "Setup Test Data" เพื่อเพิ่ม patterns ที่มีจำนวนมาก</li>
+            <li><strong>Test Pagination:</strong> ดูว่ามี pagination controls ปรากฏขึ้นสำหรับ patterns ที่มีมากกว่า 1,000 รายการ</li>
+            <li><strong>Test Copy:</strong> คลิกที่เลขบัญชีใดๆ เพื่อ copy และดู "Copied!" feedback</li>
+            <li><strong>Test CSV Export:</strong> คลิก "Export เป็น CSV" และตรวจสอบ column order และชื่อ</li>
+            <li><strong>Test Navigation:</strong> ใช้ pagination controls เพื่อเปลี่ยนหน้า</li>
+          </ol>
+          
+          <h4>Expected Results:</h4>
+          <ul>
+            <li>✅ แสดงผลหน้าละ 1,000 รายการ</li>
+            <li>✅ มี pagination controls สำหรับ patterns ที่มีมากกว่า 1,000 รายการ</li>
+            <li>✅ คลิกเลขบัญชีแล้ว copy ได้ (ไม่มี dash)</li>
+            <li>✅ แสดง "Copied!" feedback เมื่อ copy สำเร็จ</li>
+            <li>✅ CSV export มี column order: account_number, pattern, pattern_type</li>
+            <li>✅ CSV filename เป็น "account-numbers-[timestamp].csv"</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the application
+      init();
+      
+      const setupTestBtn = document.getElementById('setup-test-btn');
+      const setupResults = document.getElementById('setup-results');
+      const patternSelect = document.getElementById('pattern-select');
+      const addPatternBtn = document.getElementById('add-pattern-btn');
+      const exportBtn = document.getElementById('export-btn');
+      
+      // Setup test data
+      setupTestBtn.addEventListener('click', function() {
+        setupResults.innerHTML = '<p>Setting up test data...</p>';
+        
+        try {
+          // Clear existing patterns
+          state.patternManager.clearAll();
+          
+          // Add patterns with different sizes to test pagination
+          const testPatterns = [
+            'aaaaaaaaaa',    // 10 numbers (no pagination)
+            '?bbbbbbbbb',    // 90 numbers (no pagination)
+            '??dddddddd',    // 900 numbers (no pagination)
+            '???ddddddd'     // 7,200 numbers (needs pagination)
+          ];
+          
+          let addedCount = 0;
+          let results = '<div class="test-result success">';
+          results += '<h4>Test Data Setup Complete</h4>';
+          
+          testPatterns.forEach((pattern, index) => {
+            setTimeout(() => {
+              try {
+                state.patternManager.addPattern(pattern);
+                addedCount++;
+                
+                const patternGroups = state.patternManager.getAllPatternGroups();
+                const currentGroup = patternGroups.find(g => g.pattern === pattern);
+                
+                results += `<p>✅ Added ${pattern}: ${currentGroup ? currentGroup.numbers.length.toLocaleString() : 'unknown'} numbers</p>`;
+                
+                if (addedCount === testPatterns.length) {
+                  results += '<p><strong>Ready for testing!</strong> Check the results below for pagination controls.</p>';
+                  results += '</div>';
+                  setupResults.innerHTML = results;
+                  
+                  // Update UI
+                  uiController.updateUI();
+                }
+              } catch (error) {
+                results += `<p>❌ Failed to add ${pattern}: ${error.message}</p>`;
+                setupResults.innerHTML = results + '</div>';
+              }
+            }, index * 200);
+          });
+          
+        } catch (error) {
+          setupResults.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+        }
+      });
+      
+      // Manual pattern addition
+      addPatternBtn.addEventListener('click', function() {
+        const selectedPattern = patternSelect.value;
+        if (selectedPattern) {
+          try {
+            state.patternManager.addPattern(selectedPattern);
+            uiController.updateUI();
+            patternSelect.value = '';
+            document.getElementById('error-message').textContent = '';
+          } catch (error) {
+            document.getElementById('error-message').textContent = error.message;
+          }
+        }
+      });
+      
+      // Export functionality
+      exportBtn.addEventListener('click', function() {
+        try {
+          const patternGroups = state.patternManager.getAllPatternGroups();
+          if (patternGroups.length === 0) {
+            alert('ไม่มีข้อมูลสำหรับ export');
+            return;
+          }
+          
+          const csvExporter = new CSVExporter();
+          csvExporter.export(patternGroups);
+          
+        } catch (error) {
+          alert('Export failed: ' + error.message);
+        }
+      });
+      
+      // Show export button when there are patterns
+      const originalUpdateUI = uiController.updateUI;
+      uiController.updateUI = function() {
+        originalUpdateUI.call(this);
+        const patternGroups = state.patternManager.getAllPatternGroups();
+        exportBtn.style.display = patternGroups.length > 0 ? 'inline-block' : 'none';
+      };
+    });
+  </script>
+</body>
+</html>

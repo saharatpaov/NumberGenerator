@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprehensive Pattern Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 5px 0; padding: 8px; border-radius: 3px; font-size: 14px; }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .summary { margin: 20px 0; padding: 15px; background-color: #e9ecef; border-radius: 5px; }
+    h1 { color: #333; }
+    h2 { color: #666; margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <h1>Comprehensive Pattern Classification Test</h1>
+  <div id="results"></div>
+  <div id="summary" class="summary"></div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // All patterns from the dropdown with expected types
+    const testPatterns = [
+      // The Soloist Patterns
+      { pattern: 'aaaaaaaaaa', expected: 'The Soloist', description: 'All 10 digits identical' },
+      { pattern: 'abbbbbbbbb', expected: 'The Soloist', description: 'All 9 digits identical' },
+      { pattern: 'abdddddddd', expected: 'The Soloist', description: 'All 8 digits identical' },
+      { pattern: 'abcddddddd', expected: 'The Soloist', description: 'All 7 digits identical' },
+      { pattern: 'abcdeeeeee', expected: 'The Soloist', description: 'All 6 digits identical' },
+      { pattern: 'abcdefffff', expected: 'The Soloist', description: 'All 5 digits identical' },
+      { pattern: 'abcdefgggg', expected: 'The Soloist', description: 'All 4 digits identical (Block-ending)' },
+      
+      // Hyphen-separated Patterns (moved to Soloist except bbbtnxbbbb)
+      { pattern: 'bbbaaaaaaa', expected: 'The Soloist', description: '2 distinct digits across blocks (3+7)' },
+      { pattern: 'bbbbbaaaaa', expected: 'The Soloist', description: '2 distinct digits across blocks (5+5)' },
+      { pattern: 'aaabbbcccc', expected: 'The Soloist', description: '3 distinct digits across blocks' },
+      { pattern: 'bbbtnxbbbb', expected: 'Hyphen-separated', description: 'First and last blocks identical' },
+      
+      // The Full Straight Patterns
+      { pattern: 'abcdefghij', expected: 'The Full Straight', description: 'Ascending' },
+      { pattern: 'jihgfedcba', expected: 'The Full Straight', description: 'Descending' },
+      
+      // Cyclic Straight Patterns
+      { pattern: 'zabcdefghi', expected: 'Cyclic Straight', description: 'Cyclic progression' },
+      { pattern: 'ihgfedcbaz', expected: 'Cyclic Straight', description: 'Cyclic progression' },
+      
+      // The Rhythmic Bridge Patterns
+      { pattern: 'abcefgabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern 2-3 block' },
+      { pattern: 'abcabcdefg', expected: 'The Rhythmic Bridge', description: 'Repeating pattern front-middle' },
+      { pattern: 'efgabcabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern middle-end' }
+    ];
+
+    const validator = new PatternValidator();
+    const analyzer = new PatternAnalyzer();
+    const resultsDiv = document.getElementById('results');
+    const summaryDiv = document.getElementById('summary');
+
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = [];
+
+    console.log('Testing all dropdown patterns with main app:');
+    
+    testPatterns.forEach((test, index) => {
+      totalTests++;
+      console.log(`\n${index + 1}. Testing: ${test.pattern}`);
+      console.log(`   Expected: ${test.expected}`);
+      console.log(`   Description: ${test.description}`);
+      
+      const resultDiv = document.createElement('div');
+      resultDiv.className = 'test-result';
+      
+      try {
+        const validation = validator.validate(test.pattern);
+        if (!validation.isValid) {
+          console.log(`   ❌ Validation failed: ${validation.errorMessage}`);
+          resultDiv.className += ' fail';
+          resultDiv.innerHTML = `<strong>${index + 1}. ${test.pattern}</strong> - ${test.description}<br>❌ Validation failed: ${validation.errorMessage}`;
+          failedTests.push({ ...test, error: validation.errorMessage });
+          resultsDiv.appendChild(resultDiv);
+          return;
+        }
+        
+        const actualType = analyzer.identifyPatternType(test.pattern);
+        console.log(`   Actual: ${actualType}`);
+        
+        if (actualType === test.expected) {
+          console.log('   ✅ PASS');
+          passedTests++;
+          resultDiv.className += ' pass';
+          resultDiv.innerHTML = `<strong>${index + 1}. ${test.pattern}</strong> - ${test.description}<br>✅ PASS: ${actualType}`;
+        } else {
+          console.log('   ❌ FAIL');
+          resultDiv.className += ' fail';
+          resultDiv.innerHTML = `<strong>${index + 1}. ${test.pattern}</strong> - ${test.description}<br>❌ FAIL: Expected ${test.expected}, got ${actualType}`;
+          failedTests.push({ ...test, actualType, error: 'Type mismatch' });
+        }
+        
+      } catch (error) {
+        console.log(`   ❌ Error: ${error.message}`);
+        resultDiv.className += ' fail';
+        resultDiv.innerHTML = `<strong>${index + 1}. ${test.pattern}</strong> - ${test.description}<br>❌ Error: ${error.message}`;
+        failedTests.push({ ...test, error: error.message });
+      }
+      
+      resultsDiv.appendChild(resultDiv);
+    });
+
+    // Display summary
+    const successRate = ((passedTests / totalTests) * 100).toFixed(1);
+    
+    let summaryHTML = `
+      <h2>📊 Test Summary</h2>
+      <p><strong>Total Tests:</strong> ${totalTests}</p>
+      <p><strong>Passed:</strong> ${passedTests}</p>
+      <p><strong>Failed:</strong> ${totalTests - passedTests}</p>
+      <p><strong>Success Rate:</strong> ${successRate}%</p>
+    `;
+
+    if (failedTests.length > 0) {
+      summaryHTML += '<h3>❌ Failed Tests:</h3><ul>';
+      failedTests.forEach((test, index) => {
+        summaryHTML += `<li><strong>${test.pattern}</strong> - ${test.error}`;
+        if (test.actualType) {
+          summaryHTML += ` (Expected: ${test.expected}, Got: ${test.actualType})`;
+        }
+        summaryHTML += '</li>';
+      });
+      summaryHTML += '</ul>';
+    } else {
+      summaryHTML += '<p>🎉 <strong>All tests passed!</strong></p>';
+    }
+
+    summaryDiv.innerHTML = summaryHTML;
+
+    console.log('\n📊 Summary:');
+    console.log('===========');
+    console.log(`Total Tests: ${totalTests}`);
+    console.log(`Passed: ${passedTests}`);
+    console.log(`Failed: ${totalTests - passedTests}`);
+    console.log(`Success Rate: ${successRate}%`);
+
+    if (failedTests.length > 0) {
+      console.log('\n❌ Failed Tests:');
+      failedTests.forEach((test, index) => {
+        console.log(`${index + 1}. ${test.pattern} - ${test.error}`);
+        if (test.actualType) {
+          console.log(`   Expected: ${test.expected}, Got: ${test.actualType}`);
+        }
+      });
+    } else {
+      console.log('\n🎉 All tests passed!');
+    }
+  </script>
+</body>
+</html>

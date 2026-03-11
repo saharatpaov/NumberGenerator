@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Updated Patterns</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+    .numbers { 
+      max-height: 200px; 
+      overflow-y: auto; 
+      background: #f8f9fa; 
+      padding: 10px; 
+      border-radius: 3px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Updated Patterns</h1>
+      </div>
+    </header>
+
+    <main>
+      <div class="test-section">
+        <h2>🧪 Pattern Generation Testing</h2>
+        <div id="test-results"></div>
+        <button id="run-tests-btn" class="btn btn-primary">Run Pattern Tests</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const runTestsBtn = document.getElementById('run-tests-btn');
+      const testResultsDiv = document.getElementById('test-results');
+
+      // Test patterns focusing on the problematic ones
+      const testPatterns = [
+        { pattern: 'abcdefghij', type: 'The Full Straight', description: 'Should generate 123-456-7890' },
+        { pattern: 'jihgfedcba', type: 'The Full Straight', description: 'Should generate 987-654-3210' },
+        { pattern: 'zabcdefghi', type: 'Cyclic Straight', description: 'Should generate 20 numbers excluding Full Straight' },
+        { pattern: 'ihgfedcbaz', type: 'Cyclic Straight', description: 'Should generate 20 numbers excluding Full Straight' },
+        { pattern: 'bbbaaabbbb', type: 'The Soloist', description: 'New pattern: 3+3+4 blocks' },
+        { pattern: 'bbbtnxbbbb', type: 'Hyphen-separated', description: 'Should remain Hyphen-separated' }
+      ];
+
+      runTestsBtn.addEventListener('click', function() {
+        testResultsDiv.innerHTML = '<p>Running tests...</p>';
+        
+        const validator = new PatternValidator();
+        const analyzer = new PatternAnalyzer();
+        const generator = new PatternGenerator();
+        
+        let results = [];
+
+        testPatterns.forEach((test, index) => {
+          try {
+            console.log(`Testing ${test.pattern}...`);
+            
+            // Validate pattern
+            const validation = validator.validate(test.pattern);
+            if (!validation.isValid) {
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                type: test.type,
+                description: test.description,
+                status: 'fail',
+                message: `Validation failed: ${validation.errorMessage}`,
+                numbers: []
+              });
+              return;
+            }
+            
+            // Identify pattern type
+            const actualType = analyzer.identifyPatternType(test.pattern);
+            
+            // Generate numbers
+            const numbers = generator.generate(test.pattern, actualType);
+            
+            // Check results
+            let status = 'pass';
+            let message = `Generated ${numbers.length} numbers`;
+            
+            if (actualType !== test.type) {
+              status = 'fail';
+              message = `Type mismatch: Expected ${test.type}, got ${actualType}`;
+            }
+            
+            // Special checks for Full Straight and Cyclic Straight
+            if (test.type === 'The Full Straight') {
+              if (numbers.length !== 1) {
+                status = 'fail';
+                message += ` (Expected 1 number, got ${numbers.length})`;
+              }
+              
+              if (test.pattern === 'abcdefghij' && !numbers.includes('123-456-7890')) {
+                status = 'fail';
+                message += ' (Missing 123-456-7890)';
+              }
+              
+              if (test.pattern === 'jihgfedcba' && !numbers.includes('987-654-3210')) {
+                status = 'fail';
+                message += ' (Missing 987-654-3210)';
+              }
+            }
+            
+            if (test.type === 'Cyclic Straight') {
+              if (numbers.length < 18) { // Should be ~18 after excluding Full Straight patterns
+                status = 'fail';
+                message += ` (Expected ~18 numbers, got ${numbers.length})`;
+              }
+              
+              // Check that Full Straight numbers are NOT included
+              if (numbers.includes('123-456-7890') || numbers.includes('987-654-3210')) {
+                status = 'fail';
+                message += ' (Contains Full Straight numbers - should be excluded)';
+              }
+            }
+            
+            results.push({
+              index: index + 1,
+              pattern: test.pattern,
+              type: test.type,
+              actualType: actualType,
+              description: test.description,
+              status: status,
+              message: message,
+              numbers: numbers.slice(0, 10) // Show first 10 numbers
+            });
+            
+          } catch (error) {
+            results.push({
+              index: index + 1,
+              pattern: test.pattern,
+              type: test.type,
+              description: test.description,
+              status: 'fail',
+              message: `Error: ${error.message}`,
+              numbers: []
+            });
+          }
+        });
+
+        // Display results
+        let html = '';
+        
+        results.forEach(result => {
+          html += `
+            <div class="test-result ${result.status}">
+              <strong>${result.index}. ${result.pattern}</strong> (${result.type})<br>
+              <small>${result.description}</small><br>
+              ${result.status === 'pass' ? '✅' : '❌'} ${result.message}
+              ${result.actualType && result.actualType !== result.type ? `<br><small>Actual type: ${result.actualType}</small>` : ''}
+              ${result.numbers.length > 0 ? `
+                <div class="numbers">
+                  <strong>Sample numbers:</strong><br>
+                  ${result.numbers.join('<br>')}
+                  ${result.numbers.length === 10 ? '<br>... (showing first 10)' : ''}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+
+        testResultsDiv.innerHTML = html;
+        
+        const passCount = results.filter(r => r.status === 'pass').length;
+        console.log(`Pattern tests completed: ${passCount}/${results.length} passed`);
+      });
+    });
+  </script>
+</body>
+</html>

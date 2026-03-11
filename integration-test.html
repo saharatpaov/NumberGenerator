@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integration Test - Pattern Generator</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Integration Test - Pattern Generator</h1>
+      </div>
+    </header>
+
+    <main>
+      <div class="test-section">
+        <h2>🧪 Automated Pattern Testing</h2>
+        <div id="test-results"></div>
+        <button id="run-tests-btn" class="btn btn-primary">Run All Tests</button>
+      </div>
+
+      <!-- Original UI for manual testing -->
+      <section class="input-section">
+        <h2>Manual Testing - เลือก Pattern</h2>
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern Type:</label>
+          <select id="pattern-select" aria-describedby="pattern-help">
+            <option value="">-- เลือก Pattern --</option>
+            
+            <!-- The Soloist Patterns -->
+            <optgroup label="1. The Soloist">
+              <option value="aaaaaaaaaa" data-type="The Soloist">aaa-aaa-aaaa (All 10 digits identical)</option>
+              <option value="abbbbbbbbb" data-type="The Soloist">abb-bbb-bbbb (All 9 digits identical)</option>
+              <option value="abdddddddd" data-type="The Soloist">abd-ddd-dddd (All 8 digits identical)</option>
+              <option value="abcddddddd" data-type="The Soloist">abc-ddd-dddd (All 7 digits identical)</option>
+              <option value="abcdeeeeee" data-type="The Soloist">abc-dee-eeee (All 6 digits identical)</option>
+              <option value="abcdefffff" data-type="The Soloist">abc-def-ffff (All 5 digits identical)</option>
+              <option value="abcdefgggg" data-type="The Soloist">abc-def-gggg (All 4 digits identical - Block-ending)</option>
+            </optgroup>
+            
+            <!-- Hyphen-separated Patterns -->
+            <optgroup label="2. Hyphen-separated">
+              <option value="bbbaaaaaaa" data-type="Hyphen-separated">bbb-aaa-aaaa (2 distinct digits across blocks)</option>
+              <option value="bbbbbaaaaa" data-type="Hyphen-separated">bbb-bbb-aaaa (2 distinct digits across blocks)</option>
+              <option value="aaabbbcccc" data-type="Hyphen-separated">aaa-bbb-cccc (3 distinct digits across blocks)</option>
+              <option value="bbbtnxbbbb" data-type="Hyphen-separated">bbb-tnx-bbbb (First and last blocks identical)</option>
+            </optgroup>
+            
+            <!-- The Full Straight Patterns -->
+            <optgroup label="3. The Full Straight">
+              <option value="abcdefghij" data-type="The Full Straight">abc-def-ghij</option>
+              <option value="jihgfedcba" data-type="The Full Straight">jih-gfe-dcba</option>
+            </optgroup>
+            
+            <!-- Cyclic Straight Patterns -->
+            <optgroup label="4. Cyclic Straight">
+              <option value="zabcdefghi" data-type="Cyclic Straight">zab-cde-fghi</option>
+              <option value="ihgfedcbaz" data-type="Cyclic Straight">ihg-fed-cbaz</option>
+            </optgroup>
+            
+            <!-- The Rhythmic Bridge Patterns -->
+            <optgroup label="5. The Rhythmic Bridge">
+              <option value="abcefgabcd" data-type="The Rhythmic Bridge">abc-efg-abcd (Repeating pattern 2-3 block)</option>
+              <option value="abcabcdefg" data-type="The Rhythmic Bridge">abc-abc-defg (Repeating pattern front-middle)</option>
+              <option value="efgabcabcd" data-type="The Rhythmic Bridge">efg-abc-abcd (Repeating pattern middle-end)</option>
+            </optgroup>
+          </select>
+          <small id="pattern-help">เลือก pattern จากรายการที่กำหนดไว้</small>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+      </section>
+
+      <section class="pattern-list-section">
+        <h2>Patterns ที่เพิ่มแล้ว</h2>
+        <div id="pattern-list" class="pattern-list"></div>
+      </section>
+
+      <section class="results-section">
+        <div class="results-header">
+          <h2>ผลลัพธ์</h2>
+          <button id="export-btn" class="btn btn-secondary" style="display: none;">Export เป็น CSV</button>
+        </div>
+        <div id="results-display" class="results-display"></div>
+        <div id="performance-display" class="performance-display" style="display: none;"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Integration test script
+    document.addEventListener('DOMContentLoaded', function() {
+      const runTestsBtn = document.getElementById('run-tests-btn');
+      const testResultsDiv = document.getElementById('test-results');
+
+      // Test patterns with corrected expected types
+      const testPatterns = [
+        // The Soloist Patterns (including moved patterns)
+        { pattern: 'aaaaaaaaaa', expected: 'The Soloist', description: 'All 10 digits identical' },
+        { pattern: 'abbbbbbbbb', expected: 'The Soloist', description: 'All 9 digits identical' },
+        { pattern: 'abdddddddd', expected: 'The Soloist', description: 'All 8 digits identical' },
+        { pattern: 'abcddddddd', expected: 'The Soloist', description: 'All 7 digits identical' },
+        { pattern: 'abcdeeeeee', expected: 'The Soloist', description: 'All 6 digits identical' },
+        { pattern: 'abcdefffff', expected: 'The Soloist', description: 'All 5 digits identical' },
+        { pattern: 'abcdefgggg', expected: 'The Soloist', description: 'All 4 digits identical (Block-ending)' },
+        { pattern: 'bbbaaaaaaa', expected: 'The Soloist', description: '2 distinct digits across blocks (3+7)' },
+        { pattern: 'bbbbbaaaaa', expected: 'The Soloist', description: '2 distinct digits across blocks (5+5)' },
+        { pattern: 'aaabbbcccc', expected: 'The Soloist', description: '3 distinct digits across blocks' },
+        
+        // Hyphen-separated Patterns (only bbbtnxbbbb remains)
+        { pattern: 'bbbtnxbbbb', expected: 'Hyphen-separated', description: 'First and last blocks identical' },
+        
+        // The Full Straight Patterns
+        { pattern: 'abcdefghij', expected: 'The Full Straight', description: 'Ascending' },
+        { pattern: 'jihgfedcba', expected: 'The Full Straight', description: 'Descending' },
+        
+        // Cyclic Straight Patterns
+        { pattern: 'zabcdefghi', expected: 'Cyclic Straight', description: 'Cyclic progression' },
+        { pattern: 'ihgfedcbaz', expected: 'Cyclic Straight', description: 'Cyclic progression' },
+        
+        // The Rhythmic Bridge Patterns
+        { pattern: 'abcefgabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern 2-3 block' },
+        { pattern: 'abcabcdefg', expected: 'The Rhythmic Bridge', description: 'Repeating pattern front-middle' },
+        { pattern: 'efgabcabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern middle-end' }
+      ];
+
+      runTestsBtn.addEventListener('click', function() {
+        testResultsDiv.innerHTML = '<p>Running tests...</p>';
+        
+        const validator = new PatternValidator();
+        const analyzer = new PatternAnalyzer();
+        
+        let totalTests = 0;
+        let passedTests = 0;
+        let results = [];
+
+        testPatterns.forEach((test, index) => {
+          totalTests++;
+          
+          try {
+            const validation = validator.validate(test.pattern);
+            if (!validation.isValid) {
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                description: test.description,
+                expected: test.expected,
+                status: 'fail',
+                message: `Validation failed: ${validation.errorMessage}`
+              });
+              return;
+            }
+            
+            const actualType = analyzer.identifyPatternType(test.pattern);
+            
+            if (actualType === test.expected) {
+              passedTests++;
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                description: test.description,
+                expected: test.expected,
+                actual: actualType,
+                status: 'pass',
+                message: 'Pattern classified correctly'
+              });
+            } else {
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                description: test.description,
+                expected: test.expected,
+                actual: actualType,
+                status: 'fail',
+                message: `Type mismatch: Expected ${test.expected}, got ${actualType}`
+              });
+            }
+            
+          } catch (error) {
+            results.push({
+              index: index + 1,
+              pattern: test.pattern,
+              description: test.description,
+              expected: test.expected,
+              status: 'fail',
+              message: `Error: ${error.message}`
+            });
+          }
+        });
+
+        // Display results
+        const successRate = ((passedTests / totalTests) * 100).toFixed(1);
+        
+        let html = `
+          <div class="test-result info">
+            <h3>📊 Test Summary</h3>
+            <p><strong>Total Tests:</strong> ${totalTests}</p>
+            <p><strong>Passed:</strong> ${passedTests}</p>
+            <p><strong>Failed:</strong> ${totalTests - passedTests}</p>
+            <p><strong>Success Rate:</strong> ${successRate}%</p>
+          </div>
+        `;
+
+        results.forEach(result => {
+          html += `
+            <div class="test-result ${result.status}">
+              <strong>${result.index}. ${result.pattern}</strong> - ${result.description}<br>
+              ${result.status === 'pass' ? '✅' : '❌'} ${result.message}
+              ${result.actual ? `<br><small>Classified as: ${result.actual}</small>` : ''}
+            </div>
+          `;
+        });
+
+        testResultsDiv.innerHTML = html;
+        
+        console.log(`Integration test completed: ${passedTests}/${totalTests} passed (${successRate}%)`);
+      });
+    });
+  </script>
+</body>
+</html>

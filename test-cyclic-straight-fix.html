@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Cyclic Straight Fix</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+    .numbers { font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <h1>Test Cyclic Straight Fix</h1>
+  <button id="test-btn">Test Cyclic Straight Patterns</button>
+  <div id="results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('test-btn').addEventListener('click', function() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<p>Testing...</p>';
+      
+      try {
+        const generator = new PatternGenerator();
+        
+        // Test zabcdefghi (ascending)
+        const ascendingResults = generator.generateCyclicStraight('zabcdefghi');
+        
+        // Test ihgfedcbaz (descending)
+        const descendingResults = generator.generateCyclicStraight('ihgfedcbaz');
+        
+        // Check if results are different
+        const ascendingSet = new Set(ascendingResults);
+        const descendingSet = new Set(descendingResults);
+        
+        // Find common numbers
+        const commonNumbers = ascendingResults.filter(num => descendingSet.has(num));
+        const isDifferent = commonNumbers.length === 0 || commonNumbers.length < Math.min(ascendingResults.length, descendingResults.length) * 0.5;
+        
+        let html = '<div class="test-result ' + (isDifferent ? 'success' : 'error') + '">';
+        html += '<h3>Cyclic Straight Test Results</h3>';
+        html += `<p><strong>zabcdefghi (Ascending):</strong> ${ascendingResults.length} numbers</p>`;
+        html += `<p><strong>ihgfedcbaz (Descending):</strong> ${descendingResults.length} numbers</p>`;
+        html += `<p><strong>Common numbers:</strong> ${commonNumbers.length}</p>`;
+        html += `<p><strong>Are sufficiently different:</strong> ${isDifferent ? '✅ YES' : '❌ NO'}</p>`;
+        html += '</div>';
+        
+        html += '<div class="test-result info">';
+        html += '<h4>Ascending Pattern Numbers (zabcdefghi)</h4>';
+        html += '<div class="numbers">' + ascendingResults.join('<br>') + '</div>';
+        html += '</div>';
+        
+        html += '<div class="test-result info">';
+        html += '<h4>Descending Pattern Numbers (ihgfedcbaz)</h4>';
+        html += '<div class="numbers">' + descendingResults.join('<br>') + '</div>';
+        html += '</div>';
+        
+        if (commonNumbers.length > 0) {
+          html += '<div class="test-result error">';
+          html += '<h4>Common Numbers (Should be minimal)</h4>';
+          html += '<div class="numbers">' + commonNumbers.join('<br>') + '</div>';
+          html += '</div>';
+        }
+        
+        resultsDiv.innerHTML = html;
+        
+      } catch (error) {
+        resultsDiv.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>

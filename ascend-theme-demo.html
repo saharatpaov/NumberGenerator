@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ascend Pattern Generator - Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <div class="logo-container">
+          <div class="ascend-logo">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Inner circle with gradient -->
+              <circle cx="18" cy="18" r="18" fill="url(#gradient)"/>
+              <!-- Diagonal line -->
+              <path d="M12 24 L24 12" stroke="white" stroke-width="3" stroke-linecap="round"/>
+              <!-- Arrow head -->
+              <path d="M19 12 L24 12 L24 17" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#e91e63;stop-opacity:1" />
+                  <stop offset="50%" style="stop-color:#f44336;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#ff9800;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="brand-name">ascend</div>
+        </div>
+        <h1>Pattern-Based Number Generator</h1>
+        <p class="subtitle">สร้างตัวเลขทุกชุดค่าที่เป็นไปได้จาก pattern ของคุณ</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- Pattern Selection Area -->
+      <section class="input-section">
+        <h2>เลือก Pattern</h2>
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern Type:</label>
+          <select id="pattern-select" aria-describedby="pattern-help">
+            <option value="">-- เลือก Pattern --</option>
+            
+            <!-- The Soloist Patterns -->
+            <optgroup label="1. The Soloist">
+              <option value="aaaaaaaaaa" data-type="The Soloist" data-qty="10">aaa-aaa-aaaa (10 combinations)</option>
+              <option value="abbbbbbbbb" data-type="The Soloist" data-qty="900">abb-bbb-bbbb (900 combinations)</option>
+              <option value="andddddddd" data-type="The Soloist" data-qty="4050">and-ddd-dddd (4,050 combinations)</option>
+            </optgroup>
+            
+            <!-- Hyphen-separated Patterns -->
+            <optgroup label="2. Hyphen-separated">
+              <option value="aaabbbcccc" data-type="Hyphen-separated" data-qty="720">aaa-bbb-cccc (720 combinations)</option>
+              <option value="bbbtnxbbbb" data-type="Hyphen-separated" data-qty="90">bbb-tnx-bbbb (90 combinations)</option>
+            </optgroup>
+            
+            <!-- The Full Straight Patterns -->
+            <optgroup label="3. The Full Straight">
+              <option value="abcdefghij" data-type="The Full Straight" data-qty="2">abc-def-ghij (2 combinations)</option>
+            </optgroup>
+            
+            <!-- Cyclic Straight Patterns -->
+            <optgroup label="4. Cyclic Straight">
+              <option value="zabcdefghi" data-type="Cyclic Straight" data-qty="20">zab-cde-fghi (20 combinations)</option>
+            </optgroup>
+            
+            <!-- The Rhythmic Bridge Patterns -->
+            <optgroup label="5. The Rhythmic Bridge">
+              <option value="abcaxxabcd" data-type="The Rhythmic Bridge" data-qty="9900">abc-axx-abcd (9,900 combinations)</option>
+            </optgroup>
+          </select>
+          <small id="pattern-help">เลือก pattern จากรายการที่กำหนดไว้</small>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        <!-- Error messages will be displayed here -->
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+      </section>
+
+      <!-- Pattern List Section -->
+      <section class="pattern-list-section">
+        <h2>Patterns ที่เพิ่มแล้ว</h2>
+        <div id="pattern-list" class="pattern-list">
+          <!-- Demo pattern items -->
+          <div class="pattern-item">
+            <div class="pattern-header">
+              <span class="pattern-text">aaaaaaaaaa</span>
+              <span class="pattern-type">The Soloist</span>
+              <span class="pattern-count">10 numbers</span>
+              <button class="btn btn-remove">ลบ</button>
+            </div>
+          </div>
+          <div class="pattern-item">
+            <div class="pattern-header">
+              <span class="pattern-text">abcdefghij</span>
+              <span class="pattern-type">The Full Straight</span>
+              <span class="pattern-count">2 numbers</span>
+              <button class="btn btn-remove">ลบ</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Area -->
+      <section class="results-section">
+        <div class="results-header">
+          <h2>ผลลัพธ์</h2>
+          <button id="export-btn" class="btn btn-secondary">Export เป็น CSV</button>
+        </div>
+        <div id="results-display" class="results-display">
+          <!-- Demo results -->
+          <div class="result-group">
+            <h3>aaaaaaaaaa (The Soloist) - 10 numbers</h3>
+            <div class="numbers-grid">
+              <span class="number-item">000-000-0000</span>
+              <span class="number-item">111-111-1111</span>
+              <span class="number-item">222-222-2222</span>
+              <span class="number-item">333-333-3333</span>
+              <span class="number-item">444-444-4444</span>
+              <span class="number-item">555-555-5555</span>
+              <span class="number-item">666-666-6666</span>
+              <span class="number-item">777-777-7777</span>
+              <span class="number-item">888-888-8888</span>
+              <span class="number-item">999-999-9999</span>
+            </div>
+          </div>
+          
+          <div class="result-group">
+            <h3>abcdefghij (The Full Straight) - 2 numbers</h3>
+            <div class="numbers-grid">
+              <span class="number-item">012-345-6789</span>
+              <span class="number-item">987-654-3210</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Ascend Pattern-Based Number Generator</p>
+      <div class="footer-actions">
+        <button class="btn-link">Show Performance Metrics</button>
+        <button class="btn-link">Run Benchmarks</button>
+      </div>
+    </footer>
+  </div>
+
+  <style>
+    /* Demo-specific styles */
+    body {
+      background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    }
+    
+    .demo-note {
+      background: linear-gradient(135deg, var(--primary-pink), var(--secondary-red));
+      color: white;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      text-align: center;
+      font-weight: 500;
+    }
+  </style>
+
+  <script>
+    // Simple demo functionality
+    document.getElementById('add-pattern-btn').addEventListener('click', function() {
+      const select = document.getElementById('pattern-select');
+      const errorDiv = document.getElementById('error-message');
+      
+      if (!select.value) {
+        errorDiv.textContent = 'กรุณาเลือก pattern จากรายการ';
+        errorDiv.classList.add('show');
+      } else {
+        errorDiv.classList.remove('show');
+        alert('Demo: Pattern "' + select.value + '" would be added!');
+        select.value = '';
+      }
+    });
+
+    document.getElementById('export-btn').addEventListener('click', function() {
+      alert('Demo: CSV export would be triggered!');
+    });
+  </script>
+</body>
+</html>

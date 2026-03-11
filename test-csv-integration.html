@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Integration Test - Duplicate Removal</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .test-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #007bff;
+        }
+        .button-test {
+            margin: 10px 5px;
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button-test:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>CSV Integration Test - Duplicate Removal</h1>
+        
+        <div class="test-section">
+            <h2>Test Overview</h2>
+            <p>This test verifies that CSV export correctly removes duplicate phone numbers when multiple patterns generate the same numbers.</p>
+            <p><strong>Expected Behavior:</strong> First occurrence of duplicate number should be kept based on pattern addition order.</p>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Steps</h2>
+            <div class="step">
+                <strong>Step 1:</strong> Add patterns that will generate overlapping phone numbers
+                <button class="button-test" onclick="runStep1()">Run Step 1</button>
+            </div>
+            <div class="step">
+                <strong>Step 2:</strong> Export CSV and analyze for duplicates
+                <button class="button-test" onclick="runStep2()">Run Step 2</button>
+            </div>
+            <div class="step">
+                <strong>Step 3:</strong> Verify duplicate removal logic
+                <button class="button-test" onclick="runStep3()">Run Step 3</button>
+            </div>
+            <button class="button-test" onclick="runAllSteps()" style="background: #28a745;">Run All Steps</button>
+            <button class="button-test" onclick="clearResults()" style="background: #dc3545;">Clear Results</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div id="results"></div>
+        </div>
+
+        <!-- Hidden main app elements for testing -->
+        <div style="display: none;">
+            <select id="patternSelect">
+                <option value="aaaaaaaaaa" data-type="The Soloist">aaa-aaa-aaaa</option>
+                <option value="bbbbbbbbbb" data-type="The Soloist">bbb-bbb-bbbb</option>
+                <option value="abcdefghij" data-type="The Full Straight">abc-def-ghij</option>
+            </select>
+            <div id="patternList"></div>
+            <div id="resultsDisplay"></div>
+            <div id="errorDisplay"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize the app state
+        let state = {
+            patternManager: new PatternManager(),
+            uiController: null
+        };
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            results.appendChild(div);
+            console.log(message.replace(/<[^>]*>/g, '')); // Also log to console
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            // Clear pattern manager
+            state.patternManager.clearAll();
+            log('Results cleared and pattern manager reset', 'info');
+        }
+
+        function runStep1() {
+            try {
+                log('<h3>Step 1: Adding Test Patterns</h3>');
+                
+                // Clear any existing patterns
+                state.patternManager.clearAll();
+                
+                // Add patterns that will create overlapping numbers
+                // Pattern 1: aaaaaaaaaa (The Soloist) - generates 0800000000, 0811111111, etc.
+                log('Adding pattern 1: aaaaaaaaaa (The Soloist)');
+                state.patternManager.addPattern('aaaaaaaaaa');
+                
+                // Pattern 2: bbbbbbbbbb (The Soloist) - may generate some same numbers
+                log('Adding pattern 2: bbbbbbbbbb (The Soloist)');
+                state.patternManager.addPattern('bbbbbbbbbb');
+                
+                // Get all patterns to see what was generated
+                const patterns = state.patternManager.getAllPatternGroups();
+                
+                log('<strong>Generated Patterns:</strong>');
+                patterns.forEach((pattern, index) => {
+                    log(`Pattern ${index + 1}: ${pattern.pattern} (${pattern.patternType})`);
+                    log(`Generated ${pattern.numbers.length} numbers`);
+                    log(`First 5 numbers: ${pattern.numbers.slice(0, 5).join(', ')}`);
+                    if (pattern.numbers.length > 5) {
+                        log(`Last 5 numbers: ${pattern.numbers.slice(-5).join(', ')}`);
+                    }
+                });
+                
+                // Check for overlaps
+                const allNumbers = [];
+                const numberToPattern = {};
+                
+                patterns.forEach((pattern, patternIndex) => {
+                    pattern.numbers.forEach(number => {
+                        if (allNumbers.includes(number)) {
+                            if (!numberToPattern[number]) {
+                                numberToPattern[number] = [];
+                            }
+                            numberToPattern[number].push(patternIndex + 1);
+                        } else {
+                            allNumbers.push(number);
+                            numberToPattern[number] = [patternIndex + 1];
+                        }
+                    });
+                });
+                
+                const duplicates = Object.entries(numberToPattern).filter(([number, patternIndices]) => patternIndices.length > 1);
+                
+                if (duplicates.length > 0) {
+                    log('<strong>Found Overlapping Numbers:</strong>', 'warning');
+                    duplicates.forEach(([number, patternIndices]) => {
+                        log(`• ${number} appears in patterns: ${patternIndices.join(', ')}`, 'warning');
+                    });
+                } else {
+                    log('<strong>No overlapping numbers found between these patterns</strong>', 'info');
+                    log('Adding a custom pattern to create overlaps for testing...', 'info');
+                    
+                    // Create a custom test scenario with known overlaps
+                    state.patternManager.clearAll();
+                    
+                    // Manually create test data with overlaps
+                    const testPatterns = [
+                        {
+                            pattern: 'test1',
+                            patternType: 'Test Pattern 1',
+                            numbers: ['0800000000', '0811111111', '0822222222', '0833333333'],
+                            timestamp: Date.now()
+                        },
+                        {
+                            pattern: 'test2', 
+                            patternType: 'Test Pattern 2',
+                            numbers: ['0800000000', '0844444444', '0855555555', '0811111111'], // Overlaps: 0800000000, 0811111111
+                            timestamp: Date.now() + 1
+                        }
+                    ];
+                    
+                    // Add to pattern manager manually
+                    testPatterns.forEach(pattern => {
+                        state.patternManager.patterns.push(pattern);
+                    });
+                    
+                    log('Created test patterns with known overlaps:', 'success');
+                    log('• Pattern 1 (test1): 0800000000, 0811111111, 0822222222, 0833333333');
+                    log('• Pattern 2 (test2): 0800000000, 0844444444, 0855555555, 0811111111');
+                    log('• Expected duplicates: 0800000000, 0811111111 (should keep from Pattern 1)');
+                }
+                
+                log('<strong>✅ Step 1 Complete</strong>', 'success');
+                
+            } catch (error) {
+                log(`❌ Step 1 failed: ${error.message}`, 'error');
+                console.error('Step 1 error:', error);
+            }
+        }
+
+        function runStep2() {
+            try {
+                log('<h3>Step 2: CSV Export and Analysis</h3>');
+                
+                const patterns = state.patternManager.getAllPatternGroups();
+                
+                if (patterns.length === 0) {
+                    log('❌ No patterns found. Please run Step 1 first.', 'error');
+                    return;
+                }
+                
+                log(`Found ${patterns.length} patterns to export`);
+                
+                // Generate CSV using the CSVExporter
+                const csvExporter = new CSVExporter();
+                const csvContent = csvExporter.generateCSV(patterns);
+                
+                log('<strong>Generated CSV Content:</strong>');
+                log(`<pre>${csvContent}</pre>`);
+                
+                // Parse CSV for analysis
+                const lines = csvContent.split('\n');
+                const dataLines = lines.slice(1).filter(line => line.trim() !== '');
+                
+                log('<strong>CSV Analysis:</strong>');
+                log(`Total lines: ${lines.length} (including header)`);
+                log(`Data rows: ${dataLines.length}`);
+                
+                // Count total numbers from original patterns
+                const originalTotalNumbers = patterns.reduce((sum, pattern) => sum + pattern.numbers.length, 0);
+                log(`Original total numbers: ${originalTotalNumbers}`);
+                log(`CSV data rows: ${dataLines.length}`);
+                
+                if (dataLines.length < originalTotalNumbers) {
+                    log(`✅ Duplicate removal working: ${originalTotalNumbers - dataLines.length} duplicates removed`, 'success');
+                } else if (dataLines.length === originalTotalNumbers) {
+                    log('ℹ️ No duplicates found to remove', 'info');
+                } else {
+                    log('❌ Unexpected: More CSV rows than original numbers', 'error');
+                }
+                
+                log('<strong>✅ Step 2 Complete</strong>', 'success');
+                
+            } catch (error) {
+                log(`❌ Step 2 failed: ${error.message}`, 'error');
+                console.error('Step 2 error:', error);
+            }
+        }
+
+        function runStep3() {
+            try {
+                log('<h3>Step 3: Duplicate Removal Verification</h3>');
+                
+                const patterns = state.patternManager.getAllPatternGroups();
+                
+                if (patterns.length === 0) {
+                    log('❌ No patterns found. Please run Step 1 first.', 'error');
+                    return;
+                }
+                
+                // Generate CSV
+                const csvExporter = new CSVExporter();
+                const csvContent = csvExporter.generateCSV(patterns);
+                
+                // Parse CSV to check for duplicates
+                const lines = csvContent.split('\n');
+                const dataLines = lines.slice(1).filter(line => line.trim() !== '');
+                
+                const numberCounts = {};
+                const numberFirstPattern = {};
+                
+                dataLines.forEach(line => {
+                    const parts = line.split(',');
+                    if (parts.length >= 3) {
+                        const pattern = parts[0];
+                        const phoneNumber = parts[2];
+                        
+                        if (!numberCounts[phoneNumber]) {
+                            numberCounts[phoneNumber] = 0;
+                            numberFirstPattern[phoneNumber] = pattern;
+                        }
+                        numberCounts[phoneNumber]++;
+                    }
+                });
+                
+                log('<strong>Phone Number Analysis:</strong>');
+                const duplicateNumbers = [];
+                Object.entries(numberCounts).forEach(([number, count]) => {
+                    const status = count === 1 ? '✅' : '❌';
+                    const firstPattern = numberFirstPattern[number];
+                    log(`${status} ${number}: ${count} occurrence(s) (pattern: ${firstPattern})`);
+                    
+                    if (count > 1) {
+                        duplicateNumbers.push(number);
+                    }
+                });
+                
+                if (duplicateNumbers.length === 0) {
+                    log('<strong>🎉 SUCCESS: No duplicate phone numbers in CSV export!</strong>', 'success');
+                    log('✅ Duplicate removal is working correctly', 'success');
+                } else {
+                    log('<strong>💥 FAILURE: Found duplicate phone numbers:</strong>', 'error');
+                    duplicateNumbers.forEach(number => {
+                        log(`❌ ${number}: ${numberCounts[number]} occurrences`, 'error');
+                    });
+                }
+                
+                // Verify pattern order preservation
+                log('<strong>Pattern Order Verification:</strong>');
+                const csvPatternOrder = [];
+                dataLines.forEach(line => {
+                    const parts = line.split(',');
+                    if (parts.length >= 3) {
+                        const pattern = parts[0];
+                        if (!csvPatternOrder.includes(pattern)) {
+                            csvPatternOrder.push(pattern);
+                        }
+                    }
+                });
+                
+                const originalPatternOrder = patterns.map(p => p.pattern);
+                log(`Original pattern order: ${originalPatternOrder.join(', ')}`);
+                log(`CSV pattern order: ${csvPatternOrder.join(', ')}`);
+                
+                const orderMatches = JSON.stringify(originalPatternOrder) === JSON.stringify(csvPatternOrder);
+                if (orderMatches) {
+                    log('✅ Pattern order preserved correctly', 'success');
+                } else {
+                    log('❌ Pattern order not preserved', 'error');
+                }
+                
+                log('<strong>✅ Step 3 Complete</strong>', 'success');
+                
+            } catch (error) {
+                log(`❌ Step 3 failed: ${error.message}`, 'error');
+                console.error('Step 3 error:', error);
+            }
+        }
+
+        function runAllSteps() {
+            clearResults();
+            log('<h2>🚀 Running Complete CSV Duplicate Removal Test</h2>', 'info');
+            
+            setTimeout(() => {
+                runStep1();
+                setTimeout(() => {
+                    runStep2();
+                    setTimeout(() => {
+                        runStep3();
+                        log('<h2>🏁 All Tests Complete</h2>', 'info');
+                    }, 100);
+                }, 100);
+            }, 100);
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            log('CSV Integration Test initialized. Click "Run All Steps" to start testing.', 'info');
+        });
+    </script>
+</body>
+</html>

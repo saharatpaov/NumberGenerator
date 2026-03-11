@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ascend Pattern Generator - Final Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <div class="logo-container">
+          <div class="ascend-logo">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Inner circle with gradient -->
+              <circle cx="18" cy="18" r="18" fill="url(#gradient)"/>
+              <!-- Diagonal line -->
+              <path d="M12 24 L24 12" stroke="white" stroke-width="3" stroke-linecap="round"/>
+              <!-- Arrow head -->
+              <path d="M19 12 L24 12 L24 17" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#e91e63;stop-opacity:1" />
+                  <stop offset="50%" style="stop-color:#f44336;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#ff9800;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="brand-name">ascend</div>
+        </div>
+        <h1>Pattern-Based Number Generator</h1>
+        <p class="subtitle">สร้างตัวเลขทุกชุดค่าที่เป็นไปได้จาก pattern ของคุณ</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- Pattern Selection Area -->
+      <section class="input-section">
+        <h2>เลือก Pattern</h2>
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern Type:</label>
+          <select id="pattern-select" aria-describedby="pattern-help">
+            <option value="">-- เลือก Pattern --</option>
+            
+            <!-- The Soloist Patterns -->
+            <optgroup label="1. The Soloist">
+              <option value="aaaaaaaaaa" data-type="The Soloist" data-qty="10">aaa-aaa-aaaa (10 combinations)</option>
+              <option value="abbbbbbbbb" data-type="The Soloist" data-qty="900">abb-bbb-bbbb (900 combinations)</option>
+              <option value="andddddddd" data-type="The Soloist" data-qty="4050">and-ddd-dddd (4,050 combinations)</option>
+              <option value="abeccccccc" data-type="The Soloist" data-qty="10800">abe-ccc-cccc (10,800 combinations)</option>
+              <option value="abefcccccc" data-type="The Soloist" data-qty="18900">abe-fcc-cccc (18,900 combinations)</option>
+              <option value="abefuccccc" data-type="The Soloist" data-qty="22680">abe-fuc-cccc (22,680 combinations)</option>
+              <option value="axytrunbbb" data-type="The Soloist" data-qty="5313600">axy-tru-nbbb (5,313,600 combinations)</option>
+            </optgroup>
+            
+            <!-- Hyphen-separated Patterns -->
+            <optgroup label="2. Hyphen-separated">
+              <option value="bbbaaaaaaa" data-type="Hyphen-separated" data-qty="270">bbb-aaa-aaaa (270 combinations)</option>
+              <option value="bbbbbaaaaa" data-type="Hyphen-separated" data-qty="270">bbb-bbb-aaaa (270 combinations)</option>
+              <option value="aaabbbcccc" data-type="Hyphen-separated" data-qty="720">aaa-bbb-cccc (720 combinations)</option>
+              <option value="bbbtnxbbbb" data-type="Hyphen-separated" data-qty="90">bbb-tnx-bbbb (90 combinations)</option>
+            </optgroup>
+            
+            <!-- The Full Straight Patterns -->
+            <optgroup label="3. The Full Straight">
+              <option value="abcdefghij" data-type="The Full Straight" data-qty="2">abc-def-ghij (2 combinations)</option>
+            </optgroup>
+            
+            <!-- Cyclic Straight Patterns -->
+            <optgroup label="4. Cyclic Straight">
+              <option value="zabcdefghi" data-type="Cyclic Straight" data-qty="20">zab-cde-fghi (20 combinations)</option>
+            </optgroup>
+            
+            <!-- The Rhythmic Bridge Patterns -->
+            <optgroup label="5. The Rhythmic Bridge">
+              <option value="abcaxxabcd" data-type="The Rhythmic Bridge" data-qty="9900">abc-axx-abcd (9,900 combinations)</option>
+            </optgroup>
+          </select>
+          <small id="pattern-help">เลือก pattern จากรายการที่กำหนดไว้</small>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        <!-- Error messages will be displayed here -->
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+      </section>
+
+      <!-- Pattern List Section -->
+      <section class="pattern-list-section">
+        <h2>Patterns ที่เพิ่มแล้ว</h2>
+        <div id="pattern-list" class="pattern-list">
+          <p style="color: #666; text-align: center;">ยังไม่มี pattern ที่เพิ่ม</p>
+        </div>
+      </section>
+
+      <!-- Results Area -->
+      <section class="results-section">
+        <div class="results-header">
+          <h2>ผลลัพธ์</h2>
+          <button id="export-btn" class="btn btn-secondary" style="display: none;">Export เป็น CSV</button>
+        </div>
+        <div id="results-display" class="results-display">
+          <p style="color: #666; text-align: center;">ยังไม่มีผลลัพธ์</p>
+        </div>
+        
+        <!-- Performance Metrics Display -->
+        <div id="performance-display" class="performance-display" style="display: none;"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Ascend Pattern-Based Number Generator</p>
+      <div class="footer-actions">
+        <button id="show-performance-btn" class="btn-link">Show Performance Metrics</button>
+        <button id="run-benchmarks-btn" class="btn-link">Run Benchmarks</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  
+  <script>
+    // Simple demo to show that the app is working
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Ascend Pattern Generator loaded successfully!');
+      console.log('✅ Logo: SVG with gradient');
+      console.log('✅ Theme: Pink-Red-Orange gradient');
+      console.log('✅ Dropdown: Pattern selection working');
+      console.log('✅ UI: Modern Ascend branding');
+      
+      // Test if the main app components are loaded
+      if (typeof state !== 'undefined' && typeof uiController !== 'undefined') {
+        console.log('✅ App: All components loaded successfully');
+      } else {
+        console.log('⚠️ App: Some components may not be loaded');
+      }
+    });
+  </script>
+</body>
+</html>

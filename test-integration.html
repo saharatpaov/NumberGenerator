@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integration Test - UIController</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Integration Test - UIController</h1>
+      <p class="subtitle">Testing UIController with PatternManager integration</p>
+    </header>
+
+    <main>
+      <!-- Input Area -->
+      <section class="input-section">
+        <h2>ป้อน Pattern</h2>
+        <div class="input-group">
+          <label for="pattern-input">Pattern (10 ตัวอักษร a-j):</label>
+          <input 
+            type="text" 
+            id="pattern-input" 
+            placeholder="เช่น: abcdefghij" 
+            maxlength="10"
+          >
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        <div id="error-message" class="error-message" role="alert"></div>
+      </section>
+
+      <!-- Pattern List Section -->
+      <section class="pattern-list-section">
+        <h2>Patterns ที่เพิ่มแล้ว</h2>
+        <div id="pattern-list" class="pattern-list"></div>
+      </section>
+
+      <!-- Results Area -->
+      <section class="results-section">
+        <div class="results-header">
+          <h2>ผลลัพธ์</h2>
+          <button id="export-btn" class="btn btn-secondary" style="display: none;">Export เป็น CSV</button>
+        </div>
+        <div id="results-display" class="results-display"></div>
+      </section>
+
+      <!-- Test Controls -->
+      <section class="test-controls">
+        <h2>Test Controls</h2>
+        <button onclick="testAddPattern()" class="btn btn-primary">Test Add Pattern</button>
+        <button onclick="testErrorHandling()" class="btn btn-primary">Test Error Handling</button>
+        <button onclick="testUIUpdates()" class="btn btn-primary">Test UI Updates</button>
+        <div id="test-output" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    function log(message) {
+      const output = document.getElementById('test-output');
+      output.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+    }
+
+    function testAddPattern() {
+      log('Testing pattern addition...');
+      
+      try {
+        // Test valid pattern
+        const input = document.getElementById('pattern-input');
+        input.value = 'abcdefghij';
+        
+        if (window.uiController) {
+          window.uiController.handleAddPattern();
+          log('✓ Pattern "abcdefghij" added successfully');
+          
+          // Check if pattern appears in list
+          const patternList = document.getElementById('pattern-list');
+          if (patternList.innerHTML.includes('abcdefghij')) {
+            log('✓ Pattern appears in pattern list');
+          } else {
+            log('✗ Pattern not found in pattern list');
+          }
+          
+          // Check if results are displayed
+          const resultsDisplay = document.getElementById('results-display');
+          if (resultsDisplay.innerHTML.includes('abcdefghij')) {
+            log('✓ Pattern results displayed');
+          } else {
+            log('✗ Pattern results not displayed');
+          }
+          
+          // Check if export button is visible
+          const exportBtn = document.getElementById('export-btn');
+          if (exportBtn.style.display === 'block') {
+            log('✓ Export button is visible');
+          } else {
+            log('✗ Export button is not visible');
+          }
+          
+        } else {
+          log('✗ UIController not available');
+        }
+      } catch (error) {
+        log('✗ Error in testAddPattern: ' + error.message);
+      }
+    }
+
+    function testErrorHandling() {
+      log('Testing error handling...');
+      
+      try {
+        if (window.uiController) {
+          // Test invalid pattern
+          const input = document.getElementById('pattern-input');
+          input.value = 'invalid';
+          
+          window.uiController.handleAddPattern();
+          
+          // Check if error is displayed
+          const errorMessage = document.getElementById('error-message');
+          if (errorMessage.classList.contains('show') && errorMessage.textContent.length > 0) {
+            log('✓ Error message displayed for invalid pattern');
+          } else {
+            log('✗ Error message not displayed for invalid pattern');
+          }
+          
+          // Test error clearing
+          window.uiController.clearError();
+          if (!errorMessage.classList.contains('show') && errorMessage.textContent === '') {
+            log('✓ Error message cleared successfully');
+          } else {
+            log('✗ Error message not cleared properly');
+          }
+          
+        } else {
+          log('✗ UIController not available');
+        }
+      } catch (error) {
+        log('✗ Error in testErrorHandling: ' + error.message);
+      }
+    }
+
+    function testUIUpdates() {
+      log('Testing UI updates...');
+      
+      try {
+        if (window.uiController) {
+          // Test pattern type display
+          window.uiController.displayPatternType('abcdefghij', 'The Full Straight');
+          log('✓ displayPatternType() executed');
+          
+          // Test number count display
+          window.uiController.displayNumberCount('abcdefghij', 2);
+          log('✓ displayNumberCount() executed');
+          
+          // Test export button toggle
+          window.uiController.toggleExportButton(true);
+          const exportBtn = document.getElementById('export-btn');
+          if (exportBtn.style.display === 'block') {
+            log('✓ Export button shown');
+          } else {
+            log('✗ Export button not shown');
+          }
+          
+          window.uiController.toggleExportButton(false);
+          if (exportBtn.style.display === 'none') {
+            log('✓ Export button hidden');
+          } else {
+            log('✗ Export button not hidden');
+          }
+          
+          // Test updateUI
+          window.uiController.updateUI();
+          log('✓ updateUI() executed successfully');
+          
+        } else {
+          log('✗ UIController not available');
+        }
+      } catch (error) {
+        log('✗ Error in testUIUpdates: ' + error.message);
+      }
+    }
+
+    // Initialize and run basic tests
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        log('=== UIController Integration Test Started ===');
+        
+        if (window.uiController) {
+          log('✓ UIController initialized successfully');
+          log('✓ Global uiController variable available');
+        } else {
+          log('✗ UIController not initialized');
+        }
+        
+        if (typeof UIController === 'function') {
+          log('✓ UIController class is available');
+        } else {
+          log('✗ UIController class not found');
+        }
+        
+        log('Ready for manual testing. Click the test buttons above.');
+      }, 500);
+    });
+  </script>
+</body>
+</html>
+</content>
+</invoke>

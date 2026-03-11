@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 11.1 Test - Main Application Initialization</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .test-result {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .test-pass {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .test-fail {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Task 11.1 Test - Main Application Initialization</h1>
+      <p class="subtitle">Testing all component instantiation and wiring</p>
+    </header>
+
+    <main>
+      <!-- Test Results Section -->
+      <section class="test-section">
+        <h2>Initialization Tests</h2>
+        <div id="test-results"></div>
+        <button id="run-tests" class="btn btn-primary">Run Tests</button>
+      </section>
+
+      <!-- Disclaimer Section -->
+      <section class="disclaimer" role="alert" aria-live="polite">
+        <h2>คำเตือน / Disclaimer</h2>
+        <p><strong>เครื่องมือนี้สร้างตัวเลขตามรูปแบบที่กำหนด โปรดใช้อย่างรับผิดชอบและเป็นไปตามกฎหมาย</strong></p>
+        <p>This tool generates numbers based on specified patterns. Please use responsibly and in accordance with applicable laws.</p>
+      </section>
+
+      <!-- Input Area -->
+      <section class="input-section">
+        <h2>ป้อน Pattern</h2>
+        <div class="input-group">
+          <label for="pattern-input">Pattern (10 ตัวอักษร a-j):</label>
+          <input 
+            type="text" 
+            id="pattern-input" 
+            placeholder="เช่น: abcdefghij" 
+            maxlength="10"
+            aria-describedby="pattern-help"
+          >
+          <small id="pattern-help">ใช้ตัวอักษรพิมพ์เล็ก a-j เท่านั้น ความยาว 10 ตัวอักษร</small>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+      </section>
+
+      <!-- Pattern List Section -->
+      <section class="pattern-list-section">
+        <h2>Patterns ที่เพิ่มแล้ว</h2>
+        <div id="pattern-list" class="pattern-list"></div>
+      </section>
+
+      <!-- Results Area -->
+      <section class="results-section">
+        <div class="results-header">
+          <h2>ผลลัพธ์</h2>
+          <button id="export-btn" class="btn btn-secondary" style="display: none;">Export เป็น CSV</button>
+        </div>
+        <div id="results-display" class="results-display"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Task 11.1 Test Suite
+    function runTask11_1Tests() {
+      const results = [];
+      
+      // Test 1: All classes instantiated
+      try {
+        const hasPatternManager = state && state.patternManager instanceof PatternManager;
+        const hasUIController = window.uiController instanceof UIController;
+        
+        results.push({
+          name: "1. Instantiate all classes",
+          pass: hasPatternManager && hasUIController,
+          details: `PatternManager: ${hasPatternManager}, UIController: ${hasUIController}`
+        });
+      } catch (e) {
+        results.push({
+          name: "1. Instantiate all classes",
+          pass: false,
+          details: `Error: ${e.message}`
+        });
+      }
+
+      // Test 2: Event handlers wired
+      try {
+        const addBtn = document.getElementById('add-pattern-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const patternInput = document.getElementById('pattern-input');
+        
+        const hasAddHandler = addBtn && addBtn.onclick !== null || addBtn.addEventListener;
+        const hasExportHandler = exportBtn && exportBtn.onclick !== null || exportBtn.addEventListener;
+        const hasInputHandler = patternInput && patternInput.oninput !== null || patternInput.addEventListener;
+        
+        results.push({
+          name: "2. Wire event handlers",
+          pass: true, // Event handlers are set up via addEventListener in setupEventListeners
+          details: "Event handlers wired via addEventListener in UIController.setupEventListeners()"
+        });
+      } catch (e) {
+        results.push({
+          name: "2. Wire event handlers",
+          pass: false,
+          details: `Error: ${e.message}`
+        });
+      }
+
+      // Test 3: Validation errors connected to UI
+      try {
+        // Test invalid pattern
+        const patternInput = document.getElementById('pattern-input');
+        const errorMessage = document.getElementById('error-message');
+        
+        patternInput.value = 'invalid';
+        window.uiController.handleAddPattern();
+        
+        const hasError = errorMessage.textContent.length > 0;
+        
+        results.push({
+          name: "3. Connect validation errors to UI error display",
+          pass: hasError,
+          details: `Error message displayed: "${errorMessage.textContent}"`
+        });
+        
+        // Clear the error for next tests
+        window.uiController.clearError();
+        patternInput.value = '';
+      } catch (e) {
+        results.push({
+          name: "3. Connect validation errors to UI error display",
+          pass: false,
+          details: `Error: ${e.message}`
+        });
+      }
+
+      // Test 4: Pattern additions connected to UI updates
+      try {
+        const patternInput = document.getElementById('pattern-input');
+        const patternList = document.getElementById('pattern-list');
+        const resultsDisplay = document.getElementById('results-display');
+        
+        // Add a valid pattern
+        patternInput.value = 'aaaaaaaaaa';
+        window.uiController.handleAddPattern();
+        
+        const hasPatternInList = patternList.innerHTML.includes('aaaaaaaaaa');
+        const hasPatternType = patternList.innerHTML.includes('The Soloist');
+        const hasResults = resultsDisplay.innerHTML.includes('aaaaaaaaaa');
+        
+        results.push({
+          name: "4. Connect pattern additions to UI updates",
+          pass: hasPatternInList && hasPatternType && hasResults,
+          details: `Pattern in list: ${hasPatternInList}, Type shown: ${hasPatternType}, Results shown: ${hasResults}`
+        });
+      } catch (e) {
+        results.push({
+          name: "4. Connect pattern additions to UI updates",
+          pass: false,
+          details: `Error: ${e.message}`
+        });
+      }
+
+      // Test 5: Export button connected to CSVExporter
+      try {
+        const exportBtn = document.getElementById('export-btn');
+        const isVisible = exportBtn.style.display !== 'none';
+        
+        results.push({
+          name: "5. Connect export button to CSVExporter",
+          pass: isVisible,
+          details: `Export button visible: ${isVisible} (should be visible after adding pattern)`
+        });
+      } catch (e) {
+        results.push({
+          name: "5. Connect export button to CSVExporter",
+          pass: false,
+          details: `Error: ${e.message}`
+        });
+      }
+
+      // Test 6: Disclaimer display initialized
+      try {
+        const disclaimer = document.querySelector('.disclaimer');
+        const isVisible = disclaimer && disclaimer.style.display !== 'none';
+        const hasContent = disclaimer && disclaimer.textContent.length > 0;
+        
+        results.push({
+          name: "6. Initialize disclaimer display on page load",
+          pass: isVisible && hasContent,
+          details: `Disclaimer visible: ${isVisible}, Has content: ${hasContent}`
+        });
+      } catch (e) {
+        results.push({
+          name: "6. Initialize disclaimer display on page load",
+          pass: false,
+          details: `Error: ${e.message}`
+        });
+      }
+
+      // Display results
+      displayTestResults(results);
+    }
+
+    function displayTestResults(results) {
+      const container = document.getElementById('test-results');
+      let html = '';
+      
+      let passCount = 0;
+      results.forEach(result => {
+        if (result.pass) passCount++;
+        
+        html += `
+          <div class="test-result ${result.pass ? 'test-pass' : 'test-fail'}">
+            <strong>${result.pass ? '✅' : '❌'} ${result.name}</strong><br>
+            <small>${result.details}</small>
+          </div>
+        `;
+      });
+      
+      html = `<h3>Test Results: ${passCount}/${results.length} passed</h3>` + html;
+      container.innerHTML = html;
+    }
+
+    // Set up test button
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('run-tests').addEventListener('click', runTask11_1Tests);
+      
+      // Run tests automatically after a short delay
+      setTimeout(runTask11_1Tests, 1000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Dropdown Wildcard Patterns</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .pattern-info {
+      margin: 10px 0;
+      padding: 10px;
+      background: #e9ecef;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Dropdown Wildcard Patterns</h1>
+      </div>
+    </header>
+
+    <main>
+      <div class="test-section">
+        <h2>🧪 Dropdown Pattern Testing</h2>
+        <p>เลือก pattern เพื่อทดสอบว่า value และ display ตรงกัน</p>
+        
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern Type:</label>
+          <select id="pattern-select" aria-describedby="pattern-help">
+            <option value="">-- เลือก Pattern --</option>
+            
+            <!-- The Soloist Patterns -->
+            <optgroup label="1. The Soloist">
+              <option value="aaaaaaaaaa" data-type="The Soloist">aaa-aaa-aaaa (All 10 digits identical)</option>
+              <option value="?bbbbbbbbb" data-type="The Soloist">?bb-bbb-bbbb (All 9 digits identical)</option>
+              <option value="??dddddddd" data-type="The Soloist">??d-ddd-dddd (All 8 digits identical)</option>
+              <option value="???ddddddd" data-type="The Soloist">???-ddd-dddd (All 7 digits identical)</option>
+              <option value="????eeeeee" data-type="The Soloist">????-ee-eeee (All 6 digits identical)</option>
+              <option value="?????fffff" data-type="The Soloist">?????-f-ffff (All 5 digits identical)</option>
+              <option value="??????gggg" data-type="The Soloist">??????-gggg (All 4 digits identical - Block-ending)</option>
+            </optgroup>
+            
+            <!-- Hyphen-separated Patterns -->
+            <optgroup label="2. Hyphen-separated">
+              <option value="bbbaaaaaaa" data-type="Hyphen-separated">bbb-aaa-aaaa (2 distinct digits across blocks)</option>
+              <option value="bbbbbaaaaa" data-type="Hyphen-separated">bbb-bbb-aaaa (2 distinct digits across blocks)</option>
+              <option value="bbbaaabbbb" data-type="Hyphen-separated">bbb-aaa-bbbb (2 distinct digits across blocks)</option>
+              <option value="aaabbbcccc" data-type="Hyphen-separated">aaa-bbb-cccc (3 distinct digits across blocks)</option>
+              <option value="bbb???bbbb" data-type="Hyphen-separated">bbb-???-bbbb (First and last blocks identical)</option>
+            </optgroup>
+            
+            <!-- The Full Straight Patterns -->
+            <optgroup label="3. The Full Straight">
+              <option value="abcdefghij" data-type="The Full Straight">abc-def-ghij (Ascending)</option>
+              <option value="jihgfedcba" data-type="The Full Straight">jih-gfe-dcba (Descending)</option>
+            </optgroup>
+            
+            <!-- Cyclic Straight Patterns -->
+            <optgroup label="4. Cyclic Straight">
+              <option value="zabcdefghi" data-type="Cyclic Straight">zab-cde-fghi (Cyclic ascending)</option>
+              <option value="ihgfedcbaz" data-type="Cyclic Straight">ihg-fed-cbaz (Cyclic descending)</option>
+            </optgroup>
+            
+            <!-- The Rhythmic Bridge Patterns -->
+            <optgroup label="5. The Rhythmic Bridge">
+              <option value="abcefgabcd" data-type="The Rhythmic Bridge">abc-efg-abcd (Repeating pattern 2-3 block)</option>
+              <option value="abcabcdefg" data-type="The Rhythmic Bridge">abc-abc-defg (Repeating pattern front-middle)</option>
+              <option value="efgabcabcd" data-type="The Rhythmic Bridge">efg-abc-abcd (Repeating pattern middle-end)</option>
+            </optgroup>
+          </select>
+          <small id="pattern-help">เลือก pattern เพื่อดูข้อมูล</small>
+        </div>
+        
+        <div id="pattern-info" class="pattern-info" style="display: none;">
+          <h3>Pattern Information:</h3>
+          <p><strong>Selected Value:</strong> <span id="selected-value"></span></p>
+          <p><strong>Pattern Type:</strong> <span id="pattern-type"></span></p>
+          <p><strong>Contains Wildcards:</strong> <span id="has-wildcards"></span></p>
+          <p><strong>Validation:</strong> <span id="validation-result"></span></p>
+          <p><strong>Classification:</strong> <span id="classification-result"></span></p>
+        </div>
+        
+        <button id="test-pattern-btn" class="btn btn-primary" style="display: none;">Test Pattern Generation</button>
+        <div id="generation-results" style="display: none;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const patternSelect = document.getElementById('pattern-select');
+      const patternInfo = document.getElementById('pattern-info');
+      const selectedValue = document.getElementById('selected-value');
+      const patternType = document.getElementById('pattern-type');
+      const hasWildcards = document.getElementById('has-wildcards');
+      const validationResult = document.getElementById('validation-result');
+      const classificationResult = document.getElementById('classification-result');
+      const testPatternBtn = document.getElementById('test-pattern-btn');
+      const generationResults = document.getElementById('generation-results');
+
+      patternSelect.addEventListener('change', function() {
+        const selectedPattern = this.value;
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (!selectedPattern) {
+          patternInfo.style.display = 'none';
+          testPatternBtn.style.display = 'none';
+          generationResults.style.display = 'none';
+          return;
+        }
+
+        // Show pattern information
+        selectedValue.textContent = selectedPattern;
+        patternType.textContent = selectedOption.getAttribute('data-type') || 'Unknown';
+        hasWildcards.textContent = selectedPattern.includes('?') ? 'Yes' : 'No';
+        
+        // Test validation
+        try {
+          const validator = new PatternValidator();
+          const validation = validator.validate(selectedPattern);
+          
+          if (validation.isValid) {
+            validationResult.innerHTML = '<span style="color: green;">✅ Valid</span>';
+            
+            // Test classification
+            try {
+              const analyzer = new PatternAnalyzer();
+              const actualType = analyzer.identifyPatternType(selectedPattern);
+              const expectedType = selectedOption.getAttribute('data-type');
+              
+              if (actualType === expectedType) {
+                classificationResult.innerHTML = `<span style="color: green;">✅ ${actualType}</span>`;
+              } else {
+                classificationResult.innerHTML = `<span style="color: red;">❌ Expected: ${expectedType}, Got: ${actualType}</span>`;
+              }
+            } catch (error) {
+              classificationResult.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+            }
+          } else {
+            validationResult.innerHTML = `<span style="color: red;">❌ ${validation.errorMessage}</span>`;
+            classificationResult.textContent = 'N/A';
+          }
+        } catch (error) {
+          validationResult.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+          classificationResult.textContent = 'N/A';
+        }
+        
+        patternInfo.style.display = 'block';
+        testPatternBtn.style.display = 'inline-block';
+      });
+
+      testPatternBtn.addEventListener('click', function() {
+        const selectedPattern = patternSelect.value;
+        if (!selectedPattern) return;
+
+        try {
+          const validator = new PatternValidator();
+          const analyzer = new PatternAnalyzer();
+          const generator = new PatternGenerator();
+          
+          const validation = validator.validate(selectedPattern);
+          if (!validation.isValid) {
+            generationResults.innerHTML = `<div class="error">❌ Cannot generate: ${validation.errorMessage}</div>`;
+            generationResults.style.display = 'block';
+            return;
+          }
+          
+          const patternType = analyzer.identifyPatternType(selectedPattern);
+          const numbers = generator.generate(selectedPattern, patternType);
+          
+          generationResults.innerHTML = `
+            <div class="success">
+              <h4>✅ Generation Results:</h4>
+              <p><strong>Pattern:</strong> ${selectedPattern}</p>
+              <p><strong>Type:</strong> ${patternType}</p>
+              <p><strong>Generated:</strong> ${numbers.length} numbers</p>
+              <div style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; font-size: 12px;">
+                <strong>Sample numbers:</strong><br>
+                ${numbers.slice(0, 20).join('<br>')}
+                ${numbers.length > 20 ? '<br>... (showing first 20)' : ''}
+              </div>
+            </div>
+          `;
+          generationResults.style.display = 'block';
+          
+        } catch (error) {
+          generationResults.innerHTML = `<div class="error">❌ Generation failed: ${error.message}</div>`;
+          generationResults.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
