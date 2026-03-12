@@ -2652,7 +2652,7 @@ class UIController {
           // Use innerHTML for better performance with large datasets
           let gridHTML = '';
           numbersToShow.forEach(number => {
-            const premiumBadge = this.isPremiumNumber(number) ? '<div class="premium-badge">👑</div>' : '';
+            const premiumBadge = this.isPremiumNumber(number) ? '<div class="premium-badge">🏅</div>' : '';
             gridHTML += `<span class="number-item clickable ${this.isPremiumNumber(number) ? 'premium' : ''}" data-number="${number}" title="คลิกเพื่อดูผลรวมเลขมงคล" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}${premiumBadge}</span>`;
           });
           numbersGrid.innerHTML = gridHTML;
@@ -3017,7 +3017,7 @@ class UIController {
         if (numbersGrid) {
           let gridHTML = '';
           numbersToShow.forEach(number => {
-            const premiumBadge = this.isPremiumNumber(number) ? '<div class="premium-badge">👑</div>' : '';
+            const premiumBadge = this.isPremiumNumber(number) ? '<div class="premium-badge">🏅</div>' : '';
             gridHTML += `<span class="number-item clickable ${this.isPremiumNumber(number) ? 'premium' : ''}" data-number="${number}" title="คลิกเพื่อดูผลรวมเลขมงคล" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}${premiumBadge}</span>`;
           });
           numbersGrid.innerHTML = gridHTML;

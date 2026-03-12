@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circular Badge UI Test</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Circular Badge UI Test</h1>
+    
+    <!-- Test Button -->
+    <button onclick="testCircularBadge()" class="btn btn-primary">Test Circular Badge UI</button>
+    
+    <!-- Lucky Number Analysis Popup -->
+    <div id="lucky-overlay" class="lucky-overlay">
+      <div class="lucky-popup">
+        <div class="lucky-header">
+          <h3>🔮 ผลรวมเลขมงคล</h3>
+          <button id="close-lucky-btn" class="close-btn">&times;</button>
+        </div>
+        
+        <div class="lucky-body">
+          <div class="selected-number">
+            <label>หมายเลขบัญชีที่เลือก:</label>
+            <div id="selected-account-number" class="account-number-display">123-456-7890<div class="premium-badge">🏅</div></div>
+          </div>
+          
+          <div class="lucky-analysis">
+            <div class="sum-section">
+              <div class="circular-badge-container">
+                <div id="circular-badge" class="circular-badge">
+                  <div class="badge-label">ผลรวม</div>
+                  <div id="digit-sum" class="digit-sum-large">45</div>
+                </div>
+                <div id="rating-badge" class="rating-badge-floating excellent">ระดับดีมาก</div>
+              </div>
+              <div class="rating-description-center">
+                <div id="rating-description" class="rating-description">เลขมงคลระดับสูงสุด เหมาะกับผู้นำและความสำเร็จ</div>
+              </div>
+            </div>
+            
+            <div class="personality-section">
+              <h4>👤 บุคลิกภาพและความหมาย</h4>
+              <div id="personality-section" class="personality-display">
+                <div class="personality-item">
+                  <strong>บุคลิกภาพ:</strong> <span>ผู้นำ, มุ่งมั่น, เด็ดขาด</span>
+                </div>
+                <div class="meaning-item">
+                  <strong>ความหมาย:</strong> <span>เลขแห่งผู้นำ มีความมุ่งมั่น เด็ดขาด ชอบความท้าทาย</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="info-grid">
+              <div class="zodiac-section">
+                <h4>♈ ราศีที่เข้ากัน</h4>
+                <div id="compatible-zodiac" class="zodiac-display">
+                  <div class="zodiac-item">
+                    <span class="zodiac-icon">♈</span>
+                    <span class="zodiac-name">ราศีเมษ</span>
+                  </div>
+                  <div class="zodiac-item">
+                    <span class="zodiac-icon">♌</span>
+                    <span class="zodiac-name">ราศีสิงห์</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="career-section">
+                <h4>💼 อาชีพที่เหมาะสม</h4>
+                <div id="suitable-careers" class="career-display">
+                  <div class="career-list">
+                    <span class="career-tag">ผู้บริหาร</span>
+                    <span class="career-tag">นักการเมือง</span>
+                    <span class="career-tag">ผู้ประกอบการ</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="rating-stars-section">
+              <h4>⭐ การประเมิน</h4>
+              <div class="rating-categories">
+                <div class="rating-row">
+                  <span class="rating-label">การงาน</span>
+                  <div id="career-stars" class="star-rating">
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                  </div>
+                </div>
+                <div class="rating-row">
+                  <span class="rating-label">การเงิน</span>
+                  <div id="money-stars" class="star-rating">
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star empty">⭐</span>
+                  </div>
+                </div>
+                <div class="rating-row">
+                  <span class="rating-label">สุขภาพ</span>
+                  <div id="health-stars" class="star-rating">
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star empty">⭐</span>
+                    <span class="star empty">⭐</span>
+                  </div>
+                </div>
+                <div class="rating-row">
+                  <span class="rating-label">ความรัก</span>
+                  <div id="love-stars" class="star-rating">
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star filled">⭐</span>
+                    <span class="star empty">⭐</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="lucky-info-section">
+              <h4>🍀 ข้อมูลเพิ่มเติม</h4>
+              <div id="lucky-info" class="lucky-info-display">
+                <div class="lucky-item">
+                  <strong>🍀 โชคดี:</strong> <span>เหมาะกับการเป็นผู้นำ มีโชคในการลงทุน ธุรกิจ</span>
+                </div>
+                <div class="warning-item">
+                  <strong>⚠️ ข้อควรระวัง:</strong> <span>ระวังความเย่อหยิ่ง อย่าเอาแต่ใจตัวเอง</span>
+                </div>
+                <div class="color-item">
+                  <strong>🎨 สีมงคล:</strong> <span>แดง, ทอง</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="lucky-footer">
+          <div class="button-row">
+            <button id="copy-number-btn" class="btn btn-primary">📋 คัดลอกเลข</button>
+            <button id="close-lucky-footer-btn" class="btn btn-secondary">ปิด</button>
+          </div>
+          <div class="attribution">
+            <small>ระบบเลขศาสตร์โดย <strong>แมน การิน</strong> (Man Karin)</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function testCircularBadge() {
+      const overlay = document.getElementById('lucky-overlay');
+      overlay.classList.add('show');
+      overlay.style.display = 'flex';
+      overlay.style.opacity = '1';
+      overlay.style.visibility = 'visible';
+    }
+
+    // Close popup handlers
+    document.getElementById('close-lucky-btn').addEventListener('click', () => {
+      const overlay = document.getElementById('lucky-overlay');
+      overlay.classList.remove('show');
+      overlay.style.display = 'none';
+    });
+
+    document.getElementById('close-lucky-footer-btn').addEventListener('click', () => {
+      const overlay = document.getElementById('lucky-overlay');
+      overlay.classList.remove('show');
+      overlay.style.display = 'none';
+    });
+
+    // Click outside to close
+    document.getElementById('lucky-overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'lucky-overlay') {
+        const overlay = document.getElementById('lucky-overlay');
+        overlay.classList.remove('show');
+        overlay.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

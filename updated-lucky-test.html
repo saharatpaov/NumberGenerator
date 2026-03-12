@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Updated Lucky Number System Test</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>ระบบเลขมงคลที่ปรับปรุงแล้ว</h1>
+    <p>ใช้ข้อมูลจาก แมน การิน, หมอช้าง, หมอลักษณ์</p>
+    
+    <!-- Test Numbers -->
+    <div class="test-numbers">
+      <h2>ทดสอบเลขต่างๆ</h2>
+      <div class="numbers-grid">
+        <!-- เลขดีมาก -->
+        <span class="number-item clickable premium" onclick="testLuckyNumber('888-888-8888', this)">
+          888-888-8888<div class="premium-badge">🏅</div>
+        </span>
+        <span class="number-item clickable premium" onclick="testLuckyNumber('999-999-9999', this)">
+          999-999-9999<div class="premium-badge">🏅</div>
+        </span>
+        
+        <!-- เลขพิเศษของหมอช้าง -->
+        <span class="number-item clickable premium" onclick="testLuckyNumber('080-808-0808', this)">
+          080-808-0808<div class="premium-badge">🏅</div>
+        </span>
+        
+        <!-- เลข Master Number ของหมอลักษณ์ -->
+        <span class="number-item clickable" onclick="testLuckyNumber('112-211-1122', this)">
+          112-211-1122
+        </span>
+        
+        <!-- เลขทั่วไป -->
+        <span class="number-item clickable" onclick="testLuckyNumber('123-456-7890', this)">
+          123-456-7890
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('555-555-5555', this)">
+          555-555-5555
+        </span>
+      </div>
+    </div>
+    
+    <!-- Lucky Number Analysis Popup -->
+    <div id="lucky-overlay" class="lucky-overlay">
+      <div class="lucky-popup">
+        <div class="lucky-header">
+          <h3>🔮 ผลรวมเลขมงคล</h3>
+          <button id="close-lucky-btn" class="close-btn">&times;</button>
+        </div>
+        
+        <div class="lucky-body">
+          <div class="selected-number">
+            <label>หมายเลขบัญชีที่เลือก:</label>
+            <div id="selected-account-number" class="account-number-display">-</div>
+          </div>
+          
+          <div class="lucky-analysis">
+            <div class="sum-section">
+              <div class="circular-badge-container">
+                <div id="circular-badge" class="circular-badge">
+                  <div class="badge-label">ผลรวม</div>
+                  <div id="digit-sum" class="digit-sum-large">-</div>
+                </div>
+                <div id="rating-badge" class="rating-badge-floating">-</div>
+              </div>
+              <div class="rating-description-center">
+                <div id="rating-description" class="rating-description">-</div>
+              </div>
+            </div>
+            
+            <div class="personality-section">
+              <h4>👤 บุคลิกภาพและความหมาย</h4>
+              <div id="personality-section" class="personality-display">
+                <div class="personality-item">
+                  <strong>บุคลิกภาพ:</strong> <span>-</span>
+                </div>
+                <div class="meaning-item">
+                  <strong>ความหมาย:</strong> <span>-</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="info-grid">
+              <div class="zodiac-section">
+                <h4>♈ ราศีที่เข้ากัน</h4>
+                <div id="compatible-zodiac" class="zodiac-display">
+                  <div class="zodiac-item">
+                    <span class="zodiac-icon">-</span>
+                    <span class="zodiac-name">-</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="career-section">
+                <h4>💼 อาชีพที่เหมาะสม</h4>
+                <div id="suitable-careers" class="career-display">
+                  <div class="career-list">-</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="rating-stars-section">
+              <h4>⭐ การประเมิน (ตามหลักเลขศาสตร์ไทยแบบดั้งเดิม)</h4>
+              <div class="rating-categories">
+                <div class="rating-row">
+                  <span class="rating-label">การงาน</span>
+                  <div id="career-stars" class="star-rating">
+                    <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-row">
+                  <span class="rating-label">การเงิน</span>
+                  <div id="money-stars" class="star-rating">
+                    <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-row">
+                  <span class="rating-label">สุขภาพ</span>
+                  <div id="health-stars" class="star-rating">
+                    <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-row">
+                  <span class="rating-label">ความรัก</span>
+                  <div id="love-stars" class="star-rating">
+                    <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="lucky-info-section">
+              <h4>🍀 ข้อมูลเพิ่มเติม</h4>
+              <div id="lucky-info" class="lucky-info-display">
+                <div class="lucky-item">
+                  <strong>🍀 โชคดี:</strong> <span>-</span>
+                </div>
+                <div class="warning-item">
+                  <strong>⚠️ ข้อควรระวัง:</strong> <span>-</span>
+                </div>
+                <div class="color-item">
+                  <strong>🎨 สีมงคล:</strong> <span>-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="lucky-footer">
+          <div class="button-row">
+            <button id="copy-number-btn" class="btn btn-primary">📋 คัดลอกเลข</button>
+            <button id="close-lucky-footer-btn" class="btn btn-secondary">ปิด</button>
+          </div>
+          <div class="attribution">
+            <small>ระบบเลขศาสตร์ไทยแบบดั้งเดิม อิงตามหลักการของ <strong>แมน การิน, หมอช้าง, หมอลักษณ์</strong><br>
+            พัฒนาด้วยความเคารพต่อภูมิปัญญาไทย</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="lucky-number-system.js"></script>
+  <script>
+    function testLuckyNumber(accountNumber, element) {
+      console.log('Testing lucky number:', accountNumber);
+      
+      // Wait for lucky number system to initialize
+      setTimeout(() => {
+        if (window.luckyNumberUI) {
+          window.luckyNumberUI.showLuckyPopup(accountNumber);
+        } else {
+          console.error('Lucky number UI not ready');
+          alert('ระบบยังไม่พร้อม กรุณารอสักครู่');
+        }
+      }, 100);
+    }
+
+    // Close popup handlers
+    document.getElementById('close-lucky-btn').addEventListener('click', () => {
+      if (window.luckyNumberUI) {
+        window.luckyNumberUI.hideLuckyPopup();
+      }
+    });
+
+    document.getElementById('close-lucky-footer-btn').addEventListener('click', () => {
+      if (window.luckyNumberUI) {
+        window.luckyNumberUI.hideLuckyPopup();
+      }
+    });
+
+    // Click outside to close
+    document.getElementById('lucky-overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'lucky-overlay') {
+        if (window.luckyNumberUI) {
+          window.luckyNumberUI.hideLuckyPopup();
+        }
+      }
+    });
+
+    // Copy button handler
+    document.getElementById('copy-number-btn').addEventListener('click', () => {
+      if (window.luckyNumberUI) {
+        window.luckyNumberUI.copyAccountNumber();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,6 +1,17 @@
 /**
- * Lucky Number Analysis System - Based on Man Karin's Numerology
- * แมน การิน (Man Karin) - Famous Thai Numerologist
+ * Lucky Number Analysis System - Enhanced Traditional Thai Numerology
+ * 
+ * This system combines traditional Thai numerology wisdom with comprehensive
+ * interpretations for numbers 0-99, providing detailed analysis for:
+ * - แมน การิน: Modern numerology approach with personality-based interpretations
+ * - หมอช้าง: Traditional astrology combined with number analysis, expert in high-value numbers
+ * - หมอลักษณ์: Master number specialist, expert in special combinations and patterns
+ * 
+ * Enhanced Features:
+ * - Detailed ratings for all numbers 10-99
+ * - Master Numbers (11, 22, 33, 44, 55, 66, 77, 88, 99) with special significance
+ * - Traditional Thai numerology principles
+ * - Comprehensive star rating system for career, money, health, and love
  */
 
 class LuckyNumberAnalyzer {
@@ -340,15 +351,15 @@ class LuckyNumberUI {
         this.elements.selectedNumber.textContent = accountNumber;
       }
 
-      // Update digit sum
+      // Update circular badge
       if (this.elements.digitSum) {
         this.elements.digitSum.textContent = analysis.finalSum;
       }
 
-      // Update rating display
+      // Update rating display with floating badge
       if (this.elements.ratingBadge && this.elements.ratingDescription) {
-        this.elements.ratingBadge.textContent = `ผลรวมระดับ${analysis.rating.level}`;
-        this.elements.ratingBadge.style.backgroundColor = analysis.rating.color;
+        this.elements.ratingBadge.textContent = `ระดับ${analysis.rating.level}`;
+        this.elements.ratingBadge.className = `rating-badge-floating ${this.getRatingClass(analysis.rating.level)}`;
         this.elements.ratingDescription.textContent = analysis.rating.description;
       }
 
@@ -388,6 +399,9 @@ class LuckyNumberUI {
         this.elements.suitableCareers.innerHTML = careerHTML;
       }
 
+      // Update star ratings based on numerology
+      this.updateStarRatings(analysis);
+
       // Update lucky info
       if (this.elements.luckyInfo) {
         this.elements.luckyInfo.innerHTML = `
@@ -409,7 +423,7 @@ class LuckyNumberUI {
         if (!numberDisplay.querySelector('.premium-badge')) {
           const badge = document.createElement('div');
           badge.className = 'premium-badge';
-          badge.innerHTML = '👑 PREMIUM';
+          badge.innerHTML = '🏅'; // Gold medal emoji
           numberDisplay.appendChild(badge);
         }
       }
@@ -426,6 +440,246 @@ class LuckyNumberUI {
       console.error('Error showing lucky popup:', error);
       alert('เกิดข้อผิดพลาดในการแสดงผล: ' + error.message);
     }
+  }
+
+  /**
+   * Get CSS class for rating level
+   * @param {string} level - Rating level (ดีมาก, ดี, พอใช้)
+   * @returns {string} CSS class name
+   */
+  getRatingClass(level) {
+    switch (level) {
+      case 'ดีมาก': return 'excellent';
+      case 'ดี': return 'good';
+      case 'พอใช้': return 'fair';
+      default: return 'fair';
+    }
+  }
+
+  /**
+   * Update star ratings based on numerology analysis
+   * @param {Object} analysis - Numerology analysis result
+   */
+  updateStarRatings(analysis) {
+    const starRatings = this.calculateStarRatings(analysis);
+    
+    // Update career stars
+    const careerStars = document.getElementById('career-stars');
+    if (careerStars) {
+      this.renderStars(careerStars, starRatings.career);
+    }
+
+    // Update money stars
+    const moneyStars = document.getElementById('money-stars');
+    if (moneyStars) {
+      this.renderStars(moneyStars, starRatings.money);
+    }
+
+    // Update health stars
+    const healthStars = document.getElementById('health-stars');
+    if (healthStars) {
+      this.renderStars(healthStars, starRatings.health);
+    }
+
+    // Update love stars
+    const loveStars = document.getElementById('love-stars');
+    if (loveStars) {
+      this.renderStars(loveStars, starRatings.love);
+    }
+  }
+
+  /**
+   * Calculate star ratings based on numerology analysis
+   * Enhanced system inspired by traditional Thai numerology principles
+   * Incorporates detailed interpretations for numbers 10-99 range
+   * @param {Object} analysis - Numerology analysis result
+   * @returns {Object} Star ratings for each category
+   */
+  calculateStarRatings(analysis) {
+    const finalSum = analysis.finalSum;
+    const ratingLevel = analysis.rating.level;
+    const singleDigit = finalSum === 0 ? 9 : (finalSum % 9 === 0 ? 9 : finalSum % 9);
+    
+    // Enhanced detailed ratings for numbers 10-99 based on traditional Thai numerology
+    const detailedRatings = this.getDetailedRatings(finalSum);
+    
+    if (detailedRatings) {
+      return detailedRatings;
+    }
+    
+    // Base ratings from traditional numerology system for single digits
+    const baseRatings = {
+      1: { career: 5, money: 5, health: 4, love: 3 }, // ผู้นำ - เก่งการงาน การเงิน
+      2: { career: 3, money: 3, health: 5, love: 5 }, // ความร่วมมือ - ดีด้านสุขภาพ ความรัก
+      3: { career: 5, money: 4, health: 3, love: 4 }, // ความคิดสร้างสรรค์ - เก่งการงาน
+      4: { career: 4, money: 5, health: 5, love: 3 }, // ความมั่นคง - ดีด้านการเงิน สุขภาพ
+      5: { career: 4, money: 3, health: 3, love: 3 }, // อิสรภาพ - ปานกลางทุกด้าน
+      6: { career: 3, money: 4, health: 5, love: 5 }, // ความรับผิดชอบ - ดีด้านสุขภาพ ความรัก
+      7: { career: 5, money: 3, health: 4, love: 3 }, // ปัญญา - เก่งการงาน
+      8: { career: 5, money: 5, health: 3, love: 3 }, // ความสำเร็จ - เก่งการงาน การเงิน
+      9: { career: 4, money: 4, health: 4, love: 5 }  // การให้ - ดีด้านความรัก
+    };
+
+    // Get base ratings
+    let ratings = { ...baseRatings[singleDigit] };
+
+    // Apply rating level adjustments
+    if (ratingLevel === 'ดีมาก') {
+      // Boost all ratings for excellent numbers
+      ratings.career = Math.min(5, ratings.career + 1);
+      ratings.money = Math.min(5, ratings.money + 1);
+      ratings.health = Math.min(5, ratings.health + 1);
+      ratings.love = Math.min(5, ratings.love + 1);
+    } else if (ratingLevel === 'พอใช้') {
+      // Reduce ratings for fair numbers
+      ratings.career = Math.max(1, ratings.career - 1);
+      ratings.money = Math.max(1, ratings.money - 1);
+      ratings.health = Math.max(1, ratings.health - 1);
+      ratings.love = Math.max(1, ratings.love - 1);
+    }
+
+    return ratings;
+  }
+
+  /**
+   * Get detailed ratings for specific numbers 10-99
+   * Based on traditional Thai numerology interpretations
+   * @param {number} finalSum - The final sum (10-99)
+   * @returns {Object|null} Detailed ratings or null if not found
+   */
+  getDetailedRatings(finalSum) {
+    // Detailed ratings for numbers 10-99 based on traditional Thai numerology
+    const detailedRatingsMap = {
+      // Numbers 10-19: New beginnings and leadership
+      10: { career: 4, money: 4, health: 3, love: 3 }, // เลขแห่งการเริ่มต้นใหม่
+      11: { career: 5, money: 4, health: 4, love: 5 }, // Master Number - ความเป็นผู้นำ
+      12: { career: 4, money: 3, health: 4, love: 4 }, // ความร่วมมือและสร้างสรรค์
+      13: { career: 3, money: 3, health: 3, love: 3 }, // ความท้าทายและการเปลี่ยนแปลง
+      14: { career: 4, money: 3, health: 3, love: 4 }, // อิสรภาพและการผจญภัย
+      15: { career: 3, money: 4, health: 4, love: 5 }, // ความรับผิดชอบและครอบครัว
+      16: { career: 4, money: 3, health: 4, love: 3 }, // ปัญญาและการศึกษา
+      17: { career: 5, money: 4, health: 3, love: 3 }, // ความสำเร็จและอำนาจ
+      18: { career: 4, money: 4, health: 4, love: 4 }, // การให้และความเมตตา
+      19: { career: 4, money: 4, health: 3, love: 4 }, // การสิ้นสุดและเริ่มต้นใหม่
+
+      // Numbers 20-29: Cooperation and relationships
+      20: { career: 3, money: 3, health: 4, love: 5 }, // ความร่วมมือสูงสุด
+      21: { career: 4, money: 4, health: 4, love: 4 }, // ความสมดุลและความสำเร็จ
+      22: { career: 5, money: 5, health: 4, love: 4 }, // Master Number - นักสร้าง
+      23: { career: 4, money: 3, health: 3, love: 4 }, // ความคิดสร้างสรรค์และสื่อสาร
+      24: { career: 4, money: 4, health: 5, love: 4 }, // ความมั่นคงและการทำงานหนัก
+      25: { career: 3, money: 3, health: 3, love: 3 }, // การเปลี่ยนแปลงและอิสรภาพ
+      26: { career: 3, money: 4, health: 5, love: 5 }, // ความรับผิดชอบและการดูแล
+      27: { career: 5, money: 3, health: 4, love: 3 }, // ปัญญาและความเข้าใจลึก
+      28: { career: 5, money: 5, health: 3, love: 3 }, // ความสำเร็จทางธุรกิจ
+      29: { career: 4, money: 4, health: 4, love: 5 }, // การให้และความเมตตา
+
+      // Numbers 30-39: Creativity and expression
+      30: { career: 5, money: 4, health: 3, love: 4 }, // ความคิดสร้างสรรค์สูงสุด
+      31: { career: 4, money: 4, health: 4, love: 3 }, // ความเป็นผู้นำที่สร้างสรรค์
+      32: { career: 4, money: 3, health: 4, love: 5 }, // ความร่วมมือและการสื่อสาร
+      33: { career: 5, money: 4, health: 5, love: 5 }, // Master Number - ครูผู้ยิ่งใหญ่
+      34: { career: 4, money: 4, health: 4, love: 3 }, // ความมั่นคงและสร้างสรรค์
+      35: { career: 4, money: 3, health: 3, love: 4 }, // อิสรภาพและการแสดงออก
+      36: { career: 3, money: 4, health: 5, love: 5 }, // ความรับผิดชอบและศิลปะ
+      37: { career: 5, money: 3, health: 4, love: 3 }, // ปัญญาและความคิดสร้างสรรค์
+      38: { career: 5, money: 5, health: 3, love: 3 }, // ความสำเร็จและการแสดงออก
+      39: { career: 4, money: 4, health: 4, love: 5 }, // การให้และความสร้างสรรค์
+
+      // Numbers 40-49: Stability and hard work
+      40: { career: 4, money: 5, health: 5, love: 3 }, // ความมั่นคงสูงสุด
+      41: { career: 4, money: 4, health: 4, love: 3 }, // ความเป็นผู้นำที่มั่นคง
+      42: { career: 3, money: 4, health: 5, love: 4 }, // ความร่วมมือและมั่นคง
+      43: { career: 4, money: 4, health: 4, love: 4 }, // ความคิดสร้างสรรค์และมั่นคง
+      44: { career: 5, money: 5, health: 5, love: 3 }, // Master Number - นักสร้างที่ยิ่งใหญ่
+      45: { career: 4, money: 4, health: 4, love: 3 }, // อิสรภาพและความมั่นคง
+      46: { career: 3, money: 4, health: 5, love: 5 }, // ความรับผิดชอบและมั่นคง
+      47: { career: 5, money: 4, health: 5, love: 3 }, // ปัญญาและความมั่นคง
+      48: { career: 5, money: 5, health: 4, love: 3 }, // ความสำเร็จและมั่นคง
+      49: { career: 4, money: 4, health: 5, love: 4 }, // การให้และความมั่นคง
+
+      // Numbers 50-59: Freedom and adventure
+      50: { career: 4, money: 3, health: 3, love: 3 }, // อิสรภาพสูงสุด
+      51: { career: 4, money: 4, health: 3, love: 3 }, // ความเป็นผู้นำที่อิสระ
+      52: { career: 3, money: 3, health: 4, love: 4 }, // ความร่วมมือและอิสรภาพ
+      53: { career: 4, money: 3, health: 3, love: 4 }, // ความคิดสร้างสรรค์และอิสรภาพ
+      54: { career: 4, money: 4, health: 4, love: 3 }, // ความมั่นคงและอิสรภาพ
+      55: { career: 5, money: 4, health: 3, love: 4 }, // Master Number - อิสรภาพที่ยิ่งใหญ่
+      56: { career: 3, money: 4, health: 4, love: 5 }, // ความรับผิดชอบและอิสรภาพ
+      57: { career: 5, money: 3, health: 3, love: 3 }, // ปัญญาและอิสรภาพ
+      58: { career: 5, money: 4, health: 3, love: 3 }, // ความสำเร็จและอิสรภาพ
+      59: { career: 4, money: 3, health: 3, love: 4 }, // การให้และอิสรภาพ
+
+      // Numbers 60-69: Responsibility and nurturing
+      60: { career: 3, money: 4, health: 5, love: 5 }, // ความรับผิดชอบสูงสุด
+      61: { career: 4, money: 4, health: 4, love: 4 }, // ความเป็นผู้นำที่รับผิดชอบ
+      62: { career: 3, money: 3, health: 5, love: 5 }, // ความร่วมมือและการดูแล
+      63: { career: 4, money: 4, health: 4, love: 5 }, // ความคิดสร้างสรรค์และการดูแล
+      64: { career: 4, money: 4, health: 5, love: 4 }, // ความมั่นคงและการดูแล
+      65: { career: 3, money: 3, health: 4, love: 4 }, // อิสรภาพและการดูแล
+      66: { career: 3, money: 4, health: 5, love: 5 }, // Master Number - ผู้ดูแลที่ยิ่งใหญ่
+      67: { career: 4, money: 3, health: 5, love: 4 }, // ปัญญาและการดูแล
+      68: { career: 4, money: 5, health: 4, love: 4 }, // ความสำเร็จและการดูแล
+      69: { career: 4, money: 4, health: 5, love: 5 }, // การให้และการดูแล
+
+      // Numbers 70-79: Wisdom and spirituality
+      70: { career: 5, money: 3, health: 4, love: 3 }, // ปัญญาสูงสุด
+      71: { career: 5, money: 4, health: 4, love: 3 }, // ความเป็นผู้นำที่มีปัญญา
+      72: { career: 4, money: 3, health: 4, love: 4 }, // ความร่วมมือและปัญญา
+      73: { career: 5, money: 3, health: 3, love: 4 }, // ความคิดสร้างสรรค์และปัญญา
+      74: { career: 5, money: 4, health: 4, love: 3 }, // ความมั่นคงและปัญญา
+      75: { career: 4, money: 3, health: 3, love: 3 }, // อิสรภาพและปัญญา
+      76: { career: 4, money: 3, health: 4, love: 4 }, // ความรับผิดชอบและปัญญา
+      77: { career: 5, money: 4, health: 4, love: 4 }, // Master Number - ปัญญาที่ยิ่งใหญ่
+      78: { career: 5, money: 4, health: 4, love: 3 }, // ความสำเร็จและปัญญา
+      79: { career: 5, money: 3, health: 4, love: 4 }, // การให้และปัญญา
+
+      // Numbers 80-89: Material success and power
+      80: { career: 5, money: 5, health: 3, love: 3 }, // ความสำเร็จสูงสุด
+      81: { career: 5, money: 5, health: 4, love: 3 }, // ความเป็นผู้นำที่ประสบความสำเร็จ
+      82: { career: 4, money: 4, health: 4, love: 4 }, // ความร่วมมือและความสำเร็จ
+      83: { career: 5, money: 4, health: 3, love: 4 }, // ความคิดสร้างสรรค์และความสำเร็จ
+      84: { career: 5, money: 5, health: 4, love: 3 }, // ความมั่นคงและความสำเร็จ
+      85: { career: 5, money: 4, health: 3, love: 3 }, // อิสรภาพและความสำเร็จ
+      86: { career: 4, money: 5, health: 4, love: 4 }, // ความรับผิดชอบและความสำเร็จ
+      87: { career: 5, money: 4, health: 4, love: 3 }, // ปัญญาและความสำเร็จ
+      88: { career: 5, money: 5, health: 4, love: 4 }, // Master Number - ความสำเร็จที่ยิ่งใหญ่
+      89: { career: 5, money: 5, health: 4, love: 4 }, // การให้และความสำเร็จ
+
+      // Numbers 90-99: Universal love and completion
+      90: { career: 4, money: 4, health: 4, love: 5 }, // การให้สูงสุด
+      91: { career: 5, money: 4, health: 4, love: 4 }, // ความเป็นผู้นำที่ให้
+      92: { career: 4, money: 3, health: 4, love: 5 }, // ความร่วมมือและการให้
+      93: { career: 5, money: 4, health: 3, love: 5 }, // ความคิดสร้างสรรค์และการให้
+      94: { career: 4, money: 4, health: 4, love: 4 }, // ความมั่นคงและการให้
+      95: { career: 4, money: 3, health: 3, love: 4 }, // อิสรภาพและการให้
+      96: { career: 3, money: 4, health: 5, love: 5 }, // ความรับผิดชอบและการให้
+      97: { career: 5, money: 3, health: 4, love: 4 }, // ปัญญาและการให้
+      98: { career: 5, money: 5, health: 4, love: 4 }, // ความสำเร็จและการให้
+      99: { career: 5, money: 5, health: 5, love: 5 }, // Master Number - ความสมบูรณ์แบบ
+    };
+
+    return detailedRatingsMap[finalSum] || null;
+  }
+
+  /**
+   * Render stars in a container
+   * @param {HTMLElement} container - Container element
+   * @param {number} rating - Rating (1-5)
+   */
+  renderStars(container, rating) {
+    const stars = container.querySelectorAll('.star');
+    stars.forEach((star, index) => {
+      if (index < rating) {
+        star.classList.add('filled');
+        star.classList.remove('empty');
+        star.textContent = '★'; // Filled star
+      } else {
+        star.classList.add('empty');
+        star.classList.remove('filled');
+        star.textContent = '☆'; // Empty star
+      }
+    });
   }
 
   /**
