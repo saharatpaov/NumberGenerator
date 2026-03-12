@@ -1787,31 +1787,39 @@ class PatternGenerator {
   /**
    * Generates Thai Mobile No. patterns
    * Supports patterns: 06????????, 08????????, 09????????
-   * Note: Due to the large number of combinations (100M each), this generates a sample
-   * @param {string} pattern - Thai mobile pattern
+   * Fixed digits (0,6,8,9) are preserved, ? characters become random digits 0-9
+   * Each ? can be any digit and can duplicate other digits
+   * @param {string} pattern - Thai mobile pattern (e.g., "06????????")
    * @returns {string[]} Array of formatted numbers (sample of 1000)
    */
   generateThaiMobileNo(pattern) {
     const results = [];
-    
-    // Extract the prefix (06, 08, or 09)
-    const prefix = pattern.slice(0, 2);
     
     // Generate a sample of 1000 numbers instead of all 100M combinations
     // This is more practical for UI display and performance
     const sampleSize = 1000;
     
     for (let i = 0; i < sampleSize; i++) {
-      // Generate random 8-digit number for the remaining positions
-      const remainingDigits = Math.floor(Math.random() * 100000000)
-        .toString()
-        .padStart(8, '0');
+      let number = '';
       
-      // Construct the full number: prefix + remaining 8 digits
-      const fullNumber = prefix + remainingDigits;
+      // Process each character in the pattern
+      for (let pos = 0; pos < pattern.length; pos++) {
+        const char = pattern[pos];
+        
+        if (char === '?') {
+          // Wildcard: can be any digit 0-9
+          number += Math.floor(Math.random() * 10).toString();
+        } else if (/[0-9]/.test(char)) {
+          // Fixed digit: use the exact digit from pattern
+          number += char;
+        } else {
+          // This shouldn't happen for Thai Mobile patterns, but handle gracefully
+          throw new Error(`Invalid character '${char}' in Thai Mobile pattern: ${pattern}`);
+        }
+      }
       
       // Format as XXX-XXX-XXXX
-      results.push(this.formatNumber(fullNumber));
+      results.push(this.formatNumber(number));
     }
     
     // Sort results for consistent display

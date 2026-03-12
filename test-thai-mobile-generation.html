@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Thai Mobile Generation</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    .numbers { font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 3px; }
+    button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-success { background: #28a745; color: white; }
+  </style>
+</head>
+<body>
+  <h1>🇹🇭 Test Thai Mobile Number Generation</h1>
+  
+  <div class="test-result info">
+    <h3>Expected Behavior</h3>
+    <ul>
+      <li><strong>06????????</strong> → Numbers starting with 06, remaining 8 digits random</li>
+      <li><strong>08????????</strong> → Numbers starting with 08, remaining 8 digits random</li>
+      <li><strong>09????????</strong> → Numbers starting with 09, remaining 8 digits random</li>
+    </ul>
+    <p>Each pattern should generate 1,000 unique numbers with correct prefix.</p>
+  </div>
+
+  <div>
+    <button class="btn-primary" onclick="testPattern('06????????')">Test 06????????</button>
+    <button class="btn-primary" onclick="testPattern('08????????')">Test 08????????</button>
+    <button class="btn-primary" onclick="testPattern('09????????')">Test 09????????</button>
+    <button class="btn-success" onclick="testAllPatterns()">Test All Patterns</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function testPattern(pattern) {
+      const resultsDiv = document.getElementById('results');
+      let html = '<h3>Testing Pattern: ' + pattern + '</h3>';
+      
+      try {
+        // Generate numbers
+        const generator = new PatternGenerator();
+        const numbers = generator.generate(pattern, 'Thai Mobile No.');
+        
+        // Test 1: Count
+        const countPassed = numbers.length === 1000;
+        html += '<div class="test-result ' + (countPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Count Test:</strong> ' + (countPassed ? 'PASS' : 'FAIL');
+        html += ' - Generated: ' + numbers.length + ' numbers (expected: 1000)';
+        html += '</div>';
+        
+        // Test 2: Prefix validation
+        const expectedPrefix = pattern.slice(0, 2);
+        const prefixErrors = [];
+        numbers.forEach((num, index) => {
+          const cleanNum = num.replace(/-/g, '');
+          if (!cleanNum.startsWith(expectedPrefix)) {
+            prefixErrors.push(`${index}: ${num} (should start with ${expectedPrefix})`);
+          }
+        });
+        
+        const prefixPassed = prefixErrors.length === 0;
+        html += '<div class="test-result ' + (prefixPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Prefix Test:</strong> ' + (prefixPassed ? 'PASS' : 'FAIL');
+        html += ' - All numbers start with ' + expectedPrefix;
+        if (!prefixPassed) {
+          html += '<br>Errors: ' + prefixErrors.slice(0, 5).join(', ');
+          if (prefixErrors.length > 5) html += ' ... and ' + (prefixErrors.length - 5) + ' more';
+        }
+        html += '</div>';
+        
+        // Test 3: Format validation
+        const formatErrors = [];
+        numbers.forEach((num, index) => {
+          if (!/^\d{3}-\d{3}-\d{4}$/.test(num)) {
+            formatErrors.push(`${index}: ${num}`);
+          }
+        });
+        
+        const formatPassed = formatErrors.length === 0;
+        html += '<div class="test-result ' + (formatPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Format Test:</strong> ' + (formatPassed ? 'PASS' : 'FAIL');
+        html += ' - All numbers in XXX-XXX-XXXX format';
+        if (!formatPassed) {
+          html += '<br>Errors: ' + formatErrors.slice(0, 5).join(', ');
+        }
+        html += '</div>';
+        
+        // Test 4: Uniqueness
+        const uniqueNumbers = new Set(numbers);
+        const uniquePassed = uniqueNumbers.size === numbers.length;
+        html += '<div class="test-result ' + (uniquePassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Uniqueness Test:</strong> ' + (uniquePassed ? 'PASS' : 'FAIL');
+        html += ' - Unique: ' + uniqueNumbers.size + ', Total: ' + numbers.length;
+        html += '</div>';
+        
+        // Show sample numbers
+        html += '<div class="test-result info">';
+        html += '<strong>Sample Numbers (first 20):</strong>';
+        html += '<div class="numbers">';
+        for (let i = 0; i < Math.min(20, numbers.length); i++) {
+          html += numbers[i] + '<br>';
+        }
+        html += '</div>';
+        html += '</div>';
+        
+        // Overall result
+        const allPassed = countPassed && prefixPassed && formatPassed && uniquePassed;
+        html += '<div class="test-result ' + (allPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Overall:</strong> ' + (allPassed ? 'ALL TESTS PASSED ✅' : 'SOME TESTS FAILED ❌');
+        html += '</div>';
+        
+      } catch (error) {
+        html += '<div class="test-result fail"><strong>Error:</strong> ' + error.message + '</div>';
+      }
+      
+      resultsDiv.innerHTML = html;
+    }
+    
+    function testAllPatterns() {
+      const patterns = ['06????????', '08????????', '09????????'];
+      let allResults = '<h3>Testing All Thai Mobile Patterns</h3>';
+      let overallPassed = true;
+      
+      patterns.forEach(pattern => {
+        allResults += '<h4>' + pattern + '</h4>';
+        
+        try {
+          const generator = new PatternGenerator();
+          const numbers = generator.generate(pattern, 'Thai Mobile No.');
+          const expectedPrefix = pattern.slice(0, 2);
+          
+          // Quick tests
+          const countOk = numbers.length === 1000;
+          const prefixOk = numbers.every(num => num.replace(/-/g, '').startsWith(expectedPrefix));
+          const formatOk = numbers.every(num => /^\d{3}-\d{3}-\d{4}$/.test(num));
+          const uniqueOk = new Set(numbers).size === numbers.length;
+          
+          const patternPassed = countOk && prefixOk && formatOk && uniqueOk;
+          if (!patternPassed) overallPassed = false;
+          
+          allResults += '<div class="test-result ' + (patternPassed ? 'pass' : 'fail') + '">';
+          allResults += 'Count: ' + (countOk ? '✅' : '❌') + ' ';
+          allResults += 'Prefix: ' + (prefixOk ? '✅' : '❌') + ' ';
+          allResults += 'Format: ' + (formatOk ? '✅' : '❌') + ' ';
+          allResults += 'Unique: ' + (uniqueOk ? '✅' : '❌');
+          allResults += '<br>Sample: ' + numbers.slice(0, 3).join(', ');
+          allResults += '</div>';
+          
+        } catch (error) {
+          allResults += '<div class="test-result fail">Error: ' + error.message + '</div>';
+          overallPassed = false;
+        }
+      });
+      
+      allResults += '<div class="test-result ' + (overallPassed ? 'pass' : 'fail') + '">';
+      allResults += '<strong>Final Result:</strong> ' + (overallPassed ? 'ALL PATTERNS WORKING PERFECTLY ✅' : 'SOME PATTERNS HAVE ISSUES ❌');
+      allResults += '</div>';
+      
+      document.getElementById('results').innerHTML = allResults;
+    }
+    
+    // Auto-test on page load
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        testAllPatterns();
+      }, 500);
+    });
+  </script>
+</body>
+</html>
