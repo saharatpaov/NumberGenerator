@@ -4,12 +4,13 @@ A web-based application for generating account numbers based on various patterns
 
 ## 🌟 Features
 
-- **Pattern-Based Generation**: Support for 5 different pattern types
+- **Pattern-Based Generation**: Support for 6 different pattern types
   - The Soloist (identical digits)
   - Hyphen-separated (block patterns)
   - The Full Straight (ascending/descending)
   - Cyclic Straight (cyclic sequences)
   - The Rhythmic Bridge (repeating patterns)
+  - Thai Mobile No. (Thai mobile number patterns)
 
 - **Advanced Pagination**
   - Display 1,000 items per page
@@ -34,14 +35,14 @@ A web-based application for generating account numbers based on various patterns
 
 ## 🚀 Live Demo
 
-Visit: [https://saharatpaov.github.io/template_number_generator](https://saharatpaov.github.io/template_number_generator)
+Visit: [https://saharatpaov.github.io/NumberGenerator](https://saharatpaov.github.io/NumberGenerator)
 
 ## 💻 Local Development
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/saharatpaov/template_number_generator.git
-cd template_number_generator
+git clone https://github.com/saharatpaov/NumberGenerator.git
+cd NumberGenerator
 ```
 
 2. Open `index.html` in your browser or serve with a local server:
@@ -97,6 +98,11 @@ npx serve .
 - Middle-end repeat: `???abcabc?` → 456-123-1237, etc.
 - Fully linked: `abcabcabc?` → 123-123-1234, etc.
 
+### Thai Mobile No.
+- Started with 06: `06????????` → 060-123-4567, 061-987-6543, etc.
+- Started with 08: `08????????` → 080-234-5678, 081-876-5432, etc.
+- Started with 09: `09????????` → 090-345-6789, 091-765-4321, etc.
+
 ## 🎨 Customization
 
 The application uses CSS custom properties for easy theming:
@@ -131,4 +137,4 @@ The application uses CSS custom properties for easy theming:
 
 ## 🐛 Bug Reports
 
-Please report bugs via [GitHub Issues](https://github.com/saharatpaov/template_number_generator/issues)
+Please report bugs via [GitHub Issues](https://github.com/saharatpaov/NumberGenerator/issues)
