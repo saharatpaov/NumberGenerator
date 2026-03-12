@@ -2444,20 +2444,69 @@ class UIController {
       // Show loading
       this.showLoading('กำลังจองหมายเลขบัญชี...', this.currentReservation.accountNumber);
 
-      const response = await fetch('api/reservations.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          account_number: this.currentReservation.accountNumber,
-          thai_id: thaiId,
-          pattern_type: this.currentReservation.patternType,
-          pattern: this.currentReservation.pattern
-        })
-      });
+      // Try different API paths
+      const apiPaths = [
+        './api/reservations.php',
+        'api/reservations.php',
+        '/api/reservations.php'
+      ];
 
-      const result = await response.json();
+      let response = null;
+      let lastError = null;
+
+      for (const apiPath of apiPaths) {
+        try {
+          console.log(`Trying API path: ${apiPath}`);
+          
+          response = await fetch(apiPath, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              account_number: this.currentReservation.accountNumber,
+              thai_id: thaiId,
+              pattern_type: this.currentReservation.patternType,
+              pattern: this.currentReservation.pattern
+            })
+          });
+
+          if (response.ok) {
+            console.log(`Success with API path: ${apiPath}`);
+            break;
+          } else {
+            console.log(`Failed with API path: ${apiPath}, status: ${response.status}`);
+            lastError = `HTTP ${response.status}: ${response.statusText}`;
+          }
+        } catch (fetchError) {
+          console.log(`Error with API path: ${apiPath}`, fetchError);
+          lastError = fetchError.message;
+          response = null;
+        }
+      }
+
+      if (!response || !response.ok) {
+        throw new Error(lastError || 'ไม่สามารถเชื่อมต่อ API ได้');
+      }
+
+      const contentType = response.headers.get('content-type');
+      let result;
+
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        console.log('Non-JSON response:', text);
+        
+        // Try to extract JSON from HTML response
+        const jsonMatch = text.match(/\{.*\}/s);
+        if (jsonMatch) {
+          result = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('API ส่งคืนข้อมูลที่ไม่ถูกต้อง');
+        }
+      }
 
       this.hideLoading();
 
@@ -2487,7 +2536,19 @@ class UIController {
     } catch (error) {
       this.hideLoading();
       console.error('Reservation error:', error);
-      this.showReservationError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
+      
+      // Show detailed error for debugging
+      let errorMessage = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+      
+      if (error.message.includes('fetch')) {
+        errorMessage = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+      } else if (error.message.includes('JSON')) {
+        errorMessage = 'เซิร์ฟเวอร์ส่งข้อมูลที่ไม่ถูกต้อง';
+      } else if (error.message.includes('HTTP')) {
+        errorMessage = `เซิร์ฟเวอร์ตอบกลับด้วยข้อผิดพลาด: ${error.message}`;
+      }
+      
+      this.showReservationError(`${errorMessage}\n\nรายละเอียด: ${error.message}`);
     }
   }
 
@@ -2574,8 +2635,65 @@ class UIController {
     if (!accountNumbers || accountNumbers.length === 0) return;
 
     try {
-      const response = await fetch(`api/reservations.php?numbers=${accountNumbers.join(',')}`);
-      const result = await response.json();
+      // Try different API paths
+      const apiPaths = [
+        './api/reservations.php',
+        'api/reservations.php',
+        '/api/reservations.php'
+      ];
+
+      let response = null;
+      const numbersParam = accountNumbers.join(',');
+
+      for (const apiPath of apiPaths) {
+        try {
+          console.log(`Checking reservations via: ${apiPath}`);
+          
+          response = await fetch(`${apiPath}?numbers=${encodeURIComponent(numbersParam)}`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            console.log(`Success checking reservations via: ${apiPath}`);
+            break;
+          } else {
+            console.log(`Failed checking reservations via: ${apiPath}, status: ${response.status}`);
+          }
+        } catch (fetchError) {
+          console.log(`Error checking reservations via: ${apiPath}`, fetchError);
+          response = null;
+        }
+      }
+
+      if (!response || !response.ok) {
+        console.warn('Failed to check reservation status, using offline mode');
+        // Set all numbers as available (green) when API is not available
+        accountNumbers.forEach(number => {
+          this.updateNumberReservationStatus(number, false);
+        });
+        return;
+      }
+
+      const contentType = response.headers.get('content-type');
+      let result;
+
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        console.log('Non-JSON response for reservation check:', text);
+        
+        // Try to extract JSON from HTML response
+        const jsonMatch = text.match(/\{.*\}/s);
+        if (jsonMatch) {
+          result = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('Invalid API response');
+        }
+      }
 
       if (result.success) {
         // Update cache
@@ -2588,9 +2706,19 @@ class UIController {
           const status = result.reservations[number];
           this.updateNumberReservationStatus(number, status.reserved);
         });
+      } else {
+        console.warn('API returned error for reservation check:', result.error);
+        // Set all numbers as available when API returns error
+        accountNumbers.forEach(number => {
+          this.updateNumberReservationStatus(number, false);
+        });
       }
     } catch (error) {
       console.error('Failed to check reservation status:', error);
+      // Set all numbers as available when there's an error
+      accountNumbers.forEach(number => {
+        this.updateNumberReservationStatus(number, false);
+      });
     }
   }
 
