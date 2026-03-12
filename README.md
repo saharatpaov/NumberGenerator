@@ -1,6 +1,6 @@
 # Account Number Generator with Lucky Number Analysis
 
-A sophisticated web application that generates account numbers based on various patterns and provides lucky number analysis using **Man Karin's Numerology System** (แมน การิน).
+A sophisticated web application that generates account numbers based on various patterns and provides lucky number analysis using **Traditional Numerology System** (ระบบเลขศาสตร์แบบดั้งเดิม).
 
 ## 🌟 Features
 
@@ -14,7 +14,7 @@ A sophisticated web application that generates account numbers based on various 
 
 ### Lucky Number Analysis System
 - **Enhanced Numerology**: Uses 0-99 range for more accurate analysis (upgraded from 1-9)
-- **Man Karin's System**: Based on famous Thai numerologist แมน การิน
+- **Traditional System**: Based on established numerological principles
 - **Rating Levels**: 
   - **ดีมาก (Excellent)**: 80-99, 60-79 ranges + special single digits (1,3,6,8)
   - **ดี (Good)**: 40-59, 20-39 ranges + single digits (2,5,7,9)
@@ -49,7 +49,7 @@ The system now uses the full sum (0-99) instead of reducing to single digits (1-
 - **10-19**: Fair level - New beginnings
 - **0-9**: Special single-digit interpretations
 
-### Man Karin's Numerology Integration
+### Traditional Numerology Integration
 - Traditional Thai numerology principles
 - Zodiac compatibility (Thai zodiac system)
 - Career guidance based on number characteristics
@@ -85,7 +85,7 @@ npx serve .
 ├── index.html              # Main application page
 ├── styles.css              # Comprehensive styling
 ├── app.js                  # Core application logic
-├── lucky-number-system.js  # Man Karin's numerology system
+├── lucky-number-system.js  # Traditional numerology system
 ├── performance-monitor.js  # Performance tracking
 └── test files/             # Various test pages
     ├── complete-test.html  # Comprehensive testing
@@ -98,7 +98,7 @@ npx serve .
 1. **Select Pattern**: Choose from dropdown menu
 2. **Generate Numbers**: Click "เพิ่ม Pattern" to generate
 3. **View Results**: Numbers displayed with pagination
-4. **Lucky Analysis**: Click any number to see Man Karin's analysis
+4. **Lucky Analysis**: Click any number to see traditional numerology analysis
 5. **Export**: Download results as CSV file
 
 ## 📊 Pattern Types Supported
@@ -200,5 +200,5 @@ Please report bugs via [GitHub Issues](https://github.com/saharatpaov/NumberGene
 
 ---
 
-**Powered by Man Karin's Numerology System (แมน การิน)**  
+**Powered by Traditional Numerology System (ระบบเลขศาสตร์แบบดั้งเดิม)**  
 *For entertainment and cultural interest purposes*
