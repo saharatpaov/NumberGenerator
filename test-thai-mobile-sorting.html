@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Thai Mobile Sorting & Completeness</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    .numbers { font-family: monospace; font-size: 11px; max-height: 300px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 3px; column-count: 3; column-gap: 20px; }
+    button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; background: #007bff; color: white; }
+    select { padding: 8px; margin: 5px; border-radius: 5px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>🇹🇭 Test Thai Mobile Sorting & Completeness</h1>
+  
+  <div class="test-result info">
+    <h3>Test Requirements</h3>
+    <ul>
+      <li><strong>Count:</strong> Exactly 1,000 unique numbers per pattern</li>
+      <li><strong>Sorting:</strong> Numbers sorted from low to high (numerical order)</li>
+      <li><strong>Prefix:</strong> All numbers start with correct prefix (06, 08, 09)</li>
+      <li><strong>Format:</strong> All numbers in XXX-XXX-XXXX format</li>
+      <li><strong>Uniqueness:</strong> No duplicate numbers</li>
+    </ul>
+  </div>
+
+  <div>
+    <select id="pattern-select">
+      <option value="06????????">06???????? (Thai Mobile 06)</option>
+      <option value="08????????">08???????? (Thai Mobile 08)</option>
+      <option value="09????????">09???????? (Thai Mobile 09)</option>
+    </select>
+    <button onclick="testSelectedPattern()">Test Selected Pattern</button>
+    <button onclick="testAllPatterns()">Test All Patterns</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function testSelectedPattern() {
+      const select = document.getElementById('pattern-select');
+      const pattern = select.value;
+      runDetailedTest(pattern);
+    }
+    
+    function testAllPatterns() {
+      const patterns = ['06????????', '08????????', '09????????'];
+      let allResults = '<h3>Testing All Thai Mobile Patterns</h3>';
+      let overallPassed = true;
+      
+      patterns.forEach(pattern => {
+        const result = runQuickTest(pattern);
+        allResults += result.html;
+        if (!result.passed) overallPassed = false;
+      });
+      
+      allResults += '<div class="test-result ' + (overallPassed ? 'pass' : 'fail') + '">';
+      allResults += '<strong>Final Result:</strong> ' + (overallPassed ? 'ALL PATTERNS PERFECT ✅' : 'SOME PATTERNS HAVE ISSUES ❌');
+      allResults += '</div>';
+      
+      document.getElementById('results').innerHTML = allResults;
+    }
+    
+    function runDetailedTest(pattern) {
+      const resultsDiv = document.getElementById('results');
+      let html = '<h3>Detailed Test: ' + pattern + '</h3>';
+      let allPassed = true;
+      
+      try {
+        // Generate numbers
+        const generator = new PatternGenerator();
+        const numbers = generator.generate(pattern, 'Thai Mobile No.');
+        const expectedPrefix = pattern.slice(0, 2);
+        
+        // Test 1: Count
+        const countPassed = numbers.length === 1000;
+        html += '<div class="test-result ' + (countPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Count Test:</strong> ' + (countPassed ? 'PASS' : 'FAIL');
+        html += ' - Generated: ' + numbers.length + ' numbers (expected: 1000)';
+        if (!countPassed) allPassed = false;
+        html += '</div>';
+        
+        // Test 2: Uniqueness
+        const uniqueNumbers = new Set(numbers);
+        const uniquePassed = uniqueNumbers.size === numbers.length;
+        html += '<div class="test-result ' + (uniquePassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Uniqueness Test:</strong> ' + (uniquePassed ? 'PASS' : 'FAIL');
+        html += ' - Unique: ' + uniqueNumbers.size + ', Total: ' + numbers.length;
+        if (!uniquePassed) {
+          html += ' (Duplicates: ' + (numbers.length - uniqueNumbers.size) + ')';
+          allPassed = false;
+        }
+        html += '</div>';
+        
+        // Test 3: Prefix validation
+        const prefixErrors = [];
+        numbers.forEach((num, index) => {
+          const cleanNum = num.replace(/-/g, '');
+          if (!cleanNum.startsWith(expectedPrefix)) {
+            prefixErrors.push(`${index}: ${num}`);
+          }
+        });
+        
+        const prefixPassed = prefixErrors.length === 0;
+        html += '<div class="test-result ' + (prefixPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Prefix Test:</strong> ' + (prefixPassed ? 'PASS' : 'FAIL');
+        html += ' - All numbers start with ' + expectedPrefix;
+        if (!prefixPassed) {
+          html += ' (Errors: ' + prefixErrors.length + ')';
+          allPassed = false;
+        }
+        html += '</div>';
+        
+        // Test 4: Sorting validation
+        const sortingErrors = [];
+        for (let i = 1; i < numbers.length; i++) {
+          const prevNum = parseInt(numbers[i-1].replace(/-/g, ''));
+          const currNum = parseInt(numbers[i].replace(/-/g, ''));
+          if (prevNum > currNum) {
+            sortingErrors.push(`Position ${i}: ${numbers[i-1]} > ${numbers[i]}`);
+          }
+        }
+        
+        const sortingPassed = sortingErrors.length === 0;
+        html += '<div class="test-result ' + (sortingPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Sorting Test:</strong> ' + (sortingPassed ? 'PASS' : 'FAIL');
+        html += ' - Numbers sorted from low to high';
+        if (!sortingPassed) {
+          html += ' (Errors: ' + sortingErrors.length + ')';
+          allPassed = false;
+        }
+        html += '</div>';
+        
+        // Test 5: Format validation
+        const formatErrors = [];
+        numbers.forEach((num, index) => {
+          if (!/^\d{3}-\d{3}-\d{4}$/.test(num)) {
+            formatErrors.push(`${index}: ${num}`);
+          }
+        });
+        
+        const formatPassed = formatErrors.length === 0;
+        html += '<div class="test-result ' + (formatPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Format Test:</strong> ' + (formatPassed ? 'PASS' : 'FAIL');
+        html += ' - All numbers in XXX-XXX-XXXX format';
+        if (!formatPassed) {
+          html += ' (Errors: ' + formatErrors.length + ')';
+          allPassed = false;
+        }
+        html += '</div>';
+        
+        // Show sample numbers
+        html += '<div class="test-result info">';
+        html += '<strong>Sample Numbers (first 50, middle 50, last 50):</strong>';
+        html += '<div class="numbers">';
+        
+        // First 50
+        html += '<strong>First 50:</strong><br>';
+        for (let i = 0; i < Math.min(50, numbers.length); i++) {
+          html += numbers[i] + '<br>';
+        }
+        
+        // Middle 50
+        if (numbers.length > 100) {
+          html += '<br><strong>Middle 50:</strong><br>';
+          const start = Math.floor(numbers.length / 2) - 25;
+          for (let i = start; i < start + 50 && i < numbers.length; i++) {
+            html += numbers[i] + '<br>';
+          }
+        }
+        
+        // Last 50
+        if (numbers.length > 50) {
+          html += '<br><strong>Last 50:</strong><br>';
+          const start = Math.max(0, numbers.length - 50);
+          for (let i = start; i < numbers.length; i++) {
+            html += numbers[i] + '<br>';
+          }
+        }
+        
+        html += '</div>';
+        html += '</div>';
+        
+        // Overall result
+        html += '<div class="test-result ' + (allPassed ? 'pass' : 'fail') + '">';
+        html += '<strong>Overall:</strong> ' + (allPassed ? 'ALL TESTS PASSED ✅' : 'SOME TESTS FAILED ❌');
+        html += '</div>';
+        
+      } catch (error) {
+        html += '<div class="test-result fail"><strong>Error:</strong> ' + error.message + '</div>';
+      }
+      
+      resultsDiv.innerHTML = html;
+    }
+    
+    function runQuickTest(pattern) {
+      try {
+        const generator = new PatternGenerator();
+        const numbers = generator.generate(pattern, 'Thai Mobile No.');
+        const expectedPrefix = pattern.slice(0, 2);
+        
+        const countOk = numbers.length === 1000;
+        const uniqueOk = new Set(numbers).size === numbers.length;
+        const prefixOk = numbers.every(num => num.replace(/-/g, '').startsWith(expectedPrefix));
+        const formatOk = numbers.every(num => /^\d{3}-\d{3}-\d{4}$/.test(num));
+        
+        // Check sorting
+        let sortingOk = true;
+        for (let i = 1; i < numbers.length; i++) {
+          const prevNum = parseInt(numbers[i-1].replace(/-/g, ''));
+          const currNum = parseInt(numbers[i].replace(/-/g, ''));
+          if (prevNum > currNum) {
+            sortingOk = false;
+            break;
+          }
+        }
+        
+        const allPassed = countOk && uniqueOk && prefixOk && formatOk && sortingOk;
+        
+        let html = '<h4>' + pattern + '</h4>';
+        html += '<div class="test-result ' + (allPassed ? 'pass' : 'fail') + '">';
+        html += 'Count: ' + (countOk ? '✅' : '❌') + ' ';
+        html += 'Unique: ' + (uniqueOk ? '✅' : '❌') + ' ';
+        html += 'Prefix: ' + (prefixOk ? '✅' : '❌') + ' ';
+        html += 'Format: ' + (formatOk ? '✅' : '❌') + ' ';
+        html += 'Sorting: ' + (sortingOk ? '✅' : '❌');
+        html += '<br>Range: ' + numbers[0] + ' → ' + numbers[numbers.length - 1];
+        html += '</div>';
+        
+        return { html: html, passed: allPassed };
+        
+      } catch (error) {
+        const html = '<h4>' + pattern + '</h4><div class="test-result fail">Error: ' + error.message + '</div>';
+        return { html: html, passed: false };
+      }
+    }
+    
+    // Auto-test on page load
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        testAllPatterns();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

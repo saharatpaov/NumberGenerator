@@ -1793,13 +1793,12 @@ class PatternGenerator {
    * @returns {string[]} Array of formatted numbers (sample of 1000)
    */
   generateThaiMobileNo(pattern) {
-    const results = [];
+    const results = new Set(); // Use Set to avoid duplicates
     
-    // Generate a sample of 1000 numbers instead of all 100M combinations
-    // This is more practical for UI display and performance
-    const sampleSize = 1000;
+    // Generate numbers until we have 1000 unique numbers
+    const targetSize = 1000;
     
-    for (let i = 0; i < sampleSize; i++) {
+    while (results.size < targetSize) {
       let number = '';
       
       // Process each character in the pattern
@@ -1818,14 +1817,21 @@ class PatternGenerator {
         }
       }
       
-      // Format as XXX-XXX-XXXX
-      results.push(this.formatNumber(number));
+      // Add to set (automatically handles duplicates)
+      results.add(number);
     }
     
-    // Sort results for consistent display
-    results.sort();
+    // Convert Set to Array and format numbers
+    const formattedResults = Array.from(results).map(num => this.formatNumber(num));
     
-    return results;
+    // Sort numerically (remove dashes for proper numeric sorting)
+    formattedResults.sort((a, b) => {
+      const numA = parseInt(a.replace(/-/g, ''));
+      const numB = parseInt(b.replace(/-/g, ''));
+      return numA - numB;
+    });
+    
+    return formattedResults;
   }
 
   /**
