@@ -734,6 +734,7 @@ section h2 {
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .number-item:hover {
@@ -1349,6 +1350,7 @@ footer {
   background: linear-gradient(135deg, rgba(233, 30, 99, 0.1), rgba(255, 152, 0, 0.1));
   border-radius: 15px;
   border: 2px solid rgba(233, 30, 99, 0.2);
+  position: relative;
 }
 
 .lucky-analysis {
@@ -1623,6 +1625,50 @@ footer {
   font-size: 0.9rem;
   color: var(--text-primary);
   font-weight: 500;
+}
+
+/* Premium Badge Styles */
+.premium-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
+  color: #8b4513;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.4rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+  border: 1px solid #ffd700;
+  z-index: 10;
+  animation: premiumGlow 2s infinite alternate;
+}
+
+@keyframes premiumGlow {
+  0% { box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4); }
+  100% { box-shadow: 0 4px 16px rgba(255, 215, 0, 0.8); }
+}
+
+.number-item.premium {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 237, 78, 0.1));
+  border: 2px solid #ffd700;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.number-item.premium:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 237, 78, 0.2));
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+}
+
+/* Premium badge in popup */
+.account-number-display .premium-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
 }
 
 /* Attribution Styles */

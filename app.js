@@ -2353,6 +2353,23 @@ class UIController {
   }
 
   /**
+   * Check if a number is premium (ดีมาก rating)
+   * @param {string} accountNumber - Account number to check
+   * @returns {boolean} True if the number has "ดีมาก" rating
+   */
+  isPremiumNumber(accountNumber) {
+    try {
+      // Create a temporary analyzer to check the rating
+      const analyzer = new LuckyNumberAnalyzer();
+      const analysis = analyzer.analyzeNumber(accountNumber);
+      return analysis.rating.level === 'ดีมาก';
+    } catch (error) {
+      console.error('Error checking premium status:', error);
+      return false;
+    }
+  }
+
+  /**
    * Set up event handlers - Task 11.1 Implementation
    * Wires all event handlers for input submission, pattern removal, and CSV export
    * PERFORMANCE ENHANCED: Includes performance monitoring controls
@@ -2635,7 +2652,8 @@ class UIController {
           // Use innerHTML for better performance with large datasets
           let gridHTML = '';
           numbersToShow.forEach(number => {
-            gridHTML += `<span class="number-item clickable" data-number="${number}" title="คลิกเพื่อดูผลรวมเลขมงคล" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}</span>`;
+            const premiumBadge = this.isPremiumNumber(number) ? '<div class="premium-badge">👑</div>' : '';
+            gridHTML += `<span class="number-item clickable ${this.isPremiumNumber(number) ? 'premium' : ''}" data-number="${number}" title="คลิกเพื่อดูผลรวมเลขมงคล" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}${premiumBadge}</span>`;
           });
           numbersGrid.innerHTML = gridHTML;
 
@@ -2999,7 +3017,8 @@ class UIController {
         if (numbersGrid) {
           let gridHTML = '';
           numbersToShow.forEach(number => {
-            gridHTML += `<span class="number-item clickable" data-number="${number}" title="คลิกเพื่อดูผลรวมเลขมงคล" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}</span>`;
+            const premiumBadge = this.isPremiumNumber(number) ? '<div class="premium-badge">👑</div>' : '';
+            gridHTML += `<span class="number-item clickable ${this.isPremiumNumber(number) ? 'premium' : ''}" data-number="${number}" title="คลิกเพื่อดูผลรวมเลขมงคล" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}${premiumBadge}</span>`;
           });
           numbersGrid.innerHTML = gridHTML;
         }

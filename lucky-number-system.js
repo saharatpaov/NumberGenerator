@@ -403,6 +403,17 @@ class LuckyNumberUI {
         `;
       }
 
+      // Add premium badge to the selected number if it's "ดีมาก"
+      if (this.elements.selectedNumber && analysis.rating.level === 'ดีมาก') {
+        const numberDisplay = this.elements.selectedNumber;
+        if (!numberDisplay.querySelector('.premium-badge')) {
+          const badge = document.createElement('div');
+          badge.className = 'premium-badge';
+          badge.innerHTML = '👑 PREMIUM';
+          numberDisplay.appendChild(badge);
+        }
+      }
+
       // Show popup with force display
       this.elements.overlay.classList.add('show');
       this.elements.overlay.style.display = 'flex';
