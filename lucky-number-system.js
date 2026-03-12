@@ -101,18 +101,19 @@ class LuckyNumberAnalyzer {
     const digits = accountNumber.replace(/-/g, '').split('').map(Number);
     const sum = digits.reduce((acc, digit) => acc + digit, 0);
     
-    // Man Karin's method: Reduce to single digit (1-9)
+    // Man Karin's method: Use sum directly (0-99) for more accuracy
     let finalSum = sum;
     const reductionSteps = [sum];
     
-    while (finalSum > 9) {
+    // Only reduce if sum is greater than 99
+    while (finalSum > 99) {
       const nextSum = finalSum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0);
       reductionSteps.push(nextSum);
       finalSum = nextSum;
     }
 
     // Get Man Karin's interpretation
-    const interpretation = this.manKarinNumbers[finalSum];
+    const interpretation = this.getInterpretationForSum(finalSum);
     
     // Get rating level based on Man Karin's system
     const rating = this.getRatingLevel(finalSum);
@@ -139,25 +140,95 @@ class LuckyNumberAnalyzer {
   }
 
   /**
+   * Get interpretation for sum (0-99)
+   * @param {number} sum - Sum value (0-99)
+   * @returns {Object} Interpretation based on numerology
+   */
+  getInterpretationForSum(sum) {
+    // Reduce to single digit for base interpretation
+    const singleDigit = sum === 0 ? 9 : (sum % 9 === 0 ? 9 : sum % 9);
+    const baseInterpretation = this.manKarinNumbers[singleDigit];
+    
+    // Enhanced interpretation based on full sum (0-99)
+    const enhancedMeaning = this.getEnhancedMeaning(sum);
+    
+    return {
+      ...baseInterpretation,
+      meaning: enhancedMeaning.meaning,
+      personality: enhancedMeaning.personality,
+      enhancedSum: sum
+    };
+  }
+
+  /**
+   * Get enhanced meaning based on full sum (0-99)
+   * @param {number} sum - Full sum value
+   * @returns {Object} Enhanced meaning
+   */
+  getEnhancedMeaning(sum) {
+    // Special meanings for specific ranges
+    if (sum >= 80 && sum <= 99) {
+      return {
+        meaning: 'เลขแห่งความสำเร็จสูงสุด มีพลังแห่งการเป็นผู้นำ ความมั่งคั่ง และการบรรลุเป้าหมาย',
+        personality: 'ผู้นำระดับสูง, มีวิสัยทัศน์, ประสบความสำเร็จ'
+      };
+    } else if (sum >= 60 && sum <= 79) {
+      return {
+        meaning: 'เลขแห่งความสมดุล มีความรับผิดชอบสูง เป็นที่พึ่งพาได้ มีความเมตตาและปัญญา',
+        personality: 'สมดุล, รับผิดชอบ, มีปัญญา'
+      };
+    } else if (sum >= 40 && sum <= 59) {
+      return {
+        meaning: 'เลขแห่งความมั่นคงและการเติบโต มีพื้นฐานที่แข็งแกร่ง ทำงานหนัก มีความอดทน',
+        personality: 'มั่นคง, ขยัน, อดทน'
+      };
+    } else if (sum >= 20 && sum <= 39) {
+      return {
+        meaning: 'เลขแห่งความร่วมมือและการสื่อสาร มีความคิดสร้างสรรค์ ชอบทำงานเป็นทีม',
+        personality: 'ร่วมมือ, สร้างสรรค์, สื่อสารดี'
+      };
+    } else {
+      return {
+        meaning: 'เลขแห่งการเริ่มต้นใหม่ มีพลังแห่งการสร้างสรรค์ ความมุ่งมั่น และการเป็นผู้นำ',
+        personality: 'เริ่มต้นใหม่, สร้างสรรค์, มุ่งมั่น'
+      };
+    }
+  }
+
+  /**
    * Get rating level based on Man Karin's system
-   * @param {number} finalSum - Final digit sum (1-9)
+   * @param {number} finalSum - Final sum (0-99)
    * @returns {Object} Rating information
    */
   getRatingLevel(finalSum) {
-    // Man Karin's rating system based on numerology principles
-    const ratings = {
-      1: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับผู้นำ' },
-      2: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการทำงานร่วมกัน' },
-      3: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับงานสร้างสรรค์' },
-      4: { level: 'พอใช้', color: '#ff9800', description: 'เลขที่มั่นคง แต่ต้องระวังความเครียด' },
-      5: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการเปลี่ยนแปลง' },
-      6: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับครอบครัว' },
-      7: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการศึกษา' },
-      8: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับธุรกิจ' },
-      9: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการให้' }
-    };
-    
-    return ratings[finalSum] || { level: 'พอใช้', color: '#ff9800', description: 'เลขทั่วไป' };
+    // Man Karin's enhanced rating system for 0-99 range
+    if (finalSum >= 80 && finalSum <= 99) {
+      return { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูงสุด เหมาะกับผู้นำและความสำเร็จ' };
+    } else if (finalSum >= 60 && finalSum <= 79) {
+      return { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับความสมดุลและปัญญา' };
+    } else if (finalSum >= 40 && finalSum <= 59) {
+      return { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับความมั่นคงและการเติบโต' };
+    } else if (finalSum >= 20 && finalSum <= 39) {
+      return { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับความร่วมมือและสร้างสรรค์' };
+    } else if (finalSum >= 10 && finalSum <= 19) {
+      return { level: 'พอใช้', color: '#ff9800', description: 'เลขพอใช้ เหมาะกับการเริ่มต้นใหม่' };
+    } else {
+      // 0-9 range
+      const singleDigitRatings = {
+        1: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับผู้นำ' },
+        2: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการทำงานร่วมกัน' },
+        3: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับงานสร้างสรรค์' },
+        4: { level: 'พอใช้', color: '#ff9800', description: 'เลขที่มั่นคง แต่ต้องระวังความเครียด' },
+        5: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการเปลี่ยนแปลง' },
+        6: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับครอบครัว' },
+        7: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการศึกษา' },
+        8: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับธุรกิจ' },
+        9: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการให้' },
+        0: { level: 'พอใช้', color: '#ff9800', description: 'เลขแห่งการเริ่มต้น' }
+      };
+      
+      return singleDigitRatings[finalSum] || { level: 'พอใช้', color: '#ff9800', description: 'เลขทั่วไป' };
+    }
   }
 }
 
