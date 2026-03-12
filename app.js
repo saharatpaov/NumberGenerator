@@ -2234,6 +2234,8 @@ class UIController {
   constructor() {
     this.elements = {};
     this.loadingElements = {};
+    this.reservationElements = {};
+    this.reservationCache = new Map(); // Cache for reservation status
   }
 
   /**
@@ -2257,6 +2259,18 @@ class UIController {
       progressBar: document.getElementById('loading-progress-bar'),
       pattern: document.getElementById('loading-pattern'),
       count: document.getElementById('loading-count'),
+    };
+
+    // Cache reservation elements
+    this.reservationElements = {
+      overlay: document.getElementById('reservation-overlay'),
+      popup: document.querySelector('.reservation-popup'),
+      closeBtn: document.getElementById('close-reservation-btn'),
+      selectedNumber: document.getElementById('selected-account-number'),
+      thaiIdInput: document.getElementById('thai-id-input'),
+      errorMessage: document.getElementById('reservation-error'),
+      cancelBtn: document.getElementById('cancel-reservation-btn'),
+      confirmBtn: document.getElementById('confirm-reservation-btn'),
     };
 
     // Set up event listeners
@@ -2321,6 +2335,313 @@ class UIController {
   }
 
   /**
+   * Setup reservation popup event listeners
+   */
+  setupReservationEventListeners() {
+    if (!this.reservationElements.overlay) return;
+
+    // Close popup handlers
+    this.reservationElements.closeBtn?.addEventListener('click', () => {
+      this.hideReservationPopup();
+    });
+
+    this.reservationElements.cancelBtn?.addEventListener('click', () => {
+      this.hideReservationPopup();
+    });
+
+    // Click outside to close
+    this.reservationElements.overlay.addEventListener('click', (e) => {
+      if (e.target === this.reservationElements.overlay) {
+        this.hideReservationPopup();
+      }
+    });
+
+    // Confirm reservation
+    this.reservationElements.confirmBtn?.addEventListener('click', () => {
+      this.handleReservationConfirm();
+    });
+
+    // Thai ID input validation
+    this.reservationElements.thaiIdInput?.addEventListener('input', (e) => {
+      this.validateThaiIdInput(e.target);
+    });
+
+    // Enter key to confirm
+    this.reservationElements.thaiIdInput?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        this.handleReservationConfirm();
+      }
+    });
+  }
+
+  /**
+   * Show reservation popup for account number
+   * @param {string} accountNumber - Account number to reserve
+   * @param {string} patternType - Pattern type
+   * @param {string} pattern - Pattern
+   */
+  showReservationPopup(accountNumber, patternType, pattern) {
+    if (!this.reservationElements.overlay) return;
+
+    // Set selected account number
+    if (this.reservationElements.selectedNumber) {
+      this.reservationElements.selectedNumber.textContent = accountNumber;
+    }
+
+    // Store reservation data
+    this.currentReservation = {
+      accountNumber,
+      patternType,
+      pattern
+    };
+
+    // Clear form
+    if (this.reservationElements.thaiIdInput) {
+      this.reservationElements.thaiIdInput.value = '';
+      this.reservationElements.thaiIdInput.classList.remove('error');
+    }
+
+    this.clearReservationError();
+
+    // Show popup
+    this.reservationElements.overlay.classList.add('show');
+    
+    // Focus on Thai ID input
+    setTimeout(() => {
+      this.reservationElements.thaiIdInput?.focus();
+    }, 300);
+  }
+
+  /**
+   * Hide reservation popup
+   */
+  hideReservationPopup() {
+    if (this.reservationElements.overlay) {
+      this.reservationElements.overlay.classList.remove('show');
+    }
+    this.currentReservation = null;
+  }
+
+  /**
+   * Handle reservation confirmation
+   */
+  async handleReservationConfirm() {
+    if (!this.currentReservation) return;
+
+    const thaiId = this.reservationElements.thaiIdInput?.value.trim();
+    
+    if (!thaiId) {
+      this.showReservationError('กรุณาใส่เลขบัตรประชาชน');
+      return;
+    }
+
+    if (!this.validateThaiId(thaiId)) {
+      this.showReservationError('รูปแบบเลขบัตรประชาชนไม่ถูกต้อง');
+      return;
+    }
+
+    try {
+      // Show loading
+      this.showLoading('กำลังจองหมายเลขบัญชี...', this.currentReservation.accountNumber);
+
+      const response = await fetch('api/reservations.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          account_number: this.currentReservation.accountNumber,
+          thai_id: thaiId,
+          pattern_type: this.currentReservation.patternType,
+          pattern: this.currentReservation.pattern
+        })
+      });
+
+      const result = await response.json();
+
+      this.hideLoading();
+
+      if (result.success) {
+        // Update reservation cache
+        this.reservationCache.set(this.currentReservation.accountNumber, {
+          reserved: true,
+          thai_id: thaiId,
+          pattern_type: this.currentReservation.patternType,
+          pattern: this.currentReservation.pattern,
+          reserved_at: new Date().toISOString()
+        });
+
+        // Update UI
+        this.updateNumberReservationStatus(this.currentReservation.accountNumber, true);
+        
+        // Hide popup
+        this.hideReservationPopup();
+
+        // Show success message
+        alert(`จองหมายเลขบัญชี ${this.currentReservation.accountNumber} สำเร็จ!`);
+
+      } else {
+        this.showReservationError(result.error || 'เกิดข้อผิดพลาดในการจอง');
+      }
+
+    } catch (error) {
+      this.hideLoading();
+      console.error('Reservation error:', error);
+      this.showReservationError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
+    }
+  }
+
+  /**
+   * Validate Thai ID format and checksum
+   * @param {string} thaiId - Thai ID to validate
+   * @returns {boolean} True if valid
+   */
+  validateThaiId(thaiId) {
+    // Remove any spaces or dashes
+    thaiId = thaiId.replace(/[\s-]/g, '');
+    
+    // Check if it's exactly 13 digits
+    if (!/^\d{13}$/.test(thaiId)) {
+      return false;
+    }
+    
+    // Validate checksum using Thai ID algorithm
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+      sum += parseInt(thaiId[i]) * (13 - i);
+    }
+    
+    const checkDigit = (11 - (sum % 11)) % 10;
+    return checkDigit === parseInt(thaiId[12]);
+  }
+
+  /**
+   * Validate Thai ID input field
+   * @param {HTMLInputElement} input - Input element
+   */
+  validateThaiIdInput(input) {
+    const value = input.value.replace(/[\s-]/g, '');
+    
+    // Only allow digits
+    input.value = value.replace(/\D/g, '');
+    
+    // Limit to 13 digits
+    if (input.value.length > 13) {
+      input.value = input.value.slice(0, 13);
+    }
+
+    // Visual validation
+    if (input.value.length === 13) {
+      if (this.validateThaiId(input.value)) {
+        input.classList.remove('error');
+        this.clearReservationError();
+      } else {
+        input.classList.add('error');
+        this.showReservationError('เลขบัตรประชาชนไม่ถูกต้อง');
+      }
+    } else {
+      input.classList.remove('error');
+      this.clearReservationError();
+    }
+  }
+
+  /**
+   * Show reservation error message
+   * @param {string} message - Error message
+   */
+  showReservationError(message) {
+    if (this.reservationElements.errorMessage) {
+      this.reservationElements.errorMessage.textContent = message;
+      this.reservationElements.errorMessage.classList.add('show');
+    }
+  }
+
+  /**
+   * Clear reservation error message
+   */
+  clearReservationError() {
+    if (this.reservationElements.errorMessage) {
+      this.reservationElements.errorMessage.textContent = '';
+      this.reservationElements.errorMessage.classList.remove('show');
+    }
+  }
+
+  /**
+   * Check reservation status for account numbers
+   * @param {string[]} accountNumbers - Array of account numbers to check
+   */
+  async checkReservationStatus(accountNumbers) {
+    if (!accountNumbers || accountNumbers.length === 0) return;
+
+    try {
+      const response = await fetch(`api/reservations.php?numbers=${accountNumbers.join(',')}`);
+      const result = await response.json();
+
+      if (result.success) {
+        // Update cache
+        Object.entries(result.reservations).forEach(([number, status]) => {
+          this.reservationCache.set(number, status);
+        });
+
+        // Update UI
+        accountNumbers.forEach(number => {
+          const status = result.reservations[number];
+          this.updateNumberReservationStatus(number, status.reserved);
+        });
+      }
+    } catch (error) {
+      console.error('Failed to check reservation status:', error);
+    }
+  }
+
+  /**
+   * Update number reservation status in UI
+   * @param {string} accountNumber - Account number
+   * @param {boolean} isReserved - Whether the number is reserved
+   */
+  updateNumberReservationStatus(accountNumber, isReserved) {
+    const numberElements = document.querySelectorAll(`.number-item[data-number="${accountNumber}"]`);
+    
+    numberElements.forEach(element => {
+      element.classList.remove('available', 'reserved', 'checking');
+      
+      if (isReserved) {
+        element.classList.add('reserved');
+        element.title = 'หมายเลขนี้ถูกจองแล้ว';
+      } else {
+        element.classList.add('available');
+        element.title = 'คลิกเพื่อจองหมายเลขนี้';
+      }
+    });
+  }
+
+  /**
+   * Handle account number click (for reservation)
+   * @param {string} accountNumber - Account number clicked
+   * @param {HTMLElement} element - Clicked element
+   */
+  handleAccountNumberClick(accountNumber, element) {
+    // Check if already reserved
+    if (element.classList.contains('reserved')) {
+      alert('หมายเลขนี้ถูกจองแล้ว');
+      return;
+    }
+
+    // Get pattern info from the element's parent group
+    const resultGroup = element.closest('.result-group');
+    const header = resultGroup?.querySelector('h3');
+    const headerText = header?.textContent || '';
+    
+    // Extract pattern and pattern type from header
+    const match = headerText.match(/^(.+?)\s+\((.+?)\)/);
+    const pattern = match ? match[1] : 'unknown';
+    const patternType = match ? match[2] : 'unknown';
+
+    // Show reservation popup
+    this.showReservationPopup(accountNumber, patternType, pattern);
+  }
+
+  /**
    * Set up event handlers - Task 11.1 Implementation
    * Wires all event handlers for input submission, pattern removal, and CSV export
    * PERFORMANCE ENHANCED: Includes performance monitoring controls
@@ -2345,6 +2666,9 @@ class UIController {
     this.elements.exportBtn.addEventListener('click', () => {
       this.handleExport();
     });
+
+    // Wire reservation popup event handlers
+    this.setupReservationEventListeners();
 
     // Performance monitoring controls
     const showPerfBtn = document.getElementById('show-performance-btn');
@@ -2603,7 +2927,7 @@ class UIController {
           // Use innerHTML for better performance with large datasets
           let gridHTML = '';
           numbersToShow.forEach(number => {
-            gridHTML += `<span class="number-item clickable" title="คลิกเพื่อ copy เลขบัญชี" onclick="uiController.copyAccountNumber('${number}', this)">${number}</span>`;
+            gridHTML += `<span class="number-item clickable checking" data-number="${number}" title="คลิกเพื่อจองหมายเลขนี้" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}</span>`;
           });
           numbersGrid.innerHTML = gridHTML;
 
@@ -2684,6 +3008,22 @@ class UIController {
         // Single DOM update (performance optimization)
         this.elements.resultsDisplay.innerHTML = '';
         this.elements.resultsDisplay.appendChild(fragment);
+
+        // Check reservation status for displayed numbers
+        const allDisplayedNumbers = [];
+        orderedPatternGroups.forEach(group => {
+          const itemsPerPage = 1000;
+          const currentPage = this.currentPages?.[orderedPatternGroups.indexOf(group)] || 1;
+          const startIndex = (currentPage - 1) * itemsPerPage;
+          const endIndex = Math.min(startIndex + itemsPerPage, group.numbers.length);
+          const numbersToShow = group._sortedNumbers.slice(startIndex, endIndex);
+          allDisplayedNumbers.push(...numbersToShow);
+        });
+
+        // Check reservation status asynchronously
+        if (allDisplayedNumbers.length > 0) {
+          this.checkReservationStatus(allDisplayedNumbers);
+        }
       }
     }
 
@@ -2967,7 +3307,7 @@ class UIController {
         if (numbersGrid) {
           let gridHTML = '';
           numbersToShow.forEach(number => {
-            gridHTML += `<span class="number-item clickable" title="คลิกเพื่อ copy เลขบัญชี" onclick="uiController.copyAccountNumber('${number}', this)">${number}</span>`;
+            gridHTML += `<span class="number-item clickable checking" data-number="${number}" title="คลิกเพื่อจองหมายเลขนี้" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}</span>`;
           });
           numbersGrid.innerHTML = gridHTML;
         }

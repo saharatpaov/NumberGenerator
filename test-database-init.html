@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Database Initialization</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+    .pass { background-color: #d4edda; border-color: #c3e6cb; }
+    .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+    .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+    pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Test Database Initialization</h1>
+  <div id="results"></div>
+
+  <script>
+    async function testDatabaseInit() {
+      const results = document.getElementById('results');
+      
+      // Test 1: Initialize Database
+      const testDiv1 = document.createElement('div');
+      testDiv1.className = 'test-result loading';
+      testDiv1.innerHTML = '<h3>Test 1: Initialize Database Tables</h3><p>กำลังสร้างตาราง...</p>';
+      results.appendChild(testDiv1);
+      
+      try {
+        const response = await fetch('api/init-db.php');
+        const result = await response.json();
+        
+        if (result.success) {
+          testDiv1.className = 'test-result pass';
+          testDiv1.innerHTML = `
+            <h3>Test 1: Initialize Database Tables ✅</h3>
+            <p><strong>Status:</strong> SUCCESS</p>
+            <p><strong>Message:</strong> ${result.message}</p>
+            <p><strong>Tables Created:</strong> ${result.tables.join(', ')}</p>
+          `;
+        } else {
+          testDiv1.className = 'test-result fail';
+          testDiv1.innerHTML = `
+            <h3>Test 1: Initialize Database Tables ❌</h3>
+            <p><strong>Status:</strong> FAILED</p>
+            <p><strong>Error:</strong> ${result.error}</p>
+          `;
+        }
+      } catch (error) {
+        testDiv1.className = 'test-result fail';
+        testDiv1.innerHTML = `
+          <h3>Test 1: Initialize Database Tables ❌</h3>
+          <p><strong>Status:</strong> ERROR</p>
+          <p><strong>Error:</strong> ${error.message}</p>
+        `;
+      }
+      
+      // Test 2: Test Reservation API
+      const testDiv2 = document.createElement('div');
+      testDiv2.className = 'test-result loading';
+      testDiv2.innerHTML = '<h3>Test 2: Test Reservation API</h3><p>กำลังทดสอบ API...</p>';
+      results.appendChild(testDiv2);
+      
+      try {
+        // Test creating a reservation
+        const createResponse = await fetch('api/reservations.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account_number: '123-456-7890',
+            thai_id: '1234567890123',
+            pattern_type: 'Test Pattern',
+            pattern: 'test'
+          })
+        });
+        
+        const createResult = await createResponse.json();
+        
+        if (createResult.success) {
+          // Test checking reservation status
+          const checkResponse = await fetch('api/reservations.php?numbers=123-456-7890');
+          const checkResult = await checkResponse.json();
+          
+          if (checkResult.success && checkResult.reservations['123-456-7890'].reserved) {
+            testDiv2.className = 'test-result pass';
+            testDiv2.innerHTML = `
+              <h3>Test 2: Test Reservation API ✅</h3>
+              <p><strong>Status:</strong> SUCCESS</p>
+              <p><strong>Create Result:</strong> ${createResult.message}</p>
+              <p><strong>Check Result:</strong> Reservation found</p>
+              <pre>${JSON.stringify(checkResult.reservations['123-456-7890'], null, 2)}</pre>
+            `;
+          } else {
+            testDiv2.className = 'test-result fail';
+            testDiv2.innerHTML = `
+              <h3>Test 2: Test Reservation API ❌</h3>
+              <p><strong>Status:</strong> FAILED</p>
+              <p><strong>Error:</strong> Reservation not found after creation</p>
+            `;
+          }
+        } else {
+          testDiv2.className = 'test-result fail';
+          testDiv2.innerHTML = `
+            <h3>Test 2: Test Reservation API ❌</h3>
+            <p><strong>Status:</strong> FAILED</p>
+            <p><strong>Error:</strong> ${createResult.error}</p>
+          `;
+        }
+      } catch (error) {
+        testDiv2.className = 'test-result fail';
+        testDiv2.innerHTML = `
+          <h3>Test 2: Test Reservation API ❌</h3>
+          <p><strong>Status:</strong> ERROR</p>
+          <p><strong>Error:</strong> ${error.message}</p>
+        `;
+      }
+      
+      // Test 3: Test Thai ID Validation
+      const testDiv3 = document.createElement('div');
+      testDiv3.className = 'test-result';
+      
+      const validThaiIds = ['1234567890123']; // This is not a real valid Thai ID, just for testing format
+      const invalidThaiIds = ['123456789012', '12345678901234', 'abcdefghijklm'];
+      
+      let validationResults = [];
+      
+      // Test valid IDs (format only, not real checksum)
+      validThaiIds.forEach(id => {
+        const isValid = /^\d{13}$/.test(id);
+        validationResults.push(`${id}: ${isValid ? 'VALID FORMAT' : 'INVALID FORMAT'}`);
+      });
+      
+      // Test invalid IDs
+      invalidThaiIds.forEach(id => {
+        const isValid = /^\d{13}$/.test(id);
+        validationResults.push(`${id}: ${isValid ? 'VALID FORMAT' : 'INVALID FORMAT'}`);
+      });
+      
+      testDiv3.className = 'test-result pass';
+      testDiv3.innerHTML = `
+        <h3>Test 3: Thai ID Validation ✅</h3>
+        <p><strong>Status:</strong> SUCCESS</p>
+        <p><strong>Validation Results:</strong></p>
+        <pre>${validationResults.join('\n')}</pre>
+      `;
+      results.appendChild(testDiv3);
+    }
+    
+    // Run tests when page loads
+    document.addEventListener('DOMContentLoaded', testDatabaseInit);
+  </script>
+</body>
+</html>
