@@ -1797,22 +1797,16 @@ class PatternGenerator {
     
     // Thai Mobile patterns have 8 wildcard positions (? characters)
     // Total combinations = 10^8 = 100,000,000 numbers
-    // For practical browser performance, we generate 100,000 evenly distributed samples
+    // Generate ALL possible combinations systematically
     
     // Extract prefix (first 2 digits: 06, 08, or 09)
     const prefix = pattern.slice(0, 2);
     
-    // Generate 100,000 evenly distributed samples from the full range
-    const sampleSize = 100000;
-    const totalRange = 100000000; // 100M total possible numbers
-    const step = Math.floor(totalRange / sampleSize); // Every 1000th number
-    
-    for (let i = 0; i < sampleSize; i++) {
-      // Calculate the actual number index (evenly distributed)
-      const numberIndex = i * step;
-      
+    // Generate all 100,000,000 possible combinations for the 8 wildcard positions
+    // Each wildcard position can be any digit 0-9
+    for (let i = 0; i < 100000000; i++) {
       // Convert number to 8-digit string with leading zeros
-      const wildcardDigits = numberIndex.toString().padStart(8, '0');
+      const wildcardDigits = i.toString().padStart(8, '0');
       
       // Combine prefix + wildcard digits
       const fullNumber = prefix + wildcardDigits;
@@ -1821,7 +1815,7 @@ class PatternGenerator {
       results.push(this.formatNumber(fullNumber));
     }
     
-    // Results are already in ascending order due to sequential generation
+    // Results are already in ascending order (0 to 99,999,999)
     return results;
   }
 
@@ -1849,7 +1843,7 @@ class PatternGenerator {
     
     switch (patternType) {
       case PatternType.THAI_MOBILE_NO:
-        return 100000; // 100,000 representative samples (evenly distributed from 100M total)
+        return 100000000; // 10^8 = 100,000,000 combinations (all possible numbers)
       
       case PatternType.SOLOIST:
         const structure = analyzer.analyzeSoloistStructure(pattern);
