@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thai Mobile Integration Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-section { margin: 30px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+    .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+    .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+    h1 { color: #333; }
+    h2 { color: #666; margin-top: 0; }
+    .pattern-info { font-weight: bold; margin: 10px 0; }
+    .sample-numbers { font-family: monospace; font-size: 14px; background: #f8f9fa; padding: 10px; border-radius: 3px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>Thai Mobile Pattern Integration Test</h1>
+  
+  <div class="test-section info">
+    <h2>Test Overview</h2>
+    <p>This test verifies that Thai Mobile No. patterns work correctly with:</p>
+    <ul>
+      <li>Pattern validation (accepts digits, hyphens, and ?)</li>
+      <li>Pattern classification (identifies as Thai Mobile No.)</li>
+      <li>Number generation (creates sample numbers with correct prefix)</li>
+      <li>Integration with existing system</li>
+    </ul>
+  </div>
+
+  <div id="test-results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function runIntegrationTests() {
+      const testResults = document.getElementById('test-results');
+      let allPassed = true;
+
+      // Test 1: Validation
+      console.log('\n=== Test 1: Pattern Validation ===');
+      try {
+        const validator = new PatternValidator();
+        const testPatterns = [
+          { pattern: '06?-???-????', shouldPass: true },
+          { pattern: '08?-???-????', shouldPass: true },
+          { pattern: '09?-???-????', shouldPass: true },
+          { pattern: '07?-???-????', shouldPass: false }, // Invalid prefix
+          { pattern: '06a-???-????', shouldPass: false }, // Invalid character
+        ];
+
+        let validationPassed = true;
+        let validationDetails = '';
+
+        testPatterns.forEach(test => {
+          const result = validator.validate(test.pattern);
+          const passed = result.isValid === test.shouldPass;
+          
+          if (!passed) {
+            validationPassed = false;
+            validationDetails += `❌ ${test.pattern}: Expected ${test.shouldPass ? 'valid' : 'invalid'}, got ${result.isValid ? 'valid' : 'invalid'}<br>`;
+          } else {
+            validationDetails += `✅ ${test.pattern}: ${result.isValid ? 'Valid' : 'Invalid'} (as expected)<br>`;
+          }
+        });
+
+        const validationHtml = `
+          <div class="test-section ${validationPassed ? 'success' : 'error'}">
+            <h2>${validationPassed ? '✅' : '❌'} Test 1: Pattern Validation</h2>
+            <div class="pattern-info">Status: ${validationPassed ? 'PASSED' : 'FAILED'}</div>
+            <div class="sample-numbers">${validationDetails}</div>
+          </div>
+        `;
+        testResults.innerHTML += validationHtml;
+
+        if (!validationPassed) allPassed = false;
+
+      } catch (error) {
+        allPassed = false;
+        testResults.innerHTML += `
+          <div class="test-section error">
+            <h2>❌ Test 1: Pattern Validation</h2>
+            <div class="pattern-info">Error: ${error.message}</div>
+          </div>
+        `;
+      }
+
+      // Test 2: Pattern Classification
+      console.log('\n=== Test 2: Pattern Classification ===');
+      try {
+        const analyzer = new PatternAnalyzer();
+        const testPatterns = ['06?-???-????', '08?-???-????', '09?-???-????'];
+        
+        let classificationPassed = true;
+        let classificationDetails = '';
+
+        testPatterns.forEach(pattern => {
+          const patternType = analyzer.identifyPatternType(pattern);
+          const passed = patternType === 'Thai Mobile No.';
+          
+          if (!passed) {
+            classificationPassed = false;
+            classificationDetails += `❌ ${pattern}: Expected "Thai Mobile No.", got "${patternType}"<br>`;
+          } else {
+            classificationDetails += `✅ ${pattern}: Correctly identified as "${patternType}"<br>`;
+          }
+        });
+
+        const classificationHtml = `
+          <div class="test-section ${classificationPassed ? 'success' : 'error'}">
+            <h2>${classificationPassed ? '✅' : '❌'} Test 2: Pattern Classification</h2>
+            <div class="pattern-info">Status: ${classificationPassed ? 'PASSED' : 'FAILED'}</div>
+            <div class="sample-numbers">${classificationDetails}</div>
+          </div>
+        `;
+        testResults.innerHTML += classificationHtml;
+
+        if (!classificationPassed) allPassed = false;
+
+      } catch (error) {
+        allPassed = false;
+        testResults.innerHTML += `
+          <div class="test-section error">
+            <h2>❌ Test 2: Pattern Classification</h2>
+            <div class="pattern-info">Error: ${error.message}</div>
+          </div>
+        `;
+      }
+
+      // Test 3: Number Generation
+      console.log('\n=== Test 3: Number Generation ===');
+      try {
+        const generator = new PatternGenerator();
+        const analyzer = new PatternAnalyzer();
+        const testPatterns = [
+          { pattern: '06?-???-????', prefix: '06' },
+          { pattern: '08?-???-????', prefix: '08' },
+          { pattern: '09?-???-????', prefix: '09' }
+        ];
+        
+        let generationPassed = true;
+        let generationDetails = '';
+
+        testPatterns.forEach(test => {
+          const patternType = analyzer.identifyPatternType(test.pattern);
+          const results = generator.generate(test.pattern, patternType);
+          
+          // Check sample size
+          if (results.length !== 1000) {
+            generationPassed = false;
+            generationDetails += `❌ ${test.pattern}: Expected 1000 results, got ${results.length}<br>`;
+            return;
+          }
+          
+          // Check format and prefix
+          let formatErrors = 0;
+          let prefixErrors = 0;
+          
+          results.slice(0, 10).forEach(number => {
+            if (!/^\d{3}-\d{3}-\d{4}$/.test(number)) {
+              formatErrors++;
+            }
+            if (!number.startsWith(test.prefix)) {
+              prefixErrors++;
+            }
+          });
+          
+          if (formatErrors > 0 || prefixErrors > 0) {
+            generationPassed = false;
+            generationDetails += `❌ ${test.pattern}: Format errors: ${formatErrors}, Prefix errors: ${prefixErrors}<br>`;
+          } else {
+            generationDetails += `✅ ${test.pattern}: Generated ${results.length} numbers with correct format and prefix<br>`;
+            generationDetails += `   Sample: ${results.slice(0, 3).join(', ')}...<br>`;
+          }
+        });
+
+        const generationHtml = `
+          <div class="test-section ${generationPassed ? 'success' : 'error'}">
+            <h2>${generationPassed ? '✅' : '❌'} Test 3: Number Generation</h2>
+            <div class="pattern-info">Status: ${generationPassed ? 'PASSED' : 'FAILED'}</div>
+            <div class="sample-numbers">${generationDetails}</div>
+          </div>
+        `;
+        testResults.innerHTML += generationHtml;
+
+        if (!generationPassed) allPassed = false;
+
+      } catch (error) {
+        allPassed = false;
+        testResults.innerHTML += `
+          <div class="test-section error">
+            <h2>❌ Test 3: Number Generation</h2>
+            <div class="pattern-info">Error: ${error.message}</div>
+          </div>
+        `;
+      }
+
+      // Test 4: Integration with PatternManager
+      console.log('\n=== Test 4: PatternManager Integration ===');
+      try {
+        const patternManager = new PatternManager();
+        const testPattern = '06?-???-????';
+        
+        // Add pattern
+        const result = patternManager.addPattern(testPattern);
+        
+        let integrationPassed = true;
+        let integrationDetails = '';
+        
+        if (!result.success) {
+          integrationPassed = false;
+          integrationDetails += `❌ Failed to add pattern: ${result.error}<br>`;
+        } else {
+          integrationDetails += `✅ Successfully added pattern<br>`;
+          integrationDetails += `   Pattern Type: ${result.patternType}<br>`;
+          integrationDetails += `   Numbers Generated: ${result.numbers.length}<br>`;
+          integrationDetails += `   Sample Numbers: ${result.numbers.slice(0, 3).join(', ')}...<br>`;
+        }
+
+        const integrationHtml = `
+          <div class="test-section ${integrationPassed ? 'success' : 'error'}">
+            <h2>${integrationPassed ? '✅' : '❌'} Test 4: PatternManager Integration</h2>
+            <div class="pattern-info">Status: ${integrationPassed ? 'PASSED' : 'FAILED'}</div>
+            <div class="sample-numbers">${integrationDetails}</div>
+          </div>
+        `;
+        testResults.innerHTML += integrationHtml;
+
+        if (!integrationPassed) allPassed = false;
+
+      } catch (error) {
+        allPassed = false;
+        testResults.innerHTML += `
+          <div class="test-section error">
+            <h2>❌ Test 4: PatternManager Integration</h2>
+            <div class="pattern-info">Error: ${error.message}</div>
+          </div>
+        `;
+      }
+
+      // Final Summary
+      const summaryHtml = `
+        <div class="test-section ${allPassed ? 'success' : 'error'}">
+          <h2>${allPassed ? '🎉' : '⚠️'} Final Test Summary</h2>
+          <div class="pattern-info">Overall Status: ${allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'}</div>
+          <p>${allPassed ? 
+            'Thai Mobile No. patterns are fully integrated and working correctly!' : 
+            'Please review the failed tests above and fix any issues.'
+          }</p>
+        </div>
+      `;
+      testResults.innerHTML += summaryHtml;
+    }
+
+    // Run tests when page loads
+    window.addEventListener('load', runIntegrationTests);
+  </script>
+</body>
+</html>

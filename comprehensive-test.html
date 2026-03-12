@@ -50,7 +50,12 @@
       // The Rhythmic Bridge Patterns
       { pattern: 'abcefgabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern 2-3 block' },
       { pattern: 'abcabcdefg', expected: 'The Rhythmic Bridge', description: 'Repeating pattern front-middle' },
-      { pattern: 'efgabcabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern middle-end' }
+      { pattern: 'efgabcabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern middle-end' },
+      
+      // Thai Mobile No. Patterns
+      { pattern: '06????????', expected: 'Thai Mobile No.', description: 'Started with 06' },
+      { pattern: '08????????', expected: 'Thai Mobile No.', description: 'Started with 08' },
+      { pattern: '09????????', expected: 'Thai Mobile No.', description: 'Started with 09' }
     ];
 
     const validator = new PatternValidator();

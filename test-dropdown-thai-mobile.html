@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Thai Mobile Dropdown</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+    select { width: 100%; padding: 10px; margin: 10px 0; }
+    button { padding: 10px 20px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <h1>Thai Mobile Dropdown Test</h1>
+  
+  <div class="test-section">
+    <h2>Pattern Selection</h2>
+    <label for="pattern-select">Select Thai Mobile Pattern:</label>
+    <select id="pattern-select">
+      <option value="">-- Select Pattern --</option>
+      <optgroup label="6. Thai Mobile No.">
+        <option value="06?-???-????" data-type="Thai Mobile No.">06?-???-???? (Started with 06)</option>
+        <option value="08?-???-????" data-type="Thai Mobile No.">08?-???-???? (Started with 08)</option>
+        <option value="09?-???-????" data-type="Thai Mobile No.">09?-???-???? (Started with 09)</option>
+      </optgroup>
+    </select>
+    <button onclick="testPattern()">Test Selected Pattern</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function testPattern() {
+      const select = document.getElementById('pattern-select');
+      const resultsDiv = document.getElementById('results');
+      
+      if (!select.value) {
+        resultsDiv.innerHTML = '<div class="result error">Please select a pattern first!</div>';
+        return;
+      }
+      
+      const pattern = select.value;
+      const expectedType = select.options[select.selectedIndex].getAttribute('data-type');
+      
+      try {
+        console.log(`Testing pattern: ${pattern}`);
+        
+        // Test validation
+        const validator = new PatternValidator();
+        const validationResult = validator.validate(pattern);
+        
+        if (!validationResult.isValid) {
+          throw new Error(`Validation failed: ${validationResult.errorMessage}`);
+        }
+        
+        // Test classification
+        const analyzer = new PatternAnalyzer();
+        const patternType = analyzer.identifyPatternType(pattern);
+        
+        if (patternType !== expectedType) {
+          throw new Error(`Expected type "${expectedType}", got "${patternType}"`);
+        }
+        
+        // Test generation
+        const generator = new PatternGenerator();
+        const results = generator.generate(pattern, patternType);
+        
+        // Test with PatternManager
+        const patternManager = new PatternManager();
+        const managerResult = patternManager.addPattern(pattern);
+        
+        if (!managerResult.success) {
+          throw new Error(`PatternManager failed: ${managerResult.error}`);
+        }
+        
+        // Display success
+        let html = '<div class="result success">';
+        html += `<h3>✅ Pattern Test Successful: ${pattern}</h3>`;
+        html += `<p><strong>Pattern Type:</strong> ${patternType}</p>`;
+        html += `<p><strong>Generated Numbers:</strong> ${results.length}</p>`;
+        html += `<p><strong>Sample Numbers:</strong></p>`;
+        html += '<ul>';
+        results.slice(0, 5).forEach(number => {
+          html += `<li>${number}</li>`;
+        });
+        html += '</ul>';
+        html += `<p><strong>PatternManager Integration:</strong> ✅ Success</p>`;
+        html += '</div>';
+        
+        resultsDiv.innerHTML = html;
+        
+      } catch (error) {
+        console.error('Test failed:', error);
+        
+        let html = '<div class="result error">';
+        html += `<h3>❌ Pattern Test Failed: ${pattern}</h3>`;
+        html += `<p><strong>Error:</strong> ${error.message}</p>`;
+        html += '</div>';
+        
+        resultsDiv.innerHTML = html;
+      }
+    }
+    
+    // Auto-test all patterns on load
+    window.addEventListener('load', () => {
+      const select = document.getElementById('pattern-select');
+      const options = select.querySelectorAll('option[value]');
+      
+      let testIndex = 0;
+      function testNext() {
+        if (testIndex < options.length) {
+          select.value = options[testIndex].value;
+          testPattern();
+          testIndex++;
+          setTimeout(testNext, 1000); // Test next pattern after 1 second
+        }
+      }
+      
+      // Start auto-testing after 1 second
+      setTimeout(testNext, 1000);
+    });
+  </script>
+</body>
+</html>

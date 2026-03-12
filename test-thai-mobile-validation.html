@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Thai Mobile Validation</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    button { padding: 10px 20px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>🇹🇭 Thai Mobile Validation Test</h1>
+  
+  <button onclick="runTests()">Run Tests</button>
+  
+  <div id="test-results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function runTests() {
+      const resultsDiv = document.getElementById('test-results');
+      let results = '<h3>Test Results:</h3>';
+      let allPassed = true;
+      
+      const testCases = [
+        // Thai Mobile patterns (should pass)
+        { pattern: '06?-???-????', shouldPass: true, description: 'Thai Mobile 06 pattern' },
+        { pattern: '08?-???-????', shouldPass: true, description: 'Thai Mobile 08 pattern' },
+        { pattern: '09?-???-????', shouldPass: true, description: 'Thai Mobile 09 pattern' },
+        
+        // Regular patterns (should pass)
+        { pattern: 'aaaaaaaaaa', shouldPass: true, description: 'Regular 10-char pattern' },
+        { pattern: '?bbbbbbbbb', shouldPass: true, description: 'Regular wildcard pattern' },
+        
+        // Invalid patterns (should fail)
+        { pattern: '06?-???-???', shouldPass: false, description: 'Thai Mobile too short (11 chars)' },
+        { pattern: '06?-???-?????', shouldPass: false, description: 'Thai Mobile too long (13 chars)' },
+        { pattern: 'aaaaaaaaa', shouldPass: false, description: 'Regular too short (9 chars)' },
+        { pattern: 'aaaaaaaaaaa', shouldPass: false, description: 'Regular too long (11 chars)' }
+      ];
+      
+      testCases.forEach((testCase, index) => {
+        try {
+          const validator = new PatternValidator();
+          const result = validator.validate(testCase.pattern);
+          
+          const passed = result.isValid === testCase.shouldPass;
+          const status = passed ? 'PASS' : 'FAIL';
+          const cssClass = passed ? 'pass' : 'fail';
+          
+          results += `<div class="test-result ${cssClass}">`;
+          results += `<strong>Test ${index + 1}: ${status}</strong><br>`;
+          results += `Pattern: "${testCase.pattern}" (${testCas

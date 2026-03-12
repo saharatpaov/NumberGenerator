@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Minimal Test</title>
+</head>
+<body>
+  <h1>🇹🇭 Account Number Generator</h1>
+  <p>ถ้าเห็นข้อความนี้แสดงว่า HTML ทำงานได้</p>
+  
+  <select id="test-select">
+    <option value="">-- เลือก Pattern --</option>
+    <optgroup label="6. Thai Mobile No.">
+      <option value="06????????" data-type="Thai Mobile No.">06?-???-???? (Started with 06)</option>
+      <option value="08????????" data-type="Thai Mobile No.">08?-???-???? (Started with 08)</option>
+      <option value="09????????" data-type="Thai Mobile No.">09?-???-???? (Started with 09)</option>
+    </optgroup>
+  </select>
+  
+  <p>ถ้าเห็น dropdown ข้างบนแสดงว่า Thai Mobile patterns ทำงานได้</p>
+  
+  <script>
+    console.log('JavaScript ทำงานได้');
+    
+    // Check if Thai Mobile patterns exist
+    const select = document.getElementById('test-select');
+    const thaiMobileOptgroup = select.querySelector('optgroup[label*="Thai Mobile"]');
+    
+    if (thaiMobileOptgroup) {
+      console.log('✅ Thai Mobile patterns found!');
+      document.body.innerHTML += '<p style="color: green;">✅ Thai Mobile patterns พบแล้ว!</p>';
+    } else {
+      console.log('❌ Thai Mobile patterns NOT found!');
+      document.body.innerHTML += '<p style="color: red;">❌ Thai Mobile patterns ไม่พบ!</p>';
+    }
+  </script>
+</body>
+</html>

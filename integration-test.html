@@ -83,6 +83,13 @@
               <option value="abcabcdefg" data-type="The Rhythmic Bridge">abc-abc-defg (Repeating pattern front-middle)</option>
               <option value="efgabcabcd" data-type="The Rhythmic Bridge">efg-abc-abcd (Repeating pattern middle-end)</option>
             </optgroup>
+            
+            <!-- Thai Mobile No. Patterns -->
+            <optgroup label="6. Thai Mobile No.">
+              <option value="06?-???-????" data-type="Thai Mobile No.">06?-???-???? (Started with 06)</option>
+              <option value="08?-???-????" data-type="Thai Mobile No.">08?-???-???? (Started with 08)</option>
+              <option value="09?-???-????" data-type="Thai Mobile No.">09?-???-???? (Started with 09)</option>
+            </optgroup>
           </select>
           <small id="pattern-help">เลือก pattern จากรายการที่กำหนดไว้</small>
           <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
@@ -142,7 +149,12 @@
         // The Rhythmic Bridge Patterns
         { pattern: 'abcefgabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern 2-3 block' },
         { pattern: 'abcabcdefg', expected: 'The Rhythmic Bridge', description: 'Repeating pattern front-middle' },
-        { pattern: 'efgabcabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern middle-end' }
+        { pattern: 'efgabcabcd', expected: 'The Rhythmic Bridge', description: 'Repeating pattern middle-end' },
+        
+        // Thai Mobile No. Patterns
+        { pattern: '06????????', expected: 'Thai Mobile No.', description: 'Started with 06' },
+        { pattern: '08????????', expected: 'Thai Mobile No.', description: 'Started with 08' },
+        { pattern: '09????????', expected: 'Thai Mobile No.', description: 'Started with 09' }
       ];
 
       runTestsBtn.addEventListener('click', function() {

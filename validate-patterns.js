@@ -28,7 +28,12 @@ const testCases = [
   { pattern: 'ihgfedcbaz', expectedType: 'Cyclic Straight', description: 'Cyclic Straight (reverse)' },
   
   // The Rhythmic Bridge patterns
-  { pattern: 'abcaxxabcd', expectedType: 'The Rhythmic Bridge', description: 'Rhythmic Bridge (repeating pattern)' }
+  { pattern: 'abcaxxabcd', expectedType: 'The Rhythmic Bridge', description: 'Rhythmic Bridge (repeating pattern)' },
+  
+  // Thai Mobile No. patterns
+  { pattern: '06?-???-????', expectedType: 'Thai Mobile No.', description: 'Thai Mobile (started with 06)' },
+  { pattern: '08?-???-????', expectedType: 'Thai Mobile No.', description: 'Thai Mobile (started with 08)' },
+  { pattern: '09?-???-????', expectedType: 'Thai Mobile No.', description: 'Thai Mobile (started with 09)' }
 ];
 
 function runValidationTests() {

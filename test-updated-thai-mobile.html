@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Updated Thai Mobile Patterns</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    select { width: 100%; padding: 10px; margin: 10px 0; }
+    button { padding: 10px 20px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>🇹🇭 Test Updated Thai Mobile Patterns</h1>
+  
+  <div class="test-result info">
+    <h3>Updated Patterns (10 characters)</h3>
+    <ul>
+      <li><strong>06????????</strong> - แสดงเป็น 06?-???-????</li>
+      <li><strong>08????????</strong> - แสดงเป็น 08?-???-????</li>
+      <li><strong>09????????</strong> - แสดงเป็น 09?-???-????</li>
+    </ul>
+  </div>
+
+  <div class="test-result info">
+    <h3>Test Dropdown</h3>
+    <select id="pattern-select">
+      <option value="">-- เลือก Pattern --</option>
+      
+      <!-- Thai Mobile No. Patterns -->
+      <optgroup label="6. Thai Mobile No.">
+        <option value="06????????" data-type="Thai Mobile No.">06?-???-???? (Started with 06)</option>
+        <option value="08????????" data-type="Thai Mobile No.">08?-???-???? (Started with 08)</option>
+        <option value="09????????" data-type="Thai Mobile No.">09?-???-???? (Started with 09)</option>
+      </optgroup>
+    </select>
+    <button onclick="testSelectedPattern()">Test Selected Pattern</button>
+  </div>
+
+  <div id="test-results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function testSelectedPattern() {
+      const select = document.getElementById('pattern-select');
+      const pattern = select.value;
+      const resultsDiv = document.getElementById('test-results');
+      
+      if (!pattern) {
+        resultsDiv.innerHTML = '<div class="test-result fail">Please select a pattern first!</div>';
+        return;
+      }
+      
+      let results = '<h3>Test Results for: ' + pattern + '</h3>';
+      let allPassed = true;
+      
+      try {
+        // Test 1: Length Check
+        const lengthPassed = pattern.length === 10;
+        results += '<div class="test-result ' + (lengthPassed ? 'pass' : 'fail') + '">';
+        results += '<strong>Length Check:</strong> ' + (lengthPassed ? 'PASS' : 'FAIL');
+        results += ' - Pattern length: ' + pattern.length + ' (expected: 10)';
+        if (!lengthPassed) allPassed = false;
+        results += '</div>';
+        
+        // Test 2: Validation
+        const validator = new PatternValidator();
+        const validationResult = validator.validate(pattern);
+        results += '<div class="test-result ' + (validationResult.isValid ? 'pass' : 'fail') + '">';
+        results += '<strong>Validation:</strong> ' + (validationResult.isValid ? 'PASS' : 'FAIL');
+        if (!validationResult.isValid) {
+          results += ' - ' + validationResult.errorMessage;
+          allPassed = false;
+        }
+        results += '</div>';
+        
+        // Test 3: Classification
+        const analyzer = new PatternAnalyzer();
+        const patternType = analyzer.identifyPatternType(pattern);
+        const classificationPassed = patternType === 'Thai Mobile No.';
+        results += '<div class="test-result ' + (classificationPassed ? 'pass' : 'fail') + '">';
+        results += '<strong>Classification:</strong> ' + (classificationPassed ? 'PASS' : 'FAIL');
+        results += ' - Detected: ' + patternType + ', Expected: Thai Mobile No.';
+        if (!classificationPassed) allPassed = false;
+        results += '</div>';
+        
+        // Test 4: Generation
+        const generator = new PatternGenerator();
+        const numbers = generator.generate(pattern, patternType);
+        const generationPassed = numbers && numbers.length > 0;
+        results += '<div class="test-result ' + (generationPassed ? 'pass' : 'fail') + '">';
+        results += '<strong>Generation:</strong> ' + (generationPassed ? 'PASS' : 'FAIL');
+        results += ' - Generated ' + (numbers ? numbers.length : 0) + ' numbers';
+        if (!generationPassed) allPassed = false;
+        results += '</div>';
+        
+        // Show sample numbers
+        if (numbers && numbers.length > 0) {
+          results += '<div class="test-result info">';
+          results += '<strong>Sample Numbers:</strong><br>';
+          for (let i = 0; i < Math.min(5, numbers.length); i++) {
+            results += numbers[i] + '<br>';
+          }
+          if (numbers.length > 5) {
+            results += '... and ' + (numbers.length - 5) + ' more';
+          }
+          results += '</div>';
+        }
+        
+        // Overall result
+        results += '<div class="test-result ' + (allPassed ? 'pass' : 'fail') + '">';
+        results += '<strong>Overall Result:</strong> ' + (allPassed ? 'ALL TESTS PASSED ✅' : 'SOME TESTS FAILED ❌');
+        results += '</div>';
+        
+      } catch (error) {
+        results += '<div class="test-result fail">';
+        results += '<strong>Error:</strong> ' + error.message;
+        results += '</div>';
+      }
+      
+      resultsDiv.innerHTML = results;
+    }
+    
+    // Auto-test on page load
+    window.addEventListener('load', function() {
+      const select = document.getElementById('pattern-select');
+      const thaiMobileOptgroup = select.querySelector('optgroup[label*="Thai Mobile"]');
+      
+      let statusDiv = document.getElementById('test-results');
+      if (thaiMobileOptgroup) {
+        statusDiv.innerHTML = '<div class="test-result pass"><strong>✅ Thai Mobile optgroup found in dropdown!</strong><br>Select a Thai Mobile pattern above and click "Test Selected Pattern" to verify functionality.</div>';
+      } else {
+        statusDiv.innerHTML = '<div class="test-result fail"><strong>❌ Thai Mobile optgroup NOT found in dropdown!</strong></div>';
+      }
+    });
+  </script>
+</body>
+</html>

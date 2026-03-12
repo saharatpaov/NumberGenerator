@@ -117,9 +117,11 @@ class PatternValidator {
     // Check for valid characters
     if (!this.hasValidCharacters(pattern)) {
       const invalidChars = this.getInvalidCharacters(pattern);
+      const isThaiMobile = pattern.startsWith('06') || pattern.startsWith('08') || pattern.startsWith('09');
+      const allowedChars = isThaiMobile ? 'digits (0-9) and ?' : 'lowercase letters a-z and ?';
       return {
         isValid: false,
-        errorMessage: `Pattern contains invalid characters: ${invalidChars.join(', ')}. Only lowercase letters a-z and ? are allowed.`,
+        errorMessage: `Pattern contains invalid characters: ${invalidChars.join(', ')}. Only ${allowedChars} are allowed.`,
         invalidCharacters: invalidChars
       };
     }
@@ -141,11 +143,19 @@ class PatternValidator {
   }
 
   /**
-   * Checks if pattern contains only lowercase a-z and ? characters
+   * Checks if pattern contains only valid characters (lowercase a-z, ?, and digits for Thai mobile patterns)
    * @param {string} pattern
    * @returns {boolean}
    */
   hasValidCharacters(pattern) {
+    // Check for Thai mobile pattern (starts with 06, 08, or 09)
+    if (pattern.startsWith('06') || pattern.startsWith('08') || pattern.startsWith('09')) {
+      // Thai mobile patterns: digits and ? are allowed
+      const validChars = /^[0-9?]+$/;
+      return validChars.test(pattern);
+    }
+    
+    // Regular patterns: lowercase a-z and ? characters
     const validChars = /^[a-z?]+$/;
     return validChars.test(pattern);
   }
@@ -157,6 +167,14 @@ class PatternValidator {
    */
   getInvalidCharacters(pattern) {
     if (!pattern) return [];
+    
+    // Check for Thai mobile pattern (starts with 06, 08, or 09)
+    if (pattern.startsWith('06') || pattern.startsWith('08') || pattern.startsWith('09')) {
+      // Thai mobile patterns: digits and ? are allowed
+      return [...new Set(pattern.split('').filter(c => !/[0-9?]/.test(c)))];
+    }
+    
+    // Regular patterns: lowercase a-z and ? characters
     return [...new Set(pattern.split('').filter(c => !/[a-z?]/.test(c)))];
   }
 }
@@ -170,6 +188,7 @@ const PatternType = {
   FULL_STRAIGHT: 'The Full Straight',
   CYCLIC_STRAIGHT: 'Cyclic Straight',
   RHYTHMIC_BRIDGE: 'The Rhythmic Bridge',
+  THAI_MOBILE_NO: 'Thai Mobile No.',
   UNKNOWN: 'Unknown'
 };
 
@@ -195,6 +214,11 @@ class PatternAnalyzer {
     identifyPatternType(pattern) {
       if (!pattern || pattern.length !== 10) {
         throw new Error('Pattern must be exactly 10 characters');
+      }
+
+      // Check for Thai Mobile No. patterns first (highest priority)
+      if (this.isThaiMobileNo(pattern)) {
+        return PatternType.THAI_MOBILE_NO;
       }
 
       // Check pattern types in priority order:
@@ -673,6 +697,27 @@ class PatternAnalyzer {
   }
 
   /**
+   * Checks if pattern is a Thai Mobile No. pattern
+   * Thai mobile patterns start with 06, 08, or 09 followed by 8 more characters (digits or ?)
+   * @param {string} pattern
+   * @returns {boolean}
+   */
+  isThaiMobileNo(pattern) {
+    // Check if pattern starts with valid Thai mobile prefixes
+    if (!pattern.startsWith('06') && !pattern.startsWith('08') && !pattern.startsWith('09')) {
+      return false;
+    }
+    
+    // Check if pattern is exactly 10 characters and contains only digits and ?
+    if (pattern.length !== 10) {
+      return false;
+    }
+    
+    // Check if all characters are digits or ?
+    return /^[0-9?]+$/.test(pattern);
+  }
+
+  /**
    * Analyzes Soloist pattern structure to determine combination count
    * Updated for new specification patterns including moved patterns from Hyphen-separated
    * @param {string} pattern
@@ -1021,6 +1066,9 @@ class PatternGenerator {
     const analyzer = new PatternAnalyzer();
 
     switch (patternType) {
+      case PatternType.THAI_MOBILE_NO:
+        return this.generateThaiMobileNo(pattern);
+      
       case PatternType.SOLOIST:
         const soloistStructure = analyzer.analyzeSoloistStructure(pattern);
         return this.generateSoloist(pattern, soloistStructure);
@@ -1737,6 +1785,42 @@ class PatternGenerator {
   }
 
   /**
+   * Generates Thai Mobile No. patterns
+   * Supports patterns: 06????????, 08????????, 09????????
+   * Note: Due to the large number of combinations (100M each), this generates a sample
+   * @param {string} pattern - Thai mobile pattern
+   * @returns {string[]} Array of formatted numbers (sample of 1000)
+   */
+  generateThaiMobileNo(pattern) {
+    const results = [];
+    
+    // Extract the prefix (06, 08, or 09)
+    const prefix = pattern.slice(0, 2);
+    
+    // Generate a sample of 1000 numbers instead of all 100M combinations
+    // This is more practical for UI display and performance
+    const sampleSize = 1000;
+    
+    for (let i = 0; i < sampleSize; i++) {
+      // Generate random 8-digit number for the remaining positions
+      const remainingDigits = Math.floor(Math.random() * 100000000)
+        .toString()
+        .padStart(8, '0');
+      
+      // Construct the full number: prefix + remaining 8 digits
+      const fullNumber = prefix + remainingDigits;
+      
+      // Format as XXX-XXX-XXXX
+      results.push(this.formatNumber(fullNumber));
+    }
+    
+    // Sort results for consistent display
+    results.sort();
+    
+    return results;
+  }
+
+  /**
    * Formats a 10-digit string with dashes
    * @param {string} digits - 10-digit string
    * @returns {string} Formatted as 000-000-0000
@@ -1759,6 +1843,9 @@ class PatternGenerator {
     const analyzer = new PatternAnalyzer();
     
     switch (patternType) {
+      case PatternType.THAI_MOBILE_NO:
+        return 1000; // Sample size for practical display (actual: 100M combinations)
+      
       case PatternType.SOLOIST:
         const structure = analyzer.analyzeSoloistStructure(pattern);
         return structure.expectedCombinations;

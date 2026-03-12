@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Thai Mobile Dropdown - Final</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+    .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+    .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+    select { width: 100%; padding: 10px; margin: 10px 0; }
+    button { padding: 10px 20px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+    .result { margin: 10px 0; padding: 10px; border-radius: 3px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test Thai Mobile Dropdown - Final Check</h1>
+  
+  <div class="test-section info">
+    <h2>📋 Test Instructions</h2>
+    <p>1. เลือก Thai Mobile pattern จาก dropdown</p>
+    <p>2. คลิก "Test Pattern" เพื่อทดสอบ</p>
+    <p>3. ตรวจสอบว่า pattern ทำงานได้ถูกต้อง</p>
+  </div>
+
+  <div class="test-section">
+    <h2>🎯 Thai Mobile Pattern Test</h2>
+    <label for="pattern-select">เลือก Thai Mobile Pattern:</label>
+    <select id="pattern-select">
+      <option value="">-- เลือก Pattern --</option>
+      <optgroup label="6. Thai Mobile No.">
+        <option value="06?-???-????" data-type="Thai Mobile No.">06?-???-???? (Started with 06)</option>
+        <option value="08?-???-????" data-type="Thai Mobile No.">08?-???-???? (Started with 08)</option>
+        <option value="09?-???-????" data-type="Thai Mobile No.">09?-???-???? (Started with 09)</option>
+      </optgroup>
+    </select>
+    <button onclick="testPattern()">Test Pattern</button>
+    <div id="test-results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>🔍 Dropdown Inspection</h2>
+    <button onclick="inspectDropdown()">Inspect Main App Dropdown</button>
+    <div id="dropdown-results"></div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    function testPattern() {
+      const select = document.getElementById('pattern-select');
+      const resultsDiv = document.getElementById('test-results');
+      
+      if (!select.value) {
+        resultsDiv.innerHTML = '<div class="result error">❌ Please select a pattern first!</div>';
+        return;
+      }
+      
+      const pattern = select.value;
+      const expectedType = select.options[select.selectedIndex].getAttribute('data-type');
+      
+      try {
+        console.log(`Testing pattern: ${pattern}`);
+        
+        // Test validation
+        const validator = new PatternValidator();
+        const validationResult = validator.validate(pattern);
+        
+        if (!validationResult.isValid) {
+          throw new Error(`Validation failed: ${validationResult.errorMessage}`);
+        }
+        
+        // Test classification
+        const analyzer = new PatternAnalyzer();
+        const patternType = analyzer.identifyPatternType(pattern);
+        
+        if (patternType !== expectedType) {
+          throw new Error(`Expected type "${expectedType}", got "${patternType}"`);
+        }
+        
+        // Test generation
+        const generator = new PatternGenerator();
+        const results = generator.generate(pattern, patternType);
+        
+        // Test with PatternManager
+        const patternManager = new PatternManager();
+        const managerResult = patternManager.addPattern(pattern);
+        
+        if (!managerResult.success) {
+          throw new Error(`PatternManager failed: ${managerResult.error}`);
+        }
+        
+        // Display success
+        let html = '<div class="result success">';
+        html += `<h3>✅ Pattern Test Successful: ${pattern}</h3>`;
+        html += `<p><strong>Pattern Type:</strong> ${patternType}</p>`;
+        html += `<p><strong>Generated Numbers:</strong> ${results.length}</p>`;
+        html += `<p><strong>Sample Numbers:</strong></p>`;
+        html += '<ul>';
+        results.slice(0, 5).forEach(number => {
+          html += `<li>${number}</li>`;
+        });
+        html += '</ul>';
+        html += `<p><strong>PatternManager Integration:</strong> ✅ Success</p>`;
+        html += '</div>';
+        
+        resultsDiv.innerHTML = html;
+        
+      } catch (error) {
+        console.error('Test failed:', error);
+        
+        let html = '<div class="result error">';
+        html += `<h3>❌ Pattern Test Failed: ${pattern}</h3>`;
+        html += `<p><strong>Error:</strong> ${error.message}</p>`;
+        html += '</div>';
+        
+        resultsDiv.innerHTML = html;
+      }
+    }
+    
+    function inspectDropdown() {
+      const resultsDiv = document.getElementById('dropdown-results');
+      
+      try {
+        // Try to fetch the main app's dropdown via iframe or fetch
+        fetch('index.html')
+          .then(response => response.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const select = doc.getElementById('pattern-select');
+            
+            if (!select) {
+              throw new Error('Could not find pattern-select in index.html');
+            }
+            
+            const thaiMobileOptions = Array.from(select.querySelectorAll('optgroup[label*="Thai Mobile"] option'));
+            
+            let html = '<div class="result ' + (thaiMobileOptions.length > 0 ? 'success' : 'error') + '">';
+            html += '<h3>📊 Main App Dropdown Inspection</h3>';
+            html += `<p><strong>Thai Mobile Options Found:</strong> ${thaiMobileOptions.length}</p>`;
+            
+            if (thaiMobileOptions.length > 0) {
+              html += '<p><strong>Options:</strong></p><ul>';
+              thaiMobileOptions.forEach(option => {
+                html += `<li>${option.value} - ${option.textContent}</li>`;
+              });
+              html += '</ul>';
+              html += '<p>✅ Thai Mobile patterns are available in main app dropdown!</p>';
+            } else {
+              html += '<p>❌ No Thai Mobile patterns found in main app dropdown!</p>';
+            }
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+          })
+          .catch(error => {
+            resultsDiv.innerHTML = `<div class="result error">❌ Error inspecting dropdown: ${error.message}</div>`;
+          });
+          
+      } catch (error) {
+        resultsDiv.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+      }
+    }
+    
+    // Auto-inspect on load
+    window.addEventListener('load', function() {
+      setTimeout(inspectDropdown, 1000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Test with Thai Mobile Patterns</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    .pattern-group { margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+    .sample-numbers { font-size: 12px; max-height: 100px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Complete Pattern Test with Thai Mobile</h1>
+        <p>ทดสอบ patterns ทั้งหมด 6 ประเภท รวมถึง Thai Mobile No. patterns</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="test-section">
+        <h2>🧪 Comprehensive Pattern Test</h2>
+        <button id="run-all-tests-btn" class="btn btn-primary">Run All Pattern Tests</button>
+        <div id="test-results"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>🎯 Manual Testing Area</h2>
+        <p>ทดสอบ patterns ด้วยตนเอง - ทุก pattern types รวมถึง Thai Mobile</p>
+        
+        <div class="input-group">
+          <label for="pattern-select">เลือก Pattern:</label>
+          <select id="pattern-select">
+            <option value="">-- เลือก Pattern --</option>
+            
+            <!-- The Soloist Patterns -->
+            <optgroup label="1. The Soloist">
+              <option value="aaaaaaaaaa" data-type="The Soloist">aaa-aaa-aaaa (All 10 digits identical)</option>
+              <option value="?bbbbbbbbb" data-type="The Soloist">?bb-bbb-bbbb (All 9 digits identical)</option>
+              <option value="??dddddddd" data-type="The Soloist">??d-ddd-dddd (All 8 digits identical)</option>
+              <option value="???ddddddd" data-type="The Soloist">???-ddd-dddd (All 7 digits identical)</option>
+              <option value="????eeeeee" data-type="The Soloist">????-ee-eeee (All 6 digits identical)</option>
+              <option value="?????fffff" data-type="The Soloist">?????-f-ffff (All 5 digits identical)</option>
+              <option value="??????gggg" data-type="The Soloist">??????-gggg (All 4 digits identical - Block-ending)</option>
+            </optgroup>
+            
+            <!-- Hyphen-separated Patterns -->
+            <optgroup label="2. Hyphen-separated">
+              <option value="bbbaaaaaaa" data-type="Hyphen-separated">bbb-aaa-aaaa (2 distinct digits across blocks)</option>
+              <option value="bbbbbaaaaa" data-type="Hyphen-separated">bbb-bbb-aaaa (2 distinct digits across blocks)</option>
+              <option value="bbbaaabbbb" data-type="Hyphen-separated">bbb-aaa-bbbb (2 distinct digits across blocks)</option>
+              <option value="aaabbbcccc" data-type="Hyphen-separated">aaa-bbb-cccc (3 distinct digits across blocks)</option>
+              <option value="bbb???bbbb" data-type="Hyphen-separated">bbb-???-bbbb (First and last blocks identical)</option>
+            </optgroup>
+            
+            <!-- The Full Straight Patterns -->
+            <optgroup label="3. The Full Straight">
+              <option value="abcdefghij" data-type="The Full Straight">abc-def-ghij (Ascending)</option>
+              <option value="jihgfedcba" data-type="The Full Straight">jih-gfe-dcba (Descending)</option>
+            </optgroup>
+            
+            <!-- Cyclic Straight Patterns -->
+            <optgroup label="4. Cyclic Straight">
+              <option value="zabcdefghi" data-type="Cyclic Straight">zab-cde-fghi (Cyclic ascending)</option>
+              <option value="ihgfedcbaz" data-type="Cyclic Straight">ihg-fed-cbaz (Cyclic descending)</option>
+            </optgroup>
+            
+            <!-- The Rhythmic Bridge Patterns -->
+            <optgroup label="5. The Rhythmic Bridge">
+              <option value="abc???abc?" data-type="The Rhythmic Bridge">abc-???-abc? (Repeating pattern 2-3 block)</option>
+              <option value="abcabc????" data-type="The Rhythmic Bridge">abc-abc-???? (Repeating pattern front-middle)</option>
+              <option value="???abcabc?" data-type="The Rhythmic Bridge">???-abc-abc? (Repeating pattern middle-end)</option>
+              <option value="abcabcabc?" data-type="The Rhythmic Bridge">abc-abc-abc? (Fully linked on 3 blocks)</option>
+            </optgroup>
+            
+            <!-- Thai Mobile No. Patterns -->
+            <optgroup label="6. Thai Mobile No.">
+              <option value="06?-???-????" data-type="Thai Mobile No.">06?-???-???? (Started with 06)</option>
+              <option value="08?-???-????" data-type="Thai Mobile No.">08?-???-???? (Started with 08)</option>
+              <option value="09?-???-????" data-type="Thai Mobile No.">09?-???-???? (Started with 09)</option>
+            </optgroup>
+          </select>
+          <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
+        </div>
+        
+        <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+        
+        <div id="pattern-list" class="pattern-list"></div>
+        
+        <div class="results-header">
+          <h2>ผลลัพธ์</h2>
+          <button id="export-btn" class="btn btn-secondary" style="display: none;">Export เป็น CSV</button>
+        </div>
+        <div id="results-display" class="results-display"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the application
+      init();
+      
+      const runAllTestsBtn = document.getElementById('run-all-tests-btn');
+      const testResultsDiv = document.getElementById('test-results');
+      const patternSelect = document.getElementById('pattern-select');
+      const addPatternBtn = document.getElementById('add-pattern-btn');
+      
+      // Complete test patterns including Thai Mobile
+      const allTestPatterns = [
+        // The Soloist Patterns
+        { pattern: 'aaaaaaaaaa', expected: 'The Soloist', description: 'All 10 digits identical' },
+        { pattern: '?bbbbbbbbb', expected: 'The Soloist', description: 'All 9 digits identical (wildcard)' },
+        { pattern: '??dddddddd', expected: 'The Soloist', description: 'All 8 digits identical (wildcard)' },
+        { pattern: '???ddddddd', expected: 'The Soloist', description: 'All 7 digits identical (wildcard)' },
+        { pattern: '????eeeeee', expected: 'The Soloist', description: 'All 6 digits identical (wildcard)' },
+        { pattern: '?????fffff', expected: 'The Soloist', description: 'All 5 digits identical (wildcard)' },
+        { pattern: '??????gggg', expected: 'The Soloist', description: 'All 4 digits identical (wildcard)' },
+        
+        // Hyphen-separated Patterns
+        { pattern: 'bbbaaaaaaa', expected: 'Hyphen-separated', description: '2 distinct digits (3+7 blocks)' },
+        { pattern: 'bbbbbaaaaa', expected: 'Hyphen-separated', description: '2 distinct digits (5+5 blocks)' },
+        { pattern: 'bbbaaabbbb', expected: 'Hyphen-separated', description: '2 distinct digits (3+3+4 blocks)' },
+        { pattern: 'aaabbbcccc', expected: 'Hyphen-separated', description: '3 distinct digits across blocks' },
+        { pattern: 'bbb???bbbb', expected: 'Hyphen-separated', description: 'First and last blocks identical (wildcard)' },
+        
+        // The Full Straight Patterns
+        { pattern: 'abcdefghij', expected: 'The Full Straight', description: 'Ascending sequence' },
+        { pattern: 'jihgfedcba', expected: 'The Full Straight', description: 'Descending sequence' },
+        
+        // Cyclic Straight Patterns
+        { pattern: 'zabcdefghi', expected: 'Cyclic Straight', description: 'Cyclic ascending' },
+        { pattern: 'ihgfedcbaz', expected: 'Cyclic Straight', description: 'Cyclic descending' },
+        
+        // The Rhythmic Bridge Patterns
+        { pattern: 'abc???abc?', expected: 'The Rhythmic Bridge', description: 'Repeating pattern 2-3 block' },
+        { pattern: 'abcabc????', expected: 'The Rhythmic Bridge', description: 'Repeating pattern front-middle' },
+        { pattern: '???abcabc?', expected: 'The Rhythmic Bridge', description: 'Repeating pattern middle-end' },
+        { pattern: 'abcabcabc?', expected: 'The Rhythmic Bridge', description: 'Fully linked on 3 blocks' },
+        
+        // Thai Mobile No. Patterns
+        { pattern: '06?-???-????', expected: 'Thai Mobile No.', description: 'Thai mobile started with 06' },
+        { pattern: '08?-???-????', expected: 'Thai Mobile No.', description: 'Thai mobile started with 08' },
+        { pattern: '09?-???-????', expected: 'Thai Mobile No.', description: 'Thai mobile started with 09' }
+      ];
+
+      runAllTestsBtn.addEventListener('click', function() {
+        testResultsDiv.innerHTML = '<div class="test-result info">Running comprehensive pattern tests...</div>';
+        
+        const validator = new PatternValidator();
+        const analyzer = new PatternAnalyzer();
+        const generator = new PatternGenerator();
+        
+        let totalTests = 0;
+        let passedTests = 0;
+        let results = [];
+        let resultsByType = {};
+
+        allTestPatterns.forEach((test, index) => {
+          totalTests++;
+          
+          try {
+            // Test 1: Validation
+            const validation = validator.validate(test.pattern);
+            if (!validation.isValid) {
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                description: test.description,
+                expected: test.expected,
+                status: 'fail',
+                message: `Validation failed: ${validation.errorMessage}`
+              });
+              return;
+            }
+            
+            // Test 2: Pattern Classification
+            const actualType = analyzer.identifyPatternType(test.pattern);
+            if (actualType !== test.expected) {
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                description: test.description,
+                expected: test.expected,
+                actual: actualType,
+                status: 'fail',
+                message: `Type mismatch: Expected "${test.expected}", got "${actualType}"`
+              });
+              return;
+            }
+            
+            // Test 3: Number Generation
+            const generatedNumbers = generator.generate(test.pattern, actualType);
+            if (generatedNumbers.length === 0) {
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                description: test.description,
+                expected: test.expected,
+                actual: actualType,
+                status: 'fail',
+                message: 'No numbers generated'
+              });
+              return;
+            }
+            
+            // Test 4: Format Validation
+            const formatValid = generatedNumbers.every(num => /^\d{3}-\d{3}-\d{4}$/.test(num));
+            if (!formatValid) {
+              results.push({
+                index: index + 1,
+                pattern: test.pattern,
+                description: test.description,
+                expected: test.expected,
+                actual: actualType,
+                status: 'fail',
+                message: 'Invalid number format'
+              });
+              return;
+            }
+            
+            // Success
+            passedTests++;
+            results.push({
+              index: index + 1,
+              pattern: test.pattern,
+              description: test.description,
+              expected: test.expected,
+              actual: actualType,
+              status: 'pass',
+              count: generatedNumbers.length,
+              samples: generatedNumbers.slice(0, 3),
+              message: 'All tests passed'
+            });
+            
+            // Group by type for summary
+            if (!resultsByType[actualType]) {
+              resultsByType[actualType] = { passed: 0, total: 0, patterns: [] };
+            }
+            resultsByType[actualType].passed++;
+            resultsByType[actualType].total++;
+            resultsByType[actualType].patterns.push(test.pattern);
+            
+          } catch (error) {
+            results.push({
+              index: index + 1,
+              pattern: test.pattern,
+              description: test.description,
+              expected: test.expected,
+              status: 'fail',
+              message: `Error: ${error.message}`
+            });
+          }
+        });
+
+        // Display results
+        const successRate = ((passedTests / totalTests) * 100).toFixed(1);
+        
+        let html = `
+          <div class="test-result ${passedTests === totalTests ? 'success' : 'error'}">
+            <h3>📊 Overall Test Summary</h3>
+            <p><strong>Total Tests:</strong> ${totalTests}</p>
+            <p><strong>Passed:</strong> ${passedTests}</p>
+            <p><strong>Failed:</strong> ${totalTests - passedTests}</p>
+            <p><strong>Success Rate:</strong> ${successRate}%</p>
+            <p><strong>Status:</strong> ${passedTests === totalTests ? '🎉 ALL TESTS PASSED!' : '⚠️ Some tests failed'}</p>
+          </div>
+        `;
+
+        // Results by pattern type
+        Object.keys(resultsByType).forEach(patternType => {
+          const typeResult = resultsByType[patternType];
+          html += `
+            <div class="pattern-group">
+              <h4>${patternType}</h4>
+              <p><strong>Patterns tested:</strong> ${typeResult.total}</p>
+              <p><strong>Patterns passed:</strong> ${typeResult.passed}</p>
+              <p><strong>Success rate:</strong> ${((typeResult.passed / typeResult.total) * 100).toFixed(1)}%</p>
+              <p><strong>Patterns:</strong> ${typeResult.patterns.join(', ')}</p>
+            </div>
+          `;
+        });
+
+        // Individual test results
+        html += '<h3>📋 Individual Test Results</h3>';
+        results.forEach(result => {
+          html += `
+            <div class="test-result ${result.status}">
+              <strong>${result.index}. ${result.pattern}</strong> - ${result.description}<br>
+              <strong>Expected:</strong> ${result.expected}<br>
+              ${result.actual ? `<strong>Actual:</strong> ${result.actual}<br>` : ''}
+              ${result.count ? `<strong>Generated:</strong> ${result.count.toLocaleString()} numbers<br>` : ''}
+              ${result.samples ? `<strong>Samples:</strong> ${result.samples.join(', ')}<br>` : ''}
+              <strong>Status:</strong> ${result.status === 'pass' ? '✅' : '❌'} ${result.message}
+            </div>
+          `;
+        });
+
+        testResultsDiv.innerHTML = html;
+        
+        console.log(`Complete test finished: ${passedTests}/${totalTests} passed (${successRate}%)`);
+      });
+      
+      // Manual pattern addition
+      addPatternBtn.addEventListener('click', function() {
+        const selectedPattern = patternSelect.value;
+        if (selectedPattern) {
+          try {
+            state.patternManager.addPattern(selectedPattern);
+            uiController.updateUI();
+            patternSelect.value = '';
+            document.getElementById('error-message').textContent = '';
+          } catch (error) {
+            document.getElementById('error-message').textContent = error.message;
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

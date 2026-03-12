@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Thai Mobile Patterns</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+    .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    h1 { color: #333; }
+    h3 { color: #666; margin-top: 30px; }
+    .pattern-info { font-weight: bold; margin-bottom: 10px; }
+    .sample-numbers { font-family: monospace; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Thai Mobile Pattern Tests</h1>
+  <div id="test-results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function runTests() {
+      const testResults = document.getElementById('test-results');
+      let allPassed = true;
+
+      // Test patterns
+      const testPatterns = [
+        { pattern: '06?-???-????', expectedType: 'Thai Mobile No.' },
+        { pattern: '08?-???-????', expectedType: 'Thai Mobile No.' },
+        { pattern: '09?-???-????', expectedType: 'Thai Mobile No.' }
+      ];
+
+      testPatterns.forEach((test, index) => {
+        try {
+          console.log(`\n=== Testing Pattern ${index + 1}: ${test.pattern} ===`);
+          
+          // Test validation
+          const validator = new PatternValidator();
+          const validationResult = validator.validate(test.pattern);
+          
+          console.log('Validation Result:', validationResult);
+          
+          if (!validationResult.isValid) {
+            throw new Error(`Validation failed: ${validationResult.errorMessage}`);
+          }
+          
+          // Test pattern classification
+          const analyzer = new PatternAnalyzer();
+          const patternType = analyzer.identifyPatternType(test.pattern);
+          
+          console.log('Pattern Type:', patternType);
+          
+          if (patternType !== test.expectedType) {
+            throw new Error(`Expected type "${test.expectedType}", got "${patternType}"`);
+          }
+          
+          // Test pattern generation (sample)
+          const generator = new PatternGenerator();
+          const results = generator.generate(test.pattern, patternType);
+          
+          console.log('Generated numbers count:', results.length);
+          console.log('First 5 numbers:', results.slice(0, 5));
+          console.log('Last 5 numbers:', results.slice(-5));
+          
+          // Verify expected count (sample size)
+          const expectedCount = generator.calculateCombinationCount(test.pattern, patternType);
+          console.log('Expected count (sample):', expectedCount);
+          
+          if (results.length !== expectedCount) {
+            throw new Error(`Expected ${expectedCount} results, got ${results.length}`);
+          }
+          
+          // Verify format
+          const sampleNumber = results[0];
+          if (!/^\d{3}-\d{3}-\d{4}$/.test(sampleNumber)) {
+            throw new Error(`Invalid format: ${sampleNumber}`);
+          }
+          
+          // Verify prefix
+          const prefix = test.pattern.slice(0, 2);
+          if (!sampleNumber.startsWith(prefix)) {
+            throw new Error(`Number doesn't start with expected prefix ${prefix}: ${sampleNumber}`);
+          }
+          
+          let html = '<div class="test-result success">';
+          html += `<h3>✅ Pattern: ${test.pattern}</h3>`;
+          html += `<div class="pattern-info">Type: ${patternType}</div>`;
+          html += `<div class="pattern-info">Generated: ${results.length.toLocaleString()} numbers</div>`;
+          html += `<div class="pattern-info">Expected: ${expectedCount.toLocaleString()} numbers</div>`;
+          html += '<div class="sample-numbers">Sample numbers:<br>';
+          html += results.slice(0, 5).join('<br>');
+          html += '<br>...<br>';
+          html += results.slice(-5).join('<br>');
+          html += '</div>';
+          html += '</div>';
+          
+          testResults.innerHTML += html;
+          
+        } catch (error) {
+          allPassed = false;
+          console.error(`Test failed for ${test.pattern}:`, error);
+          
+          let html = '<div class="test-result error">';
+          html += `<h3>❌ Pattern: ${test.pattern}</h3>`;
+          html += `<div class="pattern-info">Error: ${error.message}</div>`;
+          html += '</div>';
+          
+          testResults.innerHTML += html;
+        }
+      });
+
+      // Summary
+      const summaryClass = allPassed ? 'success' : 'error';
+      const summaryIcon = allPassed ? '✅' : '❌';
+      const summaryText = allPassed ? 'All tests passed!' : 'Some tests failed!';
+      
+      testResults.innerHTML += `<div class="test-result ${summaryClass}">
+        <h3>${summaryIcon} Test Summary</h3>
+        <div class="pattern-info">${summaryText}</div>
+      </div>`;
+    }
+
+    // Run tests when page loads
+    window.addEventListener('load', runTests);
+  </script>
+</body>
+</html>

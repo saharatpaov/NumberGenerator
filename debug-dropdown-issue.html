@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Dropdown Issue</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+    .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+    .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+    select { width: 100%; padding: 10px; margin: 10px 0; font-size: 14px; }
+    .result { margin: 10px 0; padding: 10px; border-radius: 3px; font-family: monospace; }
+    pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Debug Dropdown Issue</h1>
+  
+  <div class="debug-section info">
+    <h2>📋 Problem Analysis</h2>
+    <p>User reports that Thai Mobile patterns are not showing in the dropdown despite being added to index.html</p>
+    <p>Possible causes:</p>
+    <ul>
+      <li>Browser cache</li>
+      <li>File not saved properly</li>
+      <li>HTML syntax error</li>
+      <li>JavaScript error preventing dropdown from loading</li>
+    </ul>
+  </div>
+
+  <div class="debug-section">
+    <h2>🧪 Test 1: Direct HTML Test</h2>
+    <p>This dropdown is created directly in this HTML file (not from index.html):</p>
+    <select id="test-dropdown">
+      <option value="">-- เลือก Pattern --</option>
+      
+      <!-- The Soloist Patterns -->
+      <optgroup label="1. The Soloist">
+        <option value="aaaaaaaaaa" data-type="The Soloist">aaa-aaa-aaaa (All 10 digits identical)</option>
+        <option value="?bbbbbbbbb" data-type="The Soloist">?bb-bbb-bbbb (All 9 digits identical)</option>
+      </optgroup>
+      
+      <!-- Thai Mobile No. Patterns -->
+      <optgroup label="6. Thai Mobile No.">
+        <option value="06?-???-????" data-type="Thai Mobile No.">06?-???-???? (Started with 06)</option>
+        <option value="08?-???-????" data-type="Thai Mobile No.">08?-???-???? (Started with 08)</option>
+        <option value="09?-???-????" data-type="Thai Mobile No.">09?-???-???? (Started with 09)</option>
+      </optgroup>
+    </select>
+    <button onclick="testDirectDropdown()">Test This Dropdown</button>
+    <div id="direct-test-results"></div>
+  </div>
+
+  <div class="debug-section">
+    <h2>🔍 Test 2: Fetch index.html Content</h2>
+    <button onclick="fetchIndexHtml()">Fetch and Analyze index.html</button>
+    <div id="fetch-results"></div>
+  </div>
+
+  <div class="debug-section">
+    <h2>🛠️ Test 3: Cache Busting Solutions</h2>
+    <p>Try these solutions:</p>
+    <ol>
+      <li><strong>Hard Refresh:</strong> Ctrl+F5 (Windows) or Cmd+Shift+R (Mac)</li>
+      <li><strong>Clear Browser Cache:</strong> F12 → Network tab → Disable cache</li>
+      <li><strong>Incognito/Private Mode:</strong> Open index.html in private browsing</li>
+      <li><strong>Add Cache Buster:</strong> Open index.html?v=123</li>
+    </ol>
+    <button onclick="openWithCacheBuster()">Open index.html with Cache Buster</button>
+  </div>
+
+  <div class="debug-section">
+    <h2>📊 Test 4: File Verification</h2>
+    <button onclick="verifyFile()">Verify File Contents</button>
+    <div id="verify-results"></div>
+  </div>
+
+  <script>
+    function testDirectDropdown() {
+      const dropdown = document.getElementById('test-dropdown');
+      const resultsDiv = document.getElementById('direct-test-results');
+      
+      const thaiMobileOptions = Array.from(dropdown.querySelectorAll('optgroup[label*="Thai Mobile"] option'));
+      
+      let html = '<div class="result ' + (thaiMobileOptions.length > 0 ? 'success' : 'error') + '">';
+      html += '<h3>Direct Dropdown Test Results</h3>';
+      html += `<p><strong>Thai Mobile Options Found:</strong> ${thaiMobileOptions.length}</p>`;
+      
+      if (thaiMobileOptions.length > 0) {
+        html += '<p><strong>Options:</strong></p><ul>';
+        thaiMobileOptions.forEach(option => {
+          html += `<li>${option.value} - ${option.textContent}</li>`;
+        });
+        html += '</ul>';
+        html += '<p>✅ Thai Mobile patterns work in direct HTML!</p>';
+      } else {
+        html += '<p>❌ No Thai Mobile patterns found even in direct HTML!</p>';
+      }
+      
+      html += '</div>';
+      resultsDiv.innerHTML = html;
+    }
+    
+    function fetchIndexHtml() {
+      const resultsDiv = document.getElementById('fetch-results');
+      resultsDiv.innerHTML = '<p>Fetching index.html...</p>';
+      
+      fetch('index.html?' + Date.now()) // Cache buster
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const select = doc.getElementById('pattern-select');
+          
+          if (!select) {
+            throw new Error('Could not find pattern-select in index.html');
+          }
+          
+          const allOptgroups = Array.from(select.querySelectorAll('optgroup'));
+          const thaiMobileOptgroup = select.querySelector('optgroup[label*="Thai Mobile"]');
+          const thaiMobileOptions = thaiMobileOptgroup ? Array.from(thaiMobileOptgroup.querySelectorAll('option')) : [];
+          
+          let html = '<div class="result ' + (thaiMobileOptions.length > 0 ? 'success' : 'error') + '">';
+          html += '<h3>index.html Analysis Results</h3>';
+          html += `<p><strong>Total Optgroups:</strong> ${allOptgroups.length}</p>`;
+          html += '<p><strong>Optgroup Labels:</strong></p><ul>';
+          allOptgroups.forEach(optgroup => {
+            html += `<li>${optgroup.getAttribute('label')}</li>`;
+          });
+          html += '</ul>';
+          
+          html += `<p><strong>Thai Mobile Optgroup Found:</strong> ${thaiMobileOptgroup ? 'YES' : 'NO'}</p>`;
+          html += `<p><strong>Thai Mobile Options:</strong> ${thaiMobileOptions.length}</p>`;
+          
+          if (thaiMobileOptions.length > 0) {
+            html += '<p><strong>Thai Mobile Options:</strong></p><ul>';
+            thaiMobileOptions.forEach(option => {
+              html += `<li>${option.value} - ${option.textContent}</li>`;
+            });
+            html += '</ul>';
+            html += '<p>✅ Thai Mobile patterns exist in index.html file!</p>';
+            html += '<p>🔧 <strong>Solution:</strong> Clear browser cache or hard refresh (Ctrl+F5)</p>';
+          } else {
+            html += '<p>❌ Thai Mobile patterns NOT found in index.html file!</p>';
+            html += '<p>🔧 <strong>Solution:</strong> File needs to be updated</p>';
+          }
+          
+          html += '</div>';
+          
+          // Show partial HTML content
+          html += '<div class="result info">';
+          html += '<h4>Partial HTML Content (around select element):</h4>';
+          html += '<pre>' + html.substring(html.indexOf('<select'), html.indexOf('</select>') + 9).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+          html += '</div>';
+          
+          resultsDiv.innerHTML = html;
+        })
+        .catch(error => {
+          resultsDiv.innerHTML = `<div class="result error">❌ Error fetching index.html: ${error.message}</div>`;
+        });
+    }
+    
+    function openWithCacheBuster() {
+      const timestamp = Date.now();
+      const url = `index.html?v=${timestamp}`;
+      window.open(url, '_blank');
+    }
+    
+    function verifyFile() {
+      const resultsDiv = document.getElementById('verify-results');
+      
+      // Check if we can access the file system (this won't work in browser, but shows the concept)
+      let html = '<div class="result info">';
+      html += '<h3>File Verification</h3>';
+      html += '<p>To verify the file was saved correctly:</p>';
+      html += '<ol>';
+      html += '<li>Open index.html in a text editor</li>';
+      html += '<li>Search for "Thai Mobile" - should find 4 occurrences</li>';
+      html += '<li>Search for "06?" - should find 1 occurrence</li>';
+      html += '<li>Check file size - should be larger than before</li>';
+      html += '<li>Check last modified date - should be recent</li>';
+      html += '</ol>';
+      html += '<p><strong>If file looks correct but browser doesn\'t show changes:</strong></p>';
+      html += '<ul>';
+      html += '<li>Try hard refresh (Ctrl+F5 or Cmd+Shift+R)</li>';
+      html += '<li>Clear browser cache completely</li>';
+      html += '<li>Try incognito/private browsing mode</li>';
+      html += '<li>Try different browser</li>';
+      html += '</ul>';
+      html += '</div>';
+      
+      resultsDiv.innerHTML = html;
+    }
+    
+    // Auto-run tests
+    window.addEventListener('load', function() {
+      setTimeout(testDirectDropdown, 500);
+      setTimeout(fetchIndexHtml, 1000);
+    });
+  </script>
+</body>
+</html>

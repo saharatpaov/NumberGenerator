@@ -3,14 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account Number Generator</title>
+  <title>Account Number Generator - With Thai Mobile</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- Cache buster -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 </head>
 <body>
   <div class="container">
     <header>
       <div class="header-content">
         <h1>Account Number Generator</h1>
+        <p style="color: #666; font-size: 14px;">Updated with Thai Mobile No. patterns</p>
       </div>
     </header>
 
@@ -70,7 +75,7 @@
               <option value="09????????" data-type="Thai Mobile No.">09?-???-???? (Started with 09)</option>
             </optgroup>
           </select>
-          <small id="pattern-help">เลือก pattern จากรายการที่กำหนดไว้</small>
+          <small id="pattern-help">เลือก pattern จากรายการที่กำหนดไว้ (รวม Thai Mobile No.)</small>
           <button id="add-pattern-btn" class="btn btn-primary">เพิ่ม Pattern</button>
         </div>
         <!-- Error messages will be displayed here -->
@@ -107,9 +112,33 @@
 
   <script src="performance-monitor.js"></script>
   <script src="app.js"></script>
+  
+  <!-- Debug script to verify Thai Mobile patterns -->
   <script>
-    // Initialize the application when DOM is loaded
-    document.addEventListener('DOMContentLoaded', init);
+    window.addEventListener('load', function() {
+      const select = document.getElementById('pattern-select');
+      const thaiMobileOptgroup = select.querySelector('optgroup[label*="Thai Mobile"]');
+      
+      if (thaiMobileOptgroup) {
+        console.log('✅ Thai Mobile optgroup found!');
+        const options = thaiMobileOptgroup.querySelectorAll('option');
+        console.log(`✅ Thai Mobile options: ${options.length}`);
+        options.forEach(option => {
+          console.log(`  - ${option.value}: ${option.textContent}`);
+        });
+      } else {
+        console.error('❌ Thai Mobile optgroup NOT found!');
+      }
+      
+      // Show notification
+      setTimeout(() => {
+        if (thaiMobileOptgroup) {
+          alert('✅ Thai Mobile patterns loaded successfully!\nCheck dropdown for "6. Thai Mobile No." group');
+        } else {
+          alert('❌ Thai Mobile patterns failed to load!');
+        }
+      }, 1000);
+    });
   </script>
 </body>
 </html>
