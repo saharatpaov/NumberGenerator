@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Thai Mobile Current Implementation</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+    .pass { background-color: #d4edda; border-color: #c3e6cb; }
+    .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+    .numbers { max-height: 200px; overflow-y: auto; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>Test Thai Mobile Current Implementation</h1>
+  <div id="results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function runTests() {
+      const results = document.getElementById('results');
+      
+      try {
+        // Initialize classes
+        const generator = new PatternGenerator();
+        const analyzer = new PatternAnalyzer();
+        
+        // Test Thai Mobile patterns
+        const patterns = ['06????????', '08????????', '09????????'];
+        
+        patterns.forEach(pattern => {
+          const testDiv = document.createElement('div');
+          testDiv.className = 'test-result';
+          
+          try {
+            console.log(`Testing pattern: ${pattern}`);
+            
+            // Check pattern type identification
+            const patternType = analyzer.identifyPatternType(pattern);
+            console.log(`Pattern type: ${patternType}`);
+            
+            // Try to generate numbers (with timeout to prevent browser freeze)
+            const startTime = Date.now();
+            let numbers = [];
+            let timedOut = false;
+            
+            // Set a timeout to prevent browser freeze
+            const timeout = setTimeout(() => {
+              timedOut = true;
+              console.log('Generation timed out after 5 seconds');
+            }, 5000);
+            
+            try {
+              numbers = generator.generateThaiMobileNo(pattern);
+              clearTimeout(timeout);
+            } catch (error) {
+              clearTimeout(timeout);
+              throw error;
+            }
+            
+            const endTime = Date.now();
+            const duration = endTime - startTime;
+            
+            if (timedOut) {
+              testDiv.className += ' fail';
+              testDiv.innerHTML = `
+                <h3>Pattern: ${pattern}</h3>
+                <p><strong>Status:</strong> TIMED OUT (${duration}ms)</p>
+                <p><strong>Issue:</strong> Generation took too long, likely trying to generate all 100M numbers</p>
+              `;
+            } else {
+              const isComplete = numbers.length === 100000000;
+              const isSorted = checkSorted(numbers.slice(0, 1000)); // Check first 1000 for sorting
+              
+              testDiv.className += isComplete && isSorted ? ' pass' : ' fail';
+              testDiv.innerHTML = `
+                <h3>Pattern: ${pattern}</h3>
+                <p><strong>Pattern Type:</strong> ${patternType}</p>
+                <p><strong>Numbers Generated:</strong> ${numbers.length.toLocaleString()}</p>
+                <p><strong>Expected:</strong> 100,000,000</p>
+                <p><strong>Complete:</strong> ${isComplete ? 'YES' : 'NO'}</p>
+                <p><strong>Sorted (first 1000):</strong> ${isSorted ? 'YES' : 'NO'}</p>
+                <p><strong>Generation Time:</strong> ${duration}ms</p>
+                <div class="numbers">
+                  <strong>First 10 numbers:</strong><br>
+                  ${numbers.slice(0, 10).join('<br>')}
+                  <br><br>
+                  <strong>Last 10 numbers:</strong><br>
+                  ${numbers.slice(-10).join('<br>')}
+                </div>
+              `;
+            }
+            
+          } catch (error) {
+            testDiv.className += ' fail';
+            testDiv.innerHTML = `
+              <h3>Pattern: ${pattern}</h3>
+              <p><strong>Status:</strong> ERROR</p>
+              <p><strong>Error:</strong> ${error.message}</p>
+            `;
+          }
+          
+          results.appendChild(testDiv);
+        });
+        
+      } catch (error) {
+        results.innerHTML = `<div class="test-result fail"><h3>Test Setup Error</h3><p>${error.message}</p></div>`;
+      }
+    }
+    
+    function checkSorted(numbers) {
+      for (let i = 1; i < numbers.length; i++) {
+        const prev = parseInt(numbers[i-1].replace(/-/g, ''));
+        const curr = parseInt(numbers[i].replace(/-/g, ''));
+        if (prev > curr) {
+          return false;
+        }
+      }
+      return true;
+    }
+    
+    // Run tests when page loads
+    document.addEventListener('DOMContentLoaded', runTests);
+  </script>
+</body>
+</html>

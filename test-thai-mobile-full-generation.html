@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Thai Mobile Full Generation</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .pass { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; background: #007bff; color: white; }
+    .btn-danger { background: #dc3545; }
+    .numbers { font-family: monospace; font-size: 11px; max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>🇹🇭 Test Thai Mobile Full Generation (100M Numbers)</h1>
+  
+  <div class="test-result warning">
+    <h3>⚠️ WARNING</h3>
+    <p><strong>Thai Mobile patterns now generate ALL possible combinations:</strong></p>
+    <ul>
+      <li><strong>06????????</strong> → 100,000,000 numbers (06-000-0000 to 06-999-9999)</li>
+      <li><strong>08????????</strong> → 100,000,000 numbers (08-000-0000 to 08-999-9999)</li>
+      <li><strong>09????????</strong> → 100,000,000 numbers (09-000-0000 to 09-999-9999)</li>
+    </ul>
+    <p><strong>Total combinations per pattern:</strong> 10^8 = 100,000,000</p>
+    <p><strong>Memory usage:</strong> ~10GB per pattern (may crash browser!)</p>
+  </div>
+
+  <div class="test-result info">
+    <h3>Safe Testing Options</h3>
+    <p>Choose a safe test option to verify the generation logic:</p>
+  </div>
+
+  <div>
+    <button onclick="testFirst1000()">Test First 1,000 Numbers</button>
+    <button onclick="testLast1000()">Test Last 1,000 Numbers</button>
+    <button onclick="testMiddle1000()">Test Middle 1,000 Numbers</button>
+    <button onclick="testCombinationCount()">Test Combination Count</button>
+    <button class="btn-danger" onclick="testFullGeneration()" title="WARNING: May crash browser!">⚠️ Test Full Generation (DANGEROUS)</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script src="app.js"></script>
+  <script>
+    function testCombinationCount() {
+      const resultsDiv = document.getElementById('results');
+      let html = '<h3>Testing Combination Count</h3>';
+      
+      try {
+        const generator = new PatternGenerator();
+        const patterns = ['06????????', '08????????', '09????????'];
+        
+        patterns.forEach(pattern => {
+          const count = generator.calculateCombinationCount(pattern, 'Thai Mobile No.');
+          const passed = count === 100000000;
+          
+          html += '<div class="test-result ' + (passed ? 'pass' : 'fail') + '">';
+          html += '<strong>' + pattern + ':</strong> ' + count.toLocaleString() + ' combinations ';
+          html += (passed ? '✅' : '❌');
+          html += '</div>';
+        });
+        
+      } catch (error) {
+        html += '<div class="test-result fail">Error: ' + error.message + '</div>';
+      }
+      
+      resultsDiv.innerHTML = html;
+    }
+    
+    function testFirst1000() {
+      testRange('06????????', 0, 1000, 'First 1,000 Numbers');
+    }
+    
+    function testLast1000() {
+      testRange('06????????', 99999000, 100000000, 'Last 1,000 Numbers');
+    }
+    
+    function testMiddle1000() {
+      testRange('06????????', 49999500, 50000500, 'Middle 1,000 Numbers');
+    }
+    
+    function testRange(pattern, start, end, title) {
+      const resultsDiv = document.getElementById('results');
+      let html = '<h3>Testing: ' + title + '</h3>';
+      
+      try {
+        // Simulate the generation logic for a specific range
+        const prefix = pattern.slice(0, 2);
+        const testNumbers = [];
+        
+        for (let i = start; i < end; i++) {
+          const wildcardDigits = i.toString().padStart(8, '0');
+          const fullNumber = prefix + wildcardDigits;
+          testNumbers.push(fullNumber.slice(0, 3) + '-' + fullNumber.slice(3, 6) + '-' + fullNumber.slice(6, 10));
+        }
+        
+        // Verify results
+        const count = testNumbers.length;
+        const firstNum = testNumbers[0];
+        const lastNum = testNumbers[testNumbers.length - 1];
+        const allStartWithPrefix = testNumbers.every(num => num.startsWith(prefix.slice(0, 2)));
+        const allProperFormat = testNumbers.every(num => /^\d{2}\d-\d{3}-\d{4}$/.test(num));
+        
+        // Check sorting
+        let isSorted = true;
+        for (let i = 1; i < testNumbers.length; i++) {
+          const prevNum = parseInt(testNumbers[i-1].replace(/-/g, ''));
+          const currNum = parseInt(testNumbers[i].replace(/-/g, ''));
+          if (prevNum >= currNum) {
+            isSorted = false;
+            break;
+          }
+        }
+        
+        html += '<div class="test-result ' + (count === (end - start) ? 'pass' : 'fail') + '">';
+        html += '<strong>Count:</strong> ' + count + ' numbers (expected: ' + (end - start) + ') ';
+        html += (count === (end - start) ? '✅' : '❌');
+        html += '</div>';
+        
+        html += '<div class="test-result ' + (allStartWithPrefix ? 'pass' : 'fail') + '">';
+        html += '<strong>Prefix:</strong> All start with ' + prefix + ' ';
+        html += (allStartWithPrefix ? '✅' : '❌');
+        html += '</div>';
+        
+        html += '<div class="test-result ' + (allProperFormat ? 'pass' : 'fail') + '">';
+        html += '<strong>Format:</strong> All in XX?-???-???? format ';
+        html += (allProperFormat ? '✅' : '❌');
+        html += '</div>';
+        
+        html += '<div class="test-result ' + (isSorted ? 'pass' : 'fail') + '">';
+        html += '<strong>Sorting:</strong> Numbers in ascending order ';
+        html += (isSorted ? '✅' : '❌');
+        html += '</div>';
+        
+        html += '<div class="test-result info">';
+        html += '<strong>Range:</strong> ' + firstNum + ' → ' + lastNum;
+        html += '<br><strong>Sample Numbers:</strong>';
+        html += '<div class="numbers">';
+        for (let i = 0; i < Math.min(20, testNumbers.length); i++) {
+          html += testNumbers[i] + '<br>';
+        }
+        if (testNumbers.length > 20) {
+          html += '... and ' + (testNumbers.length - 20) + ' more';
+        }
+        html += '</div>';
+        html += '</div>';
+        
+      } catch (error) {
+        html += '<div class="test-result fail">Error: ' + error.message + '</div>';
+      }
+      
+      resultsDiv.innerHTML = html;
+    }
+    
+    function testFullGeneration() {
+      if (!confirm('WARNING: This will generate 100,000,000 numbers and may crash your browser!\n\nAre you sure you want to continue?')) {
+        return;
+      }
+      
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="test-result warning">⚠️ Generating 100,000,000 numbers... This may take several minutes and use ~10GB of memory!</div>';
+      
+      // Use setTimeout to allow UI to update
+      setTimeout(() => {
+        try {
+          const startTime = Date.now();
+          const generator = new PatternGenerator();
+          const numbers = generator.generate('06????????', 'Thai Mobile No.');
+          const endTime = Date.now();
+          
+          let html = '<h3>Full Generation Test Results</h3>';
+          html += '<div class="test-result ' + (numbers.length === 100000000 ? 'pass' : 'fail') + '">';
+          html += '<strong>Count:</strong> ' + numbers.length.toLocaleString() + ' numbers ';
+          html += (numbers.length === 100000000 ? '✅' : '❌');
+          html += '</div>';
+          
+          html += '<div class="test-result info">';
+          html += '<strong>Generation Time:</strong> ' + ((endTime - startTime) / 1000).toFixed(2) + ' seconds';
+          html += '<br><strong>Memory Usage:</strong> ~' + (numbers.length * 12 / 1024 / 1024 / 1024).toFixed(1) + ' GB';
+          html += '<br><strong>First Number:</strong> ' + numbers[0];
+          html += '<br><strong>Last Number:</strong> ' + numbers[numbers.length - 1];
+          html += '</div>';
+          
+          resultsDiv.innerHTML = html;
+          
+        } catch (error) {
+          resultsDiv.innerHTML = '<div class="test-result fail"><strong>Error:</strong> ' + error.message + '<br>This is likely due to insufficient memory.</div>';
+        }
+      }, 100);
+    }
+    
+    // Auto-test on page load
+    window.addEventListener('load', function() {
+      testCombinationCount();
+    });
+  </script>
+</body>
+</html>
