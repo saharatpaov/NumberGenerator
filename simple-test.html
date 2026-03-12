@@ -2,77 +2,147 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple Test</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { color: #e91e63; }
-    .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
-    .success { background: #d4edda; color: #155724; }
-    .error { background: #f8d7da; color: #721c24; }
+    .lucky-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .lucky-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .lucky-popup {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    .close-btn {
+      float: right;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h1>🧪 Simple Test</h1>
-  <div id="status">กำลังทดสอบ...</div>
-  
+  <div id="lucky-overlay" class="lucky-overlay">
+    <div class="lucky-popup">
+      <button id="close-lucky-btn" class="close-btn">&times;</button>
+      <h3>🔮 ผลรวมเลขมงคล</h3>
+      <div id="selected-account-number">-</div>
+      <div id="digit-sum">-</div>
+      <div id="sum-calculation">-</div>
+      <div id="compatible-zodiac">-</div>
+      <div id="suitable-careers">-</div>
+      <div id="fortune-meaning">-</div>
+      <button id="copy-number-btn">คัดลอก</button>
+      <button id="close-lucky-footer-btn">ปิด</button>
+    </div>
+  </div>
+
+  <h1>Simple Test</h1>
+  <button onclick="testPopup()">Test Popup</button>
+  <div id="log"></div>
+
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const statusDiv = document.getElementById('status');
-      
-      try {
-        // Test 1: Check if we can create basic HTML
-        statusDiv.innerHTML = '<div class="success">✅ HTML โหลดสำเร็จ</div>';
+    function log(message) {
+      document.getElementById('log').innerHTML += '<div>' + message + '</div>';
+      console.log(message);
+    }
+
+    // Simple lucky number analyzer
+    class SimpleLuckyAnalyzer {
+      analyzeNumber(accountNumber) {
+        const digits = accountNumber.replace(/-/g, '').split('').map(Number);
+        const sum = digits.reduce((acc, digit) => acc + digit, 0);
+        let finalSum = sum;
+        while (finalSum > 9) {
+          finalSum = finalSum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0);
+        }
         
-        // Test 2: Check if we can run JavaScript
-        setTimeout(() => {
-          statusDiv.innerHTML += '<div class="success">✅ JavaScript ทำงานได้</div>';
-          
-          // Test 3: Try to load app.js
-          const script = document.createElement('script');
-          script.src = 'app.js';
-          script.onload = function() {
-            statusDiv.innerHTML += '<div class="success">✅ app.js โหลดสำเร็จ</div>';
-            
-            // Test 4: Check if classes exist
-            if (typeof PatternValidator !== 'undefined') {
-              statusDiv.innerHTML += '<div class="success">✅ PatternValidator class พบแล้ว</div>';
-            } else {
-              statusDiv.innerHTML += '<div class="error">❌ PatternValidator class ไม่พบ</div>';
-            }
-            
-            if (typeof PatternAnalyzer !== 'undefined') {
-              statusDiv.innerHTML += '<div class="success">✅ PatternAnalyzer class พบแล้ว</div>';
-            } else {
-              statusDiv.innerHTML += '<div class="error">❌ PatternAnalyzer class ไม่พบ</div>';
-            }
-            
-            if (typeof init !== 'undefined') {
-              statusDiv.innerHTML += '<div class="success">✅ init function พบแล้ว</div>';
-              
-              // Test 5: Try to run init
-              try {
-                init();
-                statusDiv.innerHTML += '<div class="success">✅ init() ทำงานสำเร็จ</div>';
-              } catch (error) {
-                statusDiv.innerHTML += '<div class="error">❌ init() error: ' + error.message + '</div>';
-              }
-            } else {
-              statusDiv.innerHTML += '<div class="error">❌ init function ไม่พบ</div>';
-            }
-          };
-          
-          script.onerror = function() {
-            statusDiv.innerHTML += '<div class="error">❌ app.js โหลดไม่สำเร็จ</div>';
-          };
-          
-          document.head.appendChild(script);
-        }, 100);
-        
-      } catch (error) {
-        statusDiv.innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+        return {
+          originalSum: sum,
+          finalSum: finalSum,
+          calculation: digits.join(' + ') + ' = ' + sum + (sum > 9 ? ' → ' + finalSum : ''),
+          zodiac: [{ name: 'เมษ', icon: '♈' }],
+          careers: ['ผู้นำ', 'ผู้บริหาร'],
+          fortune: 'เลขแห่งความสำเร็จ'
+        };
       }
+    }
+
+    // Simple UI
+    class SimpleLuckyUI {
+      constructor() {
+        log('SimpleLuckyUI constructor');
+        this.analyzer = new SimpleLuckyAnalyzer();
+        this.overlay = document.getElementById('lucky-overlay');
+        this.setupEvents();
+      }
+      
+      setupEvents() {
+        document.getElementById('close-lucky-btn').onclick = () => this.hide();
+        document.getElementById('close-lucky-footer-btn').onclick = () => this.hide();
+        this.overlay.onclick = (e) => {
+          if (e.target === this.overlay) this.hide();
+        };
+      }
+      
+      show(accountNumber) {
+        log('Showing popup for: ' + accountNumber);
+        const analysis = this.analyzer.analyzeNumber(accountNumber);
+        
+        document.getElementById('selected-account-number').textContent = accountNumber;
+        document.getElementById('digit-sum').textContent = analysis.finalSum;
+        document.getElementById('sum-calculation').textContent = analysis.calculation;
+        document.getElementById('compatible-zodiac').textContent = analysis.zodiac[0].icon + ' ' + analysis.zodiac[0].name;
+        document.getElementById('suitable-careers').textContent = analysis.careers.join(', ');
+        document.getElementById('fortune-meaning').textContent = analysis.fortune;
+        
+        this.overlay.classList.add('show');
+      }
+      
+      hide() {
+        log('Hiding popup');
+        this.overlay.classList.remove('show');
+      }
+    }
+
+    let luckyUI = null;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      log('DOM loaded');
+      luckyUI = new SimpleLuckyUI();
+      window.luckyUI = luckyUI;
+      log('SimpleLuckyUI ready');
     });
+
+    function testPopup() {
+      log('Test button clicked');
+      if (window.luckyUI) {
+        window.luckyUI.show('123-456-7890');
+      } else {
+        log('luckyUI not ready');
+      }
+    }
   </script>
 </body>
 </html>

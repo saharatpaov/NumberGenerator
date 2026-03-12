@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Lucky Number Test</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Lucky Number Analysis Popup -->
+  <div id="lucky-overlay" class="lucky-overlay">
+    <div class="lucky-popup">
+      <div class="lucky-header">
+        <h3>🔮 ผลรวมเลขมงคล</h3>
+        <button id="close-lucky-btn" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="lucky-body">
+        <div class="selected-number">
+          <label>หมายเลขบัญชีที่เลือก:</label>
+          <div id="selected-account-number" class="account-number-display">-</div>
+        </div>
+        
+        <div class="lucky-analysis">
+          <div class="sum-section">
+            <h4>📊 ผลรวมตัวเลข</h4>
+            <div class="sum-display">
+              <span id="digit-sum" class="digit-sum">-</span>
+              <span class="sum-label">ผลรวมรวม</span>
+            </div>
+            <div class="rating-display">
+              <div id="rating-badge" class="rating-badge">-</div>
+              <div id="rating-description" class="rating-description">-</div>
+            </div>
+          </div>
+          
+          <div class="personality-section">
+            <h4>👤 บุคลิกภาพและความหมาย</h4>
+            <div id="personality-section" class="personality-display">
+              <div class="personality-item">
+                <strong>บุคลิกภาพ:</strong> <span>-</span>
+              </div>
+              <div class="meaning-item">
+                <strong>ความหมาย:</strong> <span>-</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="info-grid">
+            <div class="zodiac-section">
+              <h4>♈ ราศีที่เข้ากัน</h4>
+              <div id="compatible-zodiac" class="zodiac-display">
+                <div class="zodiac-item">
+                  <span class="zodiac-icon">-</span>
+                  <span class="zodiac-name">-</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="career-section">
+              <h4>💼 อาชีพที่เหมาะสม</h4>
+              <div id="suitable-careers" class="career-display">
+                <div class="career-list">-</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="lucky-info-section">
+            <h4>🍀 ข้อมูลเพิ่มเติม</h4>
+            <div id="lucky-info" class="lucky-info-display">
+              <div class="lucky-item">
+                <strong>🍀 โชคดี:</strong> <span>-</span>
+              </div>
+              <div class="warning-item">
+                <strong>⚠️ ข้อควรระวัง:</strong> <span>-</span>
+              </div>
+              <div class="color-item">
+                <strong>🎨 สีมงคล:</strong> <span>-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="lucky-footer">
+        <div class="button-row">
+          <button id="copy-number-btn" class="btn btn-primary">📋 คัดลอกเลข</button>
+          <button id="close-lucky-footer-btn" class="btn btn-secondary">ปิด</button>
+        </div>
+        <div class="attribution">
+          <small>ระบบเลขศาสตร์โดย <strong>แมน การิน</strong> (Man Karin)</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>ระบบเลขมงคล แมน การิน</h1>
+        <p class="subtitle">ทดสอบระบบวิเคราะห์เลขมงคลตามหลักเลขศาสตร์</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="results-section">
+        <h2>ทดสอบเลขมงคลต่างๆ</h2>
+        <p>คลิกที่หมายเลขด้านล่างเพื่อดูผลรวมเลขมงคลและระดับความดีตามระบบแมน การิน</p>
+        
+        <div class="results-display">
+          <div class="result-group">
+            <h3>เลขผลรวม 1 (ดีมาก) - เลขแห่งผู้นำ</h3>
+            <div class="numbers-grid">
+              <span class="number-item clickable" onclick="testClick('100-000-0000', this)">100-000-0000</span>
+              <span class="number-item clickable" onclick="testClick('010-000-0000', this)">010-000-0000</span>
+            </div>
+          </div>
+          
+          <div class="result-group">
+            <h3>เลขผลรวม 3 (ดีมาก) - เลขแห่งความคิดสร้างสรรค์</h3>
+            <div class="numbers-grid">
+              <span class="number-item clickable" onclick="testClick('111-000-0000', this)">111-000-0000</span>
+              <span class="number-item clickable" onclick="testClick('300-000-0000', this)">300-000-0000</span>
+            </div>
+          </div>
+          
+          <div class="result-group">
+            <h3>เลขผลรวม 6 (ดีมาก) - เลขแห่งความรับผิดชอบ</h3>
+            <div class="numbers-grid">
+              <span class="number-item clickable" onclick="testClick('222-000-0000', this)">222-000-0000</span>
+              <span class="number-item clickable" onclick="testClick('600-000-0000', this)">600-000-0000</span>
+            </div>
+          </div>
+          
+          <div class="result-group">
+            <h3>เลขผลรวม 8 (ดีมาก) - เลขแห่งความสำเร็จ</h3>
+            <div class="numbers-grid">
+              <span class="number-item clickable" onclick="testClick('800-000-0000', this)">800-000-0000</span>
+              <span class="number-item clickable" onclick="testClick('444-000-0000', this)">444-000-0000</span>
+            </div>
+          </div>
+          
+          <div class="result-group">
+            <h3>เลขผลรวม 2, 5, 7, 9 (ดี)</h3>
+            <div class="numbers-grid">
+              <span class="number-item clickable" onclick="testClick('200-000-0000', this)">200-000-0000</span>
+              <span class="number-item clickable" onclick="testClick('500-000-0000', this)">500-000-0000</span>
+              <span class="number-item clickable" onclick="testClick('700-000-0000', this)">700-000-0000</span>
+              <span class="number-item clickable" onclick="testClick('900-000-0000', this)">900-000-0000</span>
+            </div>
+          </div>
+          
+          <div class="result-group">
+            <h3>เลขผลรวม 4 (พอใช้)</h3>
+            <div class="numbers-grid">
+              <span class="number-item clickable" onclick="testClick('400-000-0000', this)">400-000-0000</span>
+              <span class="number-item clickable" onclick="testClick('130-000-0000', this)">130-000-0000</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="lucky-number-system.js"></script>
+  <script>
+    function testClick(accountNumber, element) {
+      console.log('Testing lucky number analysis for:', accountNumber);
+      
+      // Add visual feedback
+      element.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        element.style.transform = 'scale(1)';
+      }, 150);
+      
+      // Show lucky number popup
+      setTimeout(() => {
+        if (window.luckyNumberUI) {
+          console.log('Using initialized lucky number UI');
+          window.luckyNumberUI.showLuckyPopup(accountNumber);
+        } else {
+          console.error('Lucky number UI not initialized! Trying to initialize...');
+          
+          if (typeof LuckyNumberUI !== 'undefined') {
+            try {
+              window.luckyNumberUI = new LuckyNumberUI();
+              window.luckyNumberUI.showLuckyPopup(accountNumber);
+              console.log('Successfully initialized and showed popup');
+            } catch (error) {
+              console.error('Failed to initialize:', error);
+              alert('เกิดข้อผิดพลาดในระบบเลขมงคล: ' + error.message);
+            }
+          } else {
+            alert('ระบบเลขมงคลยังไม่พร้อม กรุณารีเฟรชหน้าเว็บ');
+          }
+        }
+      }, 200);
+    }
+  </script>
+</body>
+</html>

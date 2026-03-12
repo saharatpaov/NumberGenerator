@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Lucky Number System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Lucky Number Analysis Popup -->
+  <div id="lucky-overlay" class="lucky-overlay">
+    <div class="lucky-popup">
+      <div class="lucky-header">
+        <h3>🔮 ผลรวมเลขมงคล</h3>
+        <button id="close-lucky-btn" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="lucky-body">
+        <div class="selected-number">
+          <label>หมายเลขบัญชีที่เลือก:</label>
+          <div id="selected-account-number" class="account-number-display">-</div>
+        </div>
+        
+        <div class="lucky-analysis">
+          <div class="sum-section">
+            <h4>📊 ผลรวมตัวเลข</h4>
+            <div class="sum-display">
+              <span id="digit-sum" class="digit-sum">-</span>
+              <span class="sum-label">ผลรวมรวม</span>
+            </div>
+            <div class="sum-breakdown">
+              <span id="sum-calculation" class="sum-calculation">-</span>
+            </div>
+          </div>
+          
+          <div class="zodiac-section">
+            <h4>♈ ราศีที่เข้ากัน</h4>
+            <div id="compatible-zodiac" class="zodiac-display">
+              <div class="zodiac-item">
+                <span class="zodiac-icon">-</span>
+                <span class="zodiac-name">-</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="career-section">
+            <h4>💼 อาชีพที่เหมาะสม</h4>
+            <div id="suitable-careers" class="career-display">
+              <div class="career-list">-</div>
+            </div>
+          </div>
+          
+          <div class="fortune-section">
+            <h4>🍀 ความหมายเลขมงคล</h4>
+            <div id="fortune-meaning" class="fortune-display">
+              <p class="fortune-text">-</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="lucky-footer">
+        <button id="copy-number-btn" class="btn btn-primary">📋 คัดลอกเลข</button>
+        <button id="close-lucky-footer-btn" class="btn btn-secondary">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 2rem;">
+    <h1>Test Lucky Number System</h1>
+    <p>Click the button below to test the lucky number popup:</p>
+    <button onclick="testLuckyPopup()" style="padding: 1rem 2rem; font-size: 1.2rem; background: #e91e63; color: white; border: none; border-radius: 8px; cursor: pointer;">
+      Test Lucky Number: 123-456-7890
+    </button>
+    
+    <div style="margin-top: 2rem;">
+      <h3>Console Output:</h3>
+      <div id="console-output" style="background: #f5f5f5; padding: 1rem; border-radius: 8px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <script src="lucky-number-system.js"></script>
+  <script>
+    // Override console.log to show in page
+    const originalLog = console.log;
+    const originalError = console.error;
+    const consoleOutput = document.getElementById('console-output');
+    
+    function addToConsole(type, ...args) {
+      const timestamp = new Date().toLocaleTimeString();
+      const message = `[${timestamp}] ${type}: ${args.join(' ')}\n`;
+      consoleOutput.textContent += message;
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+    
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      addToConsole('LOG', ...args);
+    };
+    
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addToConsole('ERROR', ...args);
+    };
+    
+    function testLuckyPopup() {
+      console.log('Test button clicked');
+      if (window.luckyNumberUI) {
+        console.log('Calling showLuckyPopup...');
+        window.luckyNumberUI.showLuckyPopup('123-456-7890');
+      } else {
+        console.error('luckyNumberUI not available');
+      }
+    }
+    
+    // Test initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded, testing initialization...');
+      setTimeout(() => {
+        console.log('luckyNumberUI available:', !!window.luckyNumberUI);
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

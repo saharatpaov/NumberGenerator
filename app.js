@@ -2234,8 +2234,6 @@ class UIController {
   constructor() {
     this.elements = {};
     this.loadingElements = {};
-    this.reservationElements = {};
-    this.reservationCache = new Map(); // Cache for reservation status
   }
 
   /**
@@ -2259,18 +2257,6 @@ class UIController {
       progressBar: document.getElementById('loading-progress-bar'),
       pattern: document.getElementById('loading-pattern'),
       count: document.getElementById('loading-count'),
-    };
-
-    // Cache reservation elements
-    this.reservationElements = {
-      overlay: document.getElementById('reservation-overlay'),
-      popup: document.querySelector('.reservation-popup'),
-      closeBtn: document.getElementById('close-reservation-btn'),
-      selectedNumber: document.getElementById('selected-account-number'),
-      thaiIdInput: document.getElementById('thai-id-input'),
-      errorMessage: document.getElementById('reservation-error'),
-      cancelBtn: document.getElementById('cancel-reservation-btn'),
-      confirmBtn: document.getElementById('confirm-reservation-btn'),
     };
 
     // Set up event listeners
@@ -2335,438 +2321,35 @@ class UIController {
   }
 
   /**
-   * Setup reservation popup event listeners
-   */
-  setupReservationEventListeners() {
-    if (!this.reservationElements.overlay) return;
-
-    // Close popup handlers
-    this.reservationElements.closeBtn?.addEventListener('click', () => {
-      this.hideReservationPopup();
-    });
-
-    this.reservationElements.cancelBtn?.addEventListener('click', () => {
-      this.hideReservationPopup();
-    });
-
-    // Click outside to close
-    this.reservationElements.overlay.addEventListener('click', (e) => {
-      if (e.target === this.reservationElements.overlay) {
-        this.hideReservationPopup();
-      }
-    });
-
-    // Confirm reservation
-    this.reservationElements.confirmBtn?.addEventListener('click', () => {
-      this.handleReservationConfirm();
-    });
-
-    // Thai ID input validation
-    this.reservationElements.thaiIdInput?.addEventListener('input', (e) => {
-      this.validateThaiIdInput(e.target);
-    });
-
-    // Enter key to confirm
-    this.reservationElements.thaiIdInput?.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        this.handleReservationConfirm();
-      }
-    });
-  }
-
-  /**
-   * Show reservation popup for account number
-   * @param {string} accountNumber - Account number to reserve
-   * @param {string} patternType - Pattern type
-   * @param {string} pattern - Pattern
-   */
-  showReservationPopup(accountNumber, patternType, pattern) {
-    if (!this.reservationElements.overlay) return;
-
-    // Set selected account number
-    if (this.reservationElements.selectedNumber) {
-      this.reservationElements.selectedNumber.textContent = accountNumber;
-    }
-
-    // Store reservation data
-    this.currentReservation = {
-      accountNumber,
-      patternType,
-      pattern
-    };
-
-    // Clear form
-    if (this.reservationElements.thaiIdInput) {
-      this.reservationElements.thaiIdInput.value = '';
-      this.reservationElements.thaiIdInput.classList.remove('error');
-    }
-
-    this.clearReservationError();
-
-    // Show popup
-    this.reservationElements.overlay.classList.add('show');
-    
-    // Focus on Thai ID input
-    setTimeout(() => {
-      this.reservationElements.thaiIdInput?.focus();
-    }, 300);
-  }
-
-  /**
-   * Hide reservation popup
-   */
-  hideReservationPopup() {
-    if (this.reservationElements.overlay) {
-      this.reservationElements.overlay.classList.remove('show');
-    }
-    this.currentReservation = null;
-  }
-
-  /**
-   * Handle reservation confirmation
-   */
-  async handleReservationConfirm() {
-    if (!this.currentReservation) return;
-
-    const thaiId = this.reservationElements.thaiIdInput?.value.trim();
-    
-    if (!thaiId) {
-      this.showReservationError('กรุณาใส่เลขบัตรประชาชน');
-      return;
-    }
-
-    if (!this.validateThaiId(thaiId)) {
-      this.showReservationError('รูปแบบเลขบัตรประชาชนไม่ถูกต้อง');
-      return;
-    }
-
-    try {
-      // Show loading
-      this.showLoading('กำลังจองหมายเลขบัญชี...', this.currentReservation.accountNumber);
-
-      // Try different API paths
-      const apiPaths = [
-        './api/reservations.php',
-        'api/reservations.php',
-        '/api/reservations.php'
-      ];
-
-      let response = null;
-      let lastError = null;
-
-      for (const apiPath of apiPaths) {
-        try {
-          console.log(`Trying API path: ${apiPath}`);
-          
-          response = await fetch(apiPath, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              account_number: this.currentReservation.accountNumber,
-              thai_id: thaiId,
-              pattern_type: this.currentReservation.patternType,
-              pattern: this.currentReservation.pattern
-            })
-          });
-
-          if (response.ok) {
-            console.log(`Success with API path: ${apiPath}`);
-            break;
-          } else {
-            console.log(`Failed with API path: ${apiPath}, status: ${response.status}`);
-            lastError = `HTTP ${response.status}: ${response.statusText}`;
-          }
-        } catch (fetchError) {
-          console.log(`Error with API path: ${apiPath}`, fetchError);
-          lastError = fetchError.message;
-          response = null;
-        }
-      }
-
-      if (!response || !response.ok) {
-        throw new Error(lastError || 'ไม่สามารถเชื่อมต่อ API ได้');
-      }
-
-      const contentType = response.headers.get('content-type');
-      let result;
-
-      if (contentType && contentType.includes('application/json')) {
-        result = await response.json();
-      } else {
-        const text = await response.text();
-        console.log('Non-JSON response:', text);
-        
-        // Try to extract JSON from HTML response
-        const jsonMatch = text.match(/\{.*\}/s);
-        if (jsonMatch) {
-          result = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error('API ส่งคืนข้อมูลที่ไม่ถูกต้อง');
-        }
-      }
-
-      this.hideLoading();
-
-      if (result.success) {
-        // Update reservation cache
-        this.reservationCache.set(this.currentReservation.accountNumber, {
-          reserved: true,
-          thai_id: thaiId,
-          pattern_type: this.currentReservation.patternType,
-          pattern: this.currentReservation.pattern,
-          reserved_at: new Date().toISOString()
-        });
-
-        // Update UI
-        this.updateNumberReservationStatus(this.currentReservation.accountNumber, true);
-        
-        // Hide popup
-        this.hideReservationPopup();
-
-        // Show success message
-        alert(`จองหมายเลขบัญชี ${this.currentReservation.accountNumber} สำเร็จ!`);
-
-      } else {
-        this.showReservationError(result.error || 'เกิดข้อผิดพลาดในการจอง');
-      }
-
-    } catch (error) {
-      this.hideLoading();
-      console.error('Reservation error:', error);
-      
-      // Show detailed error for debugging
-      let errorMessage = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
-      
-      if (error.message.includes('fetch')) {
-        errorMessage = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
-      } else if (error.message.includes('JSON')) {
-        errorMessage = 'เซิร์ฟเวอร์ส่งข้อมูลที่ไม่ถูกต้อง';
-      } else if (error.message.includes('HTTP')) {
-        errorMessage = `เซิร์ฟเวอร์ตอบกลับด้วยข้อผิดพลาด: ${error.message}`;
-      }
-      
-      this.showReservationError(`${errorMessage}\n\nรายละเอียด: ${error.message}`);
-    }
-  }
-
-  /**
-   * Validate Thai ID format and checksum
-   * @param {string} thaiId - Thai ID to validate
-   * @returns {boolean} True if valid
-   */
-  validateThaiId(thaiId) {
-    // Remove any spaces or dashes
-    thaiId = thaiId.replace(/[\s-]/g, '');
-    
-    // Check if it's exactly 13 digits
-    if (!/^\d{13}$/.test(thaiId)) {
-      return false;
-    }
-    
-    // Validate checksum using Thai ID algorithm
-    let sum = 0;
-    for (let i = 0; i < 12; i++) {
-      sum += parseInt(thaiId[i]) * (13 - i);
-    }
-    
-    const checkDigit = (11 - (sum % 11)) % 10;
-    return checkDigit === parseInt(thaiId[12]);
-  }
-
-  /**
-   * Validate Thai ID input field
-   * @param {HTMLInputElement} input - Input element
-   */
-  validateThaiIdInput(input) {
-    const value = input.value.replace(/[\s-]/g, '');
-    
-    // Only allow digits
-    input.value = value.replace(/\D/g, '');
-    
-    // Limit to 13 digits
-    if (input.value.length > 13) {
-      input.value = input.value.slice(0, 13);
-    }
-
-    // Visual validation
-    if (input.value.length === 13) {
-      if (this.validateThaiId(input.value)) {
-        input.classList.remove('error');
-        this.clearReservationError();
-      } else {
-        input.classList.add('error');
-        this.showReservationError('เลขบัตรประชาชนไม่ถูกต้อง');
-      }
-    } else {
-      input.classList.remove('error');
-      this.clearReservationError();
-    }
-  }
-
-  /**
-   * Show reservation error message
-   * @param {string} message - Error message
-   */
-  showReservationError(message) {
-    if (this.reservationElements.errorMessage) {
-      this.reservationElements.errorMessage.textContent = message;
-      this.reservationElements.errorMessage.classList.add('show');
-    }
-  }
-
-  /**
-   * Clear reservation error message
-   */
-  clearReservationError() {
-    if (this.reservationElements.errorMessage) {
-      this.reservationElements.errorMessage.textContent = '';
-      this.reservationElements.errorMessage.classList.remove('show');
-    }
-  }
-
-  /**
-   * Check reservation status for account numbers
-   * @param {string[]} accountNumbers - Array of account numbers to check
-   */
-  async checkReservationStatus(accountNumbers) {
-    if (!accountNumbers || accountNumbers.length === 0) return;
-
-    try {
-      // Try different API paths
-      const apiPaths = [
-        './api/reservations.php',
-        'api/reservations.php',
-        '/api/reservations.php'
-      ];
-
-      let response = null;
-      const numbersParam = accountNumbers.join(',');
-
-      for (const apiPath of apiPaths) {
-        try {
-          console.log(`Checking reservations via: ${apiPath}`);
-          
-          response = await fetch(`${apiPath}?numbers=${encodeURIComponent(numbersParam)}`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-
-          if (response.ok) {
-            console.log(`Success checking reservations via: ${apiPath}`);
-            break;
-          } else {
-            console.log(`Failed checking reservations via: ${apiPath}, status: ${response.status}`);
-          }
-        } catch (fetchError) {
-          console.log(`Error checking reservations via: ${apiPath}`, fetchError);
-          response = null;
-        }
-      }
-
-      if (!response || !response.ok) {
-        console.warn('Failed to check reservation status, using offline mode');
-        // Set all numbers as available (green) when API is not available
-        accountNumbers.forEach(number => {
-          this.updateNumberReservationStatus(number, false);
-        });
-        return;
-      }
-
-      const contentType = response.headers.get('content-type');
-      let result;
-
-      if (contentType && contentType.includes('application/json')) {
-        result = await response.json();
-      } else {
-        const text = await response.text();
-        console.log('Non-JSON response for reservation check:', text);
-        
-        // Try to extract JSON from HTML response
-        const jsonMatch = text.match(/\{.*\}/s);
-        if (jsonMatch) {
-          result = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error('Invalid API response');
-        }
-      }
-
-      if (result.success) {
-        // Update cache
-        Object.entries(result.reservations).forEach(([number, status]) => {
-          this.reservationCache.set(number, status);
-        });
-
-        // Update UI
-        accountNumbers.forEach(number => {
-          const status = result.reservations[number];
-          this.updateNumberReservationStatus(number, status.reserved);
-        });
-      } else {
-        console.warn('API returned error for reservation check:', result.error);
-        // Set all numbers as available when API returns error
-        accountNumbers.forEach(number => {
-          this.updateNumberReservationStatus(number, false);
-        });
-      }
-    } catch (error) {
-      console.error('Failed to check reservation status:', error);
-      // Set all numbers as available when there's an error
-      accountNumbers.forEach(number => {
-        this.updateNumberReservationStatus(number, false);
-      });
-    }
-  }
-
-  /**
-   * Update number reservation status in UI
-   * @param {string} accountNumber - Account number
-   * @param {boolean} isReserved - Whether the number is reserved
-   */
-  updateNumberReservationStatus(accountNumber, isReserved) {
-    const numberElements = document.querySelectorAll(`.number-item[data-number="${accountNumber}"]`);
-    
-    numberElements.forEach(element => {
-      element.classList.remove('available', 'reserved', 'checking');
-      
-      if (isReserved) {
-        element.classList.add('reserved');
-        element.title = 'หมายเลขนี้ถูกจองแล้ว';
-      } else {
-        element.classList.add('available');
-        element.title = 'คลิกเพื่อจองหมายเลขนี้';
-      }
-    });
-  }
-
-  /**
-   * Handle account number click (for reservation)
+   * Handle account number click (for lucky number analysis)
    * @param {string} accountNumber - Account number clicked
    * @param {HTMLElement} element - Clicked element
    */
   handleAccountNumberClick(accountNumber, element) {
-    // Check if already reserved
-    if (element.classList.contains('reserved')) {
-      alert('หมายเลขนี้ถูกจองแล้ว');
-      return;
-    }
-
-    // Get pattern info from the element's parent group
-    const resultGroup = element.closest('.result-group');
-    const header = resultGroup?.querySelector('h3');
-    const headerText = header?.textContent || '';
+    console.log('Account number clicked:', accountNumber);
+    console.log('Lucky number UI available:', !!window.luckyNumberUI);
     
-    // Extract pattern and pattern type from header
-    const match = headerText.match(/^(.+?)\s+\((.+?)\)/);
-    const pattern = match ? match[1] : 'unknown';
-    const patternType = match ? match[2] : 'unknown';
-
-    // Show reservation popup
-    this.showReservationPopup(accountNumber, patternType, pattern);
+    // Show lucky number analysis popup
+    if (window.luckyNumberUI) {
+      console.log('Showing lucky popup...');
+      window.luckyNumberUI.showLuckyPopup(accountNumber);
+    } else {
+      console.error('Lucky number UI not initialized! Trying to initialize...');
+      
+      // Try to initialize if not ready
+      if (typeof LuckyNumberUI !== 'undefined') {
+        try {
+          window.luckyNumberUI = new LuckyNumberUI();
+          window.luckyNumberUI.showLuckyPopup(accountNumber);
+          console.log('Successfully initialized and showed popup');
+        } catch (error) {
+          console.error('Failed to initialize:', error);
+          alert('เกิดข้อผิดพลาดในระบบเลขมงคล');
+        }
+      } else {
+        alert('ระบบเลขมงคลยังไม่พร้อม กรุณารีเฟรชหน้าเว็บ');
+      }
+    }
   }
 
   /**
@@ -2794,9 +2377,6 @@ class UIController {
     this.elements.exportBtn.addEventListener('click', () => {
       this.handleExport();
     });
-
-    // Wire reservation popup event handlers
-    this.setupReservationEventListeners();
 
     // Performance monitoring controls
     const showPerfBtn = document.getElementById('show-performance-btn');
@@ -3055,7 +2635,7 @@ class UIController {
           // Use innerHTML for better performance with large datasets
           let gridHTML = '';
           numbersToShow.forEach(number => {
-            gridHTML += `<span class="number-item clickable checking" data-number="${number}" title="คลิกเพื่อจองหมายเลขนี้" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}</span>`;
+            gridHTML += `<span class="number-item clickable" data-number="${number}" title="คลิกเพื่อดูผลรวมเลขมงคล" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}</span>`;
           });
           numbersGrid.innerHTML = gridHTML;
 
@@ -3136,22 +2716,6 @@ class UIController {
         // Single DOM update (performance optimization)
         this.elements.resultsDisplay.innerHTML = '';
         this.elements.resultsDisplay.appendChild(fragment);
-
-        // Check reservation status for displayed numbers
-        const allDisplayedNumbers = [];
-        orderedPatternGroups.forEach(group => {
-          const itemsPerPage = 1000;
-          const currentPage = this.currentPages?.[orderedPatternGroups.indexOf(group)] || 1;
-          const startIndex = (currentPage - 1) * itemsPerPage;
-          const endIndex = Math.min(startIndex + itemsPerPage, group.numbers.length);
-          const numbersToShow = group._sortedNumbers.slice(startIndex, endIndex);
-          allDisplayedNumbers.push(...numbersToShow);
-        });
-
-        // Check reservation status asynchronously
-        if (allDisplayedNumbers.length > 0) {
-          this.checkReservationStatus(allDisplayedNumbers);
-        }
       }
     }
 
@@ -3435,7 +2999,7 @@ class UIController {
         if (numbersGrid) {
           let gridHTML = '';
           numbersToShow.forEach(number => {
-            gridHTML += `<span class="number-item clickable checking" data-number="${number}" title="คลิกเพื่อจองหมายเลขนี้" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}</span>`;
+            gridHTML += `<span class="number-item clickable" data-number="${number}" title="คลิกเพื่อดูผลรวมเลขมงคล" onclick="uiController.handleAccountNumberClick('${number}', this)">${number}</span>`;
           });
           numbersGrid.innerHTML = gridHTML;
         }
