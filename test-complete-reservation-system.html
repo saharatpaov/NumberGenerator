@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Complete Reservation System</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+    .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+    .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .pass { background-color: #d4edda; border-color: #c3e6cb; }
+    .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+    .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+    .info { background-color: #d1ecf1; border-color: #bee5eb; }
+    pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+    button { padding: 8px 16px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+    .step-counter { font-weight: bold; color: #007bff; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Complete Reservation System Test</h1>
+  <p>This page tests the entire reservation system from database connection to frontend functionality.</p>
+  
+  <div class="test-section">
+    <h2>🔧 Manual Test Controls</h2>
+    <button class="btn-primary" onclick="runAllTests()">Run All Tests</button>
+    <button class="btn-secondary" onclick="testDatabaseConnection()">Test Database Connection</button>
+    <button class="btn-secondary" onclick="testDatabaseInit()">Initialize Database</button>
+    <button class="btn-secondary" onclick="testReservationAPI()">Test Reservation API</button>
+    <button class="btn-success" onclick="clearResults()">Clear Results</button>
+  </div>
+
+  <div id="test-results"></div>
+
+  <script>
+    let testCounter = 0;
+    
+    function clearResults() {
+      document.getElementById('test-results').innerHTML = '';
+      testCounter = 0;
+    }
+    
+    function addTestResult(title, status, content, details = '') {
+      testCounter++;
+      const results = document.getElementById('test-results');
+      const div = document.createElement('div');
+      div.className = `test-result ${status}`;
+      
+      let statusIcon = '';
+      switch(status) {
+        case 'pass': statusIcon = '✅'; break;
+        case 'fail': statusIcon = '❌'; break;
+        case 'loading': statusIcon = '⏳'; break;
+        case 'info': statusIcon = 'ℹ️'; break;
+      }
+      
+      div.innerHTML = `
+        <h3><span class="step-counter">Step ${testCounter}:</span> ${statusIcon} ${title}</h3>
+        <div>${content}</div>
+        ${details ? `<details><summary>Details</summary><pre>${details}</pre></details>` : ''}
+      `;
+      
+      results.appendChild(div);
+      div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    async function runAllTests() {
+      clearResults();
+      addTestResult('Starting Complete System Test', 'info', 'Running all tests in sequence...');
+      
+      await testDatabaseConnection();
+      await sleep(1000);
+      await testDatabaseInit();
+      await sleep(1000);
+      await testReservationAPI();
+      await sleep(1000);
+      await testThaiIdValidation();
+      await sleep(1000);
+      await testReservationWorkflow();
+      
+      addTestResult('All Tests Completed', 'info', 'Check individual test results above for details.');
+    }
+    
+    async function testDatabaseConnection() {
+      addTestResult('Database Connection Test', 'loading', 'Testing connection to MySQL database...');
+      
+      try {
+        const response = await fetch('api/test-connection.php');
+        const text = await response.text();
+        
+        if (response.ok && text.includes('SUCCESS')) {
+          addTestResult('Database Connection Test', 'pass', 
+            'Successfully connected to MySQL database!<br>' +
+            '<strong>Server:</strong> sql12.freemysqlhosting.net:3306<br>' +
+            '<strong>Database:</strong> sql12819700', 
+            text.substring(0, 1000) + '...'
+          );
+        } else {
+          addTestResult('Database Connection Test', 'fail', 
+            'Failed to connect to database', text.substring(0, 500)
+          );
+        }
+      } catch (error) {
+        addTestResult('Database Connection Test', 'fail', 
+          `Connection error: ${error.message}`
+        );
+      }
+    }
+    
+    async function testDatabaseInit() {
+      addTestResult('Database Initialization', 'loading', 'Creating database tables...');
+      
+      try {
+        const response = await fetch('api/init-db.php?format=json');
+        const result = await response.json();
+        
+        if (result.success) {
+          addTestResult('Database Initialization', 'pass', 
+            `Database tables created successfully!<br>` +
+            `<strong>Tables:</strong> ${result.tables.join(', ')}<br>` +
+            `<strong>Sample Data:</strong> ${result.sample_data_count} records<br>` +
+            `<strong>Active Reservations:</strong> ${result.active_reservations}`,
+            JSON.stringify(result, null, 2)
+          );
+        } else {
+          addTestResult('Database Initialization', 'fail', 
+            `Failed to create tables: ${result.error}`,
+            JSON.stringify(result, null, 2)
+          );
+        }
+      } catch (error) {
+        addTestResult('Database Initialization', 'fail', 
+          `Initialization error: ${error.message}`
+        );
+      }
+    }
+    
+    async function testReservationAPI() {
+      addTestResult('Reservation API Test', 'loading', 'Testing reservation API endpoints...');
+      
+      try {
+        // Test 1: Create a reservation
+        const testAccountNumber = '999-888-7777';
+        const testThaiId = '1234567890123';
+        
+        const createResponse = await fetch('api/reservations.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account_number: testAccountNumber,
+            thai_id: testThaiId,
+            pattern_type: 'Test Pattern',
+            pattern: 'test-api'
+          })
+        });
+        
+        const createResult = await createResponse.json();
+        
+        if (!createResult.success) {
+          addTestResult('Reservation API Test', 'fail', 
+            `Failed to create reservation: ${createResult.error}`,
+            JSON.stringify(createResult, null, 2)
+          );
+          return;
+        }
+        
+        // Test 2: Check reservation status
+        const checkResponse = await fetch(`api/reservations.php?numbers=${testAccountNumber}`);
+        const checkResult = await checkResponse.json();
+        
+        if (!checkResult.success || !checkResult.reservations[testAccountNumber]?.reserved) {
+          addTestResult('Reservation API Test', 'fail', 
+            'Reservation not found after creation',
+            JSON.stringify(checkResult, null, 2)
+          );
+          return;
+        }
+        
+        // Test 3: Try to create duplicate reservation (should fail)
+        const duplicateResponse = await fetch('api/reservations.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account_number: testAccountNumber,
+            thai_id: '9876543210987',
+            pattern_type: 'Test Pattern',
+            pattern: 'test-api'
+          })
+        });
+        
+        const duplicateResult = await duplicateResponse.json();
+        
+        if (duplicateResult.success) {
+          addTestResult('Reservation API Test', 'fail', 
+            'Duplicate reservation was allowed (should be prevented)'
+          );
+          return;
+        }
+        
+        // Test 4: Cancel reservation
+        const cancelResponse = await fetch('api/reservations.php', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account_number: testAccountNumber,
+            thai_id: testThaiId
+          })
+        });
+        
+        const cancelResult = await cancelResponse.json();
+        
+        if (!cancelResult.success) {
+          addTestResult('Reservation API Test', 'fail', 
+            `Failed to cancel reservation: ${cancelResult.error}`,
+            JSON.stringify(cancelResult, null, 2)
+          );
+          return;
+        }
+        
+        addTestResult('Reservation API Test', 'pass', 
+          'All API endpoints working correctly!<br>' +
+          '✅ Create reservation<br>' +
+          '✅ Check reservation status<br>' +
+          '✅ Prevent duplicate reservations<br>' +
+          '✅ Cancel reservation',
+          `Create: ${JSON.stringify(createResult, null, 2)}\n\n` +
+          `Check: ${JSON.stringify(checkResult, null, 2)}\n\n` +
+          `Duplicate: ${JSON.stringify(duplicateResult, null, 2)}\n\n` +
+          `Cancel: ${JSON.stringify(cancelResult, null, 2)}`
+        );
+        
+      } catch (error) {
+        addTestResult('Reservation API Test', 'fail', 
+          `API test error: ${error.message}`
+        );
+      }
+    }
+    
+    async function testThaiIdValidation() {
+      addTestResult('Thai ID Validation Test', 'loading', 'Testing Thai ID validation logic...');
+      
+      const testCases = [
+        { id: '1234567890123', expected: false, note: 'Invalid checksum' },
+        { id: '123456789012', expected: false, note: 'Too short (12 digits)' },
+        { id: '12345678901234', expected: false, note: 'Too long (14 digits)' },
+        { id: 'abcdefghijklm', expected: false, note: 'Non-numeric' },
+        { id: '1100800000018', expected: true, note: 'Valid format and checksum' },
+        { id: '1234567890120', expected: false, note: 'Invalid checksum' }
+      ];
+      
+      let results = [];
+      let allPassed = true;
+      
+      testCases.forEach(testCase => {
+        const isValid = validateThaiId(testCase.id);
+        const passed = isValid === testCase.expected;
+        
+        results.push(`${testCase.id}: ${isValid ? 'VALID' : 'INVALID'} (Expected: ${testCase.expected ? 'VALID' : 'INVALID'}) - ${passed ? '✅' : '❌'} ${testCase.note}`);
+        
+        if (!passed) allPassed = false;
+      });
+      
+      addTestResult('Thai ID Validation Test', allPassed ? 'pass' : 'fail', 
+        `Thai ID validation ${allPassed ? 'working correctly' : 'has issues'}!<br>` +
+        `Tested ${testCases.length} cases, ${results.filter(r => r.includes('✅')).length} passed`,
+        results.join('\n')
+      );
+    }
+    
+    async function testReservationWorkflow() {
+      addTestResult('Reservation Workflow Test', 'loading', 'Testing complete reservation workflow...');
+      
+      try {
+        // Simulate the complete workflow
+        const testNumber = '777-666-5555';
+        const testThaiId = '1100800000018'; // Valid Thai ID
+        
+        // Step 1: Check if number is available
+        let checkResponse = await fetch(`api/reservations.php?numbers=${testNumber}`);
+        let checkResult = await checkResponse.json();
+        
+        const initiallyReserved = checkResult.success && checkResult.reservations[testNumber]?.reserved;
+        
+        // Step 2: If reserved, cancel it first
+        if (initiallyReserved) {
+          const cancelResponse = await fetch('api/reservations.php', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              account_number: testNumber,
+              thai_id: checkResult.reservations[testNumber].thai_id
+            })
+          });
+        }
+        
+        // Step 3: Make reservation
+        const reserveResponse = await fetch('api/reservations.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account_number: testNumber,
+            thai_id: testThaiId,
+            pattern_type: 'Workflow Test',
+            pattern: 'test-workflow'
+          })
+        });
+        
+        const reserveResult = await reserveResponse.json();
+        
+        if (!reserveResult.success) {
+          addTestResult('Reservation Workflow Test', 'fail', 
+            `Failed to make reservation: ${reserveResult.error}`
+          );
+          return;
+        }
+        
+        // Step 4: Verify reservation exists
+        checkResponse = await fetch(`api/reservations.php?numbers=${testNumber}`);
+        checkResult = await checkResponse.json();
+        
+        const isNowReserved = checkResult.success && checkResult.reservations[testNumber]?.reserved;
+        
+        if (!isNowReserved) {
+          addTestResult('Reservation Workflow Test', 'fail', 
+            'Reservation not found after creation'
+          );
+          return;
+        }
+        
+        addTestResult('Reservation Workflow Test', 'pass', 
+          'Complete reservation workflow working correctly!<br>' +
+          `✅ Number availability check<br>` +
+          `✅ Reservation creation<br>` +
+          `✅ Reservation verification<br>` +
+          `<strong>Reserved Number:</strong> ${testNumber}<br>` +
+          `<strong>Thai ID:</strong> ${testThaiId}`,
+          JSON.stringify(checkResult.reservations[testNumber], null, 2)
+        );
+        
+      } catch (error) {
+        addTestResult('Reservation Workflow Test', 'fail', 
+          `Workflow test error: ${error.message}`
+        );
+      }
+    }
+    
+    // Helper functions
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    function validateThaiId(thaiId) {
+      // Remove any spaces or dashes
+      thaiId = thaiId.replace(/[\s-]/g, '');
+      
+      // Check if it's exactly 13 digits
+      if (!/^\d{13}$/.test(thaiId)) {
+        return false;
+      }
+      
+      // Validate checksum using Thai ID algorithm
+      let sum = 0;
+      for (let i = 0; i < 12; i++) {
+        sum += parseInt(thaiId[i]) * (13 - i);
+      }
+      
+      const checkDigit = (11 - (sum % 11)) % 10;
+      return checkDigit === parseInt(thaiId[12]);
+    }
+    
+    // Auto-run tests on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      addTestResult('System Ready', 'info', 
+        'Reservation system test page loaded successfully.<br>' +
+        'Click "Run All Tests" to start comprehensive testing.'
+      );
+    });
+  </script>
+</body>
+</html>
