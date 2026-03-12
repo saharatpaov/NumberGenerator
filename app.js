@@ -2233,6 +2233,7 @@ class CSVExporter {
 class UIController {
   constructor() {
     this.elements = {};
+    this.loadingElements = {};
   }
 
   /**
@@ -2249,8 +2250,74 @@ class UIController {
       exportBtn: document.getElementById('export-btn'),
     };
 
+    // Cache loading elements
+    this.loadingElements = {
+      overlay: document.getElementById('loading-overlay'),
+      message: document.getElementById('loading-message'),
+      progressBar: document.getElementById('loading-progress-bar'),
+      pattern: document.getElementById('loading-pattern'),
+      count: document.getElementById('loading-count'),
+    };
+
     // Set up event listeners
     this.setupEventListeners();
+  }
+
+  /**
+   * Show loading screen with customizable message
+   * @param {string} message - Loading message to display
+   * @param {string} pattern - Pattern being processed
+   */
+  showLoading(message = 'กำลังประมวลผล...', pattern = '') {
+    if (this.loadingElements.overlay) {
+      this.loadingElements.overlay.classList.add('show');
+      
+      if (this.loadingElements.message) {
+        this.loadingElements.message.textContent = message;
+      }
+      
+      if (this.loadingElements.pattern && pattern) {
+        this.loadingElements.pattern.textContent = `Pattern: ${pattern}`;
+      }
+      
+      if (this.loadingElements.count) {
+        this.loadingElements.count.textContent = '0 / 0';
+      }
+      
+      if (this.loadingElements.progressBar) {
+        this.loadingElements.progressBar.style.width = '0%';
+      }
+    }
+  }
+
+  /**
+   * Update loading progress
+   * @param {number} current - Current progress count
+   * @param {number} total - Total expected count
+   * @param {string} message - Optional message update
+   */
+  updateLoadingProgress(current, total, message = null) {
+    if (this.loadingElements.count) {
+      this.loadingElements.count.textContent = `${current.toLocaleString()} / ${total.toLocaleString()}`;
+    }
+    
+    if (this.loadingElements.progressBar && total > 0) {
+      const percentage = Math.min((current / total) * 100, 100);
+      this.loadingElements.progressBar.style.width = `${percentage}%`;
+    }
+    
+    if (message && this.loadingElements.message) {
+      this.loadingElements.message.textContent = message;
+    }
+  }
+
+  /**
+   * Hide loading screen
+   */
+  hideLoading() {
+    if (this.loadingElements.overlay) {
+      this.loadingElements.overlay.classList.remove('show');
+    }
   }
 
   /**
@@ -2361,27 +2428,66 @@ class UIController {
     const pattern = selectedOption.value;
 
     try {
-      // Performance monitoring: Start timing the entire operation
-      const endTiming = window.performanceMonitor ? window.performanceMonitor.startTiming('patternProcessing') : null;
+      // Show loading screen
+      const patternType = selectedOption.getAttribute('data-type') || 'Unknown';
+      this.showLoading(`กำลังสร้างหมายเลขบัญชี สำหรับ ${patternType}`, pattern);
 
-      // Add pattern using PatternManager (includes validation, type identification, and number generation)
-      state.patternManager.addPattern(pattern);
+      // Use setTimeout to allow loading screen to show before heavy computation
+      setTimeout(() => {
+        try {
+          // Performance monitoring: Start timing the entire operation
+          const endTiming = window.performanceMonitor ? window.performanceMonitor.startTiming('patternProcessing') : null;
 
-      // Record performance metrics
-      if (endTiming) {
-        endTiming({ pattern, operation: 'addPattern' });
-      }
+          // For Thai Mobile patterns, show progress updates
+          if (pattern.startsWith('06') || pattern.startsWith('08') || pattern.startsWith('09')) {
+            this.updateLoadingProgress(0, 100000000, 'กำลังสร้างหมายเลขมือถือไทย 100 ล้านเลข...');
+            
+            // Simulate progress updates for large generation
+            let progressCount = 0;
+            const progressInterval = setInterval(() => {
+              progressCount += 10000000; // 10M increments
+              this.updateLoadingProgress(progressCount, 100000000);
+              
+              if (progressCount >= 100000000) {
+                clearInterval(progressInterval);
+              }
+            }, 100);
+          }
 
-      // Clear error and reset select field
-      this.clearError();
-      this.elements.patternSelect.value = '';
+          // Add pattern using PatternManager (includes validation, type identification, and number generation)
+          state.patternManager.addPattern(pattern);
 
-      // Connect pattern additions to UI updates (showing pattern type and all generated numbers)
-      this.updateUI();
-      
-      console.log(`Pattern "${pattern}" added successfully with type identification and number generation`);
+          // Record performance metrics
+          if (endTiming) {
+            endTiming({ pattern, operation: 'addPattern' });
+          }
+
+          // Hide loading screen
+          this.hideLoading();
+
+          // Clear error and reset select field
+          this.clearError();
+          this.elements.patternSelect.value = '';
+
+          // Connect pattern additions to UI updates (showing pattern type and all generated numbers)
+          this.updateUI();
+          
+          console.log(`Pattern "${pattern}" added successfully with type identification and number generation`);
+
+        } catch (error) {
+          // Hide loading screen on error
+          this.hideLoading();
+          
+          // Connect validation errors to UI error display
+          this.showError(error.message);
+          console.log(`Pattern "${pattern}" validation failed: ${error.message}`);
+        }
+      }, 100); // Small delay to ensure loading screen shows
 
     } catch (error) {
+      // Hide loading screen on error
+      this.hideLoading();
+      
       // Connect validation errors to UI error display
       this.showError(error.message);
       console.log(`Pattern "${pattern}" validation failed: ${error.message}`);
@@ -2697,29 +2803,62 @@ class UIController {
         return;
       }
       
-      // Performance monitoring: Start timing CSV export
-      const endTiming = window.performanceMonitor ? window.performanceMonitor.startTiming('csvExport') : null;
+      // Calculate total numbers for progress tracking
+      const totalNumbers = patternGroups.reduce((sum, group) => sum + group.numbers.length, 0);
       
-      // Connect export button to CSVExporter (exporting all numbers with pattern types)
-      const csvExporter = new CSVExporter();
-      csvExporter.export(patternGroups);
+      // Show loading screen for export
+      this.showLoading('กำลังสร้างไฟล์ CSV...', `${patternGroups.length} patterns`);
+      this.updateLoadingProgress(0, totalNumbers, 'กำลังประมวลผลข้อมูลสำหรับ Export...');
       
-      // Record performance metrics
-      if (endTiming) {
-        const totalNumbers = patternGroups.reduce((sum, group) => sum + group.numbers.length, 0);
-        endTiming({ 
-          patterns: patternGroups.length, 
-          totalNumbers,
-          operation: 'csvExport' 
-        });
-      }
-      
-      // Clear any existing errors
-      this.clearError();
-      
-      console.log(`CSV export completed for ${patternGroups.length} patterns with all numbers and pattern types`);
+      // Use setTimeout to allow loading screen to show
+      setTimeout(() => {
+        try {
+          // Performance monitoring: Start timing CSV export
+          const endTiming = window.performanceMonitor ? window.performanceMonitor.startTiming('csvExport') : null;
+          
+          // Simulate progress for large exports
+          let processedNumbers = 0;
+          const progressInterval = setInterval(() => {
+            processedNumbers += Math.min(100000, totalNumbers - processedNumbers);
+            this.updateLoadingProgress(processedNumbers, totalNumbers, 'กำลังสร้างไฟล์ CSV...');
+            
+            if (processedNumbers >= totalNumbers) {
+              clearInterval(progressInterval);
+            }
+          }, 50);
+          
+          // Connect export button to CSVExporter (exporting all numbers with pattern types)
+          const csvExporter = new CSVExporter();
+          csvExporter.export(patternGroups);
+          
+          // Record performance metrics
+          if (endTiming) {
+            endTiming({ 
+              patterns: patternGroups.length, 
+              totalNumbers,
+              operation: 'csvExport' 
+            });
+          }
+          
+          // Hide loading screen
+          this.hideLoading();
+          
+          // Clear any existing errors
+          this.clearError();
+          
+          console.log(`CSV export completed for ${patternGroups.length} patterns with all numbers and pattern types`);
+          
+        } catch (error) {
+          // Hide loading screen on error
+          this.hideLoading();
+          console.error('Export error:', error.message);
+          this.showError(error.message);
+        }
+      }, 100);
       
     } catch (error) {
+      // Hide loading screen on error
+      this.hideLoading();
       console.error('Export error:', error.message);
       this.showError(error.message);
     }

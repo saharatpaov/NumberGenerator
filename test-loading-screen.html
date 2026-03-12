@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Loading Screen</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-title">กำลังประมวลผล<span class="loading-dots"></span></div>
+      <div id="loading-message" class="loading-message">กำลังสร้างหมายเลขบัญชี</div>
+      <div class="loading-progress">
+        <div id="loading-progress-bar" class="loading-progress-bar"></div>
+      </div>
+      <div class="loading-stats">
+        <span id="loading-pattern">Pattern: -</span>
+        <span id="loading-count">0 / 0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Test Loading Screen</h1>
+      </div>
+    </header>
+
+    <main>
+      <section class="input-section">
+        <h2>ทดสอบ Loading Screen</h2>
+        <div class="input-group">
+          <button id="test-loading-btn" class="btn btn-primary">ทดสอบ Loading Screen</button>
+          <button id="test-progress-btn" class="btn btn-secondary">ทดสอบ Progress Bar</button>
+          <button id="test-thai-mobile-btn" class="btn btn-secondary">ทดสอบ Thai Mobile Loading</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="performance-monitor.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Initialize the application when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      init();
+      
+      // Test buttons
+      document.getElementById('test-loading-btn').addEventListener('click', function() {
+        console.log('Testing basic loading screen...');
+        uiController.showLoading('กำลังทดสอบ Loading Screen...', 'test-pattern');
+        
+        setTimeout(() => {
+          uiController.hideLoading();
+          console.log('Loading screen test completed');
+        }, 3000);
+      });
+      
+      document.getElementById('test-progress-btn').addEventListener('click', function() {
+        console.log('Testing progress bar...');
+        uiController.showLoading('กำลังทดสอบ Progress Bar...', 'progress-test');
+        
+        let progress = 0;
+        const total = 1000000;
+        const interval = setInterval(() => {
+          progress += 50000;
+          uiController.updateLoadingProgress(progress, total, `กำลังประมวลผล... ${Math.round((progress/total)*100)}%`);
+          
+          if (progress >= total) {
+            clearInterval(interval);
+            setTimeout(() => {
+              uiController.hideLoading();
+              console.log('Progress bar test completed');
+            }, 1000);
+          }
+        }, 100);
+      });
+      
+      document.getElementById('test-thai-mobile-btn').addEventListener('click', function() {
+        console.log('Testing Thai Mobile loading simulation...');
+        uiController.showLoading('กำลังสร้างหมายเลขมือถือไทย...', '06????????');
+        
+        let progress = 0;
+        const total = 100000000; // 100M
+        const interval = setInterval(() => {
+          progress += 10000000; // 10M increments
+          uiController.updateLoadingProgress(progress, total, 'กำลังสร้างหมายเลขมือถือไทย 100 ล้านเลข...');
+          
+          if (progress >= total) {
+            clearInterval(interval);
+            setTimeout(() => {
+              uiController.hideLoading();
+              console.log('Thai Mobile loading test completed');
+            }, 1000);
+          }
+        }, 200);
+      });
+    });
+  </script>
+</body>
+</html>
