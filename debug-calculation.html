@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Calculation</title>
+</head>
+<body>
+    <h1>Debug การคำนวณผลรวม</h1>
+    <div id="results"></div>
+    
+    <script src="lucky-number-system.js"></script>
+    <script>
+        const analyzer = new LuckyNumberAnalyzer();
+        
+        // Test cases
+        const testNumbers = [
+            '111-111-1111',  // ควรเป็น 11
+            '011-111-1111',  // ควรเป็น 9  
+            '222-222-2222',  // ควรเป็น 22
+            '000-000-0000'   // ควรเป็น 0
+        ];
+        
+        let results = '<h2>ผลการทดสอบ:</h2>';
+        
+        testNumbers.forEach(number => {
+            const analysis = analyzer.analyzeNumber(number);
+            const digits = number.replace(/-/g, '').split('').map(Number);
+            const manualSum = digits.reduce((acc, digit) => acc + digit, 0);
+            
+            results += `
+                <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                    <strong>หมายเลข:</strong> ${number}<br>
+                    <strong>หลักทั้งหมด:</strong> ${digits.join(' + ')}<br>
+                    <strong>ผลรวมที่คำนวณเอง:</strong> ${manualSum}<br>
+                    <strong>ผลรวมจากระบบ:</strong> ${analysis.finalSum}<br>
+                    <strong>ระดับ:</strong> ${analysis.rating.level}<br>
+                    <strong>สี:</strong> <span style="color: ${analysis.rating.color}">${analysis.rating.color}</span><br>
+                    <hr>
+                </div>
+            `;
+        });
+        
+        document.getElementById('results').innerHTML = results;
+    </script>
+</body>
+</html>

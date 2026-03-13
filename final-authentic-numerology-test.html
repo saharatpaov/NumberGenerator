@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทดสอบระบบเลขศาสตร์แบบดั้งเดิมที่ปรับปรุงแล้ว</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🔮 ระบบเลขศาสตร์แบบดั้งเดิมที่ปรับปรุงแล้ว</h1>
+    <p>ระบบเลขศาสตร์ที่ใช้ข้อมูลแท้จริงจากการวิจัยเลขศาสตร์แบบดั้งเดิม ครอบคลุมเลข 0-99</p>
+    
+    <!-- Test Categories -->
+    <div class="test-categories">
+      <h2>ทดสอบตามหมวดหมู่</h2>
+      
+      <!-- Master Numbers -->
+      <div class="category-section">
+        <h3>🌟 Master Numbers (เลขมงคลพิเศษ)</h3>
+        <div class="numbers-grid">
+          <span class="number-item clickable premium" onclick="testLuckyNumber('111-111-1111', this)">
+            11 (Master)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('222-222-2222', this)">
+            22 (Master)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('333-333-3333', this)">
+            33 (Master)<div class="premium-badge">🏅</div>
+          </span>
+        </div>
+      </div>
+      
+      <!-- Karmic Numbers -->
+      <div class="category-section">
+        <h3>⚖️ Karmic Numbers (เลขกรรม)</h3>
+        <div class="numbers-grid">
+          <span class="number-item clickable" onclick="testLuckyNumber('111-111-1112', this)">
+            13 (Karmic)
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('111-111-1113', this)">
+            14 (Karmic)
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('111-111-1114', this)">
+            16 (Karmic)
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('111-111-1115', this)">
+            19 (Karmic)
+          </span>
+        </div>
+      </div>
+      
+      <!-- Power Numbers -->
+      <div class="category-section">
+        <h3>💪 Power Numbers (เลขพลัง)</h3>
+        <div class="numbers-grid">
+          <span class="number-item clickable premium" onclick="testLuckyNumber('444-444-4444', this)">
+            44 (Power)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('555-555-5555', this)">
+            55 (Power)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('666-666-6666', this)">
+            66 (Power)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('777-777-7777', this)">
+            77 (Power)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('888-888-8888', this)">
+            88 (Power)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('999-999-9999', this)">
+            99 (Power)<div class="premium-badge">🏅</div>
+          </span>
+        </div>
+      </div>
+      
+      <!-- Core Numbers -->
+      <div class="category-section">
+        <h3>🎯 Core Numbers (เลขหลัก 1-9)</h3>
+        <div class="numbers-grid">
+          <span class="number-item clickable premium" onclick="testLuckyNumber('100-000-0000', this)">
+            1 (ผู้นำ)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('200-000-0000', this)">
+            2 (ความร่วมมือ)
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('300-000-0000', this)">
+            3 (สร้างสรรค์)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('400-000-0000', this)">
+            4 (มั่นคง)
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('500-000-0000', this)">
+            5 (อิสรภาพ)
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('600-000-0000', this)">
+            6 (ความรัก)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('700-000-0000', this)">
+            7 (ปัญญา)
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('800-000-0000', this)">
+            8 (ความสำเร็จ)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('900-000-0000', this)">
+            9 (การให้)
+          </span>
+        </div>
+      </div>
+      
+      <!-- Random Test Numbers -->
+      <div class="category-section">
+        <h3>🎲 ตัวอย่างเลขต่างๆ</h3>
+        <div class="numbers-grid">
+          <span class="number-item clickable" onclick="testLuckyNumber('123-456-7890', this)">
+            123-456-7890 (45)
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('987-654-3210', this)">
+            987-654-3210 (54)
+          </span>
+          <span class="number-item clickable premium" onclick="testLuckyNumber('111-222-3333', this)">
+            111-222-3333 (18)<div class="premium-badge">🏅</div>
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('555-123-4567', this)">
+            555-123-4567 (42)
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Lucky Number Analysis Popup -->
+    <div id="lucky-overlay" class="lucky-overlay">
+      <div class="lucky-popup">
+        <div class="lucky-header">
+          <h3>🔮 ผลรวมเลขมงคล</h3>
+          <button id="close-lucky-btn" class="close-btn">&times;</button>
+        </div>
+        
+        <div class="lucky-body">
+          <div class="selected-number">
+            <label>หมายเลขบัญชีที่เลือก:</label>
+            <div id="selected-account-number" class="account-number-display">-</div>
+          </div>
+          
+          <div class="lucky-analysis">
+            <div class="sum-section">
+              <div class="circular-badge-container">
+                <div id="circular-badge" class="circular-badge">
+                  <div class="badge-label">ผลรวม</div>
+                  <div id="digit-sum" class="digit-sum-large">-</div>
+                </div>
+                <div id="rating-badge" class="rating-badge-floating">-</div>
+              </div>
+              <div class="rating-description-center">
+                <div id="rating-description" class="rating-description">-</div>
+              </div>
+            </div>
+            
+            <div class="personality-section">
+              <h4>👤 บุคลิกภาพและความหมาย</h4>
+              <div id="personality-section" class="personality-display">-</div>
+            </div>
+            
+            <div class="star-ratings-section">
+              <h4>⭐ คะแนนดาวในแต่ละด้าน</h4>
+              <div class="star-ratings-grid">
+                <div class="rating-category">
+                  <div class="category-label">การงาน</div>
+                  <div id="career-stars" class="stars-container">
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-category">
+                  <div class="category-label">การเงิน</div>
+                  <div id="money-stars" class="stars-container">
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-category">
+                  <div class="category-label">สุขภาพ</div>
+                  <div id="health-stars" class="stars-container">
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-category">
+                  <div class="category-label">ความรัก</div>
+                  <div id="love-stars" class="stars-container">
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="zodiac-section">
+              <h4>♈ ราศีที่เข้ากัน</h4>
+              <div id="compatible-zodiac" class="zodiac-display">-</div>
+            </div>
+            
+            <div class="career-section">
+              <h4>💼 อาชีพที่เหมาะสม</h4>
+              <div id="suitable-careers" class="career-display">-</div>
+            </div>
+            
+            <div class="lucky-info-section">
+              <h4>🍀 ข้อมูลเพิ่มเติม</h4>
+              <div id="lucky-info" class="lucky-info-display">-</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="lucky-footer">
+          <button id="copy-number-btn" class="btn btn-secondary">📋 คัดลอกหมายเลข</button>
+          <button id="close-lucky-footer-btn" class="btn btn-primary">ปิด</button>
+        </div>
+        
+        <div class="attribution">
+          <small>ระบบเลขศาสตร์แบบดั้งเดิม - อิงจากการวิจัยเลขศาสตร์แท้จริง</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="lucky-number-system.js"></script>
+  <script>
+    function testLuckyNumber(accountNumber, element) {
+      console.log('Testing lucky number:', accountNumber);
+      
+      // Wait for the system to be initialized
+      if (window.luckyNumberUI) {
+        window.luckyNumberUI.showLuckyPopup(accountNumber);
+      } else {
+        console.log('Lucky number system not ready, waiting...');
+        setTimeout(() => {
+          if (window.luckyNumberUI) {
+            window.luckyNumberUI.showLuckyPopup(accountNumber);
+          } else {
+            alert('ระบบยังไม่พร้อม กรุณาลองใหม่อีกครั้ง');
+          }
+        }, 500);
+      }
+    }
+    
+    // Display system info on load
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🔮 ระบบเลขศาสตร์แบบดั้งเดิมที่ปรับปรุงแล้ว');
+      console.log('✅ ข้อมูลเลขศาสตร์ครบถ้วน 0-99');
+      console.log('✅ Master Numbers: 11, 22, 33');
+      console.log('✅ Karmic Numbers: 13, 14, 16, 19');
+      console.log('✅ Power Numbers: 44, 55, 66, 77, 88, 99');
+      console.log('✅ อิงจากการวิจัยเลขศาสตร์แท้จริง');
+    });
+  </script>
+</body>
+</html>

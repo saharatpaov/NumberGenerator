@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏅 ทดสอบ Badge แสดงผล</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-section {
+      margin: 2rem 0;
+      padding: 2rem;
+      background: #f8f9fa;
+      border-radius: 15px;
+      border: 1px solid #dee2e6;
+    }
+    .badge-demo {
+      display: inline-block;
+      position: relative;
+      margin: 1rem;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #fff8e1, #ffecb3);
+      border: 2px solid #FFD700;
+      border-radius: 15px;
+      font-weight: bold;
+      color: #e65100;
+    }
+    .demo-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.6);
+      border: 2px solid #fff;
+    }
+    .status-good {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      text-align: center;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏅 ทดสอบ Badge แสดงผล</h1>
+    <p style="text-align: center; font-size: 1.1rem; color: #6c757d;">
+      ทดสอบการแสดงผล Badge ที่มุมบนขวาของเลขระดับ "บารมี"
+    </p>
+    
+    <div class="status-good">
+      <strong>✅ Badge ควรแสดงที่มุมบนขวา:</strong> เหมือนตัวอย่างด้านล่าง
+    </div>
+    
+    <div class="test-section">
+      <h2>🎯 ตัวอย่าง Badge ที่ถูกต้อง</h2>
+      <div style="text-align: center;">
+        <div class="badge-demo">
+          ตัวอย่าง Badge
+          <span class="demo-badge">🏅</span>
+        </div>
+        <div class="badge-demo">
+          999-999-9999
+          <span class="demo-badge">🏅</span>
+        </div>
+        <div class="badge-demo">
+          888-888-8888
+          <span class="demo-badge">🏅</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>🏅 ทดสอบระดับ "บารมี" (ต้องมี Badge เหมือนด้านบน)</h2>
+      <div class="numbers-grid">
+        <span class="number-item clickable" onclick="testLuckyNumber('999-999-9999', this)">
+          999-999-9999 (90)
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('888-888-8888', this)">
+          888-888-8888 (88)
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('100-000-0000', this)">
+          100-000-0000 (1)
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('111-111-1111', this)">
+          111-111-1111 (11)
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('777-777-7777', this)">
+          777-777-7777 (77)
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('222-222-2222', this)">
+          222-222-2222 (22)
+        </span>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>💰 ทดสอบระดับอื่นๆ (ไม่ควรมี Badge)</h2>
+      <div class="numbers-grid">
+        <span class="number-item clickable" onclick="testLuckyNumber('300-000-0000', this)">
+          300-000-0000 (3) - เศรษฐี
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('555-555-5555', this)">
+          555-555-5555 (50) - วาสนา
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('444-444-4444', this)">
+          444-444-4444 (40) - พอตัว
+        </span>
+        <span class="number-item clickable" onclick="testLuckyNumber('123-456-7890', this)">
+          123-456-7890 (45) - ติดขัด
+        </span>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>📊 สถานะการทดสอบ</h2>
+      <div id="test-status" style="text-align: center; font-size: 1.1rem;">
+        <div id="badge-count">🏅 Badge ที่แสดง: <span id="badge-counter">0</span></div>
+        <div id="baramee-count">🎯 เลขบารมีทั้งหมด: <span id="baramee-counter">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lucky Number Analysis Popup -->
+  <div id="lucky-overlay" class="lucky-overlay">
+    <div class="lucky-popup">
+      <div class="lucky-header">
+        <h3>🔮 ผลรวมเลขมงคล</h3>
+        <button id="close-lucky-btn" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="lucky-body">
+        <div class="selected-number">
+          <label>หมายเลขบัญชีที่เลือก:</label>
+          <div id="selected-account-number" class="account-number-display">-</div>
+        </div>
+        
+        <div class="lucky-analysis">
+          <div class="sum-section">
+            <div class="circular-badge-container">
+              <div id="circular-badge" class="circular-badge">
+                <div class="badge-label">ผลรวม</div>
+                <div id="digit-sum" class="digit-sum-large">-</div>
+              </div>
+              <div id="rating-badge" class="rating-badge-floating">-</div>
+            </div>
+            <div class="rating-description-center">
+              <div id="rating-description" class="rating-description">-</div>
+            </div>
+          </div>
+          
+          <div class="personality-section">
+            <h4>👤 บุคลิกภาพและความหมาย</h4>
+            <div id="personality-section" class="personality-display">-</div>
+          </div>
+          
+          <div class="star-ratings-section">
+            <h4>⭐ คะแนนดาวในแต่ละด้าน</h4>
+            <div class="star-ratings-grid">
+              <div class="rating-category">
+                <div class="category-label">การงาน</div>
+                <div id="career-stars" class="stars-container">
+                  <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                </div>
+              </div>
+              <div class="rating-category">
+                <div class="category-label">การเงิน</div>
+                <div id="money-stars" class="stars-container">
+                  <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                </div>
+              </div>
+              <div class="rating-category">
+                <div class="category-label">สุขภาพ</div>
+                <div id="health-stars" class="stars-container">
+                  <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                </div>
+              </div>
+              <div class="rating-category">
+                <div class="category-label">ความรัก</div>
+                <div id="love-stars" class="stars-container">
+                  <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="zodiac-section">
+            <h4>♈ ราศีที่เข้ากัน</h4>
+            <div id="compatible-zodiac" class="zodiac-display">-</div>
+          </div>
+          
+          <div class="career-section">
+            <h4>💼 อาชีพที่เหมาะสม</h4>
+            <div id="suitable-careers" class="career-display">-</div>
+          </div>
+          
+          <div class="lucky-info-section">
+            <h4>🍀 ข้อมูลเพิ่มเติม</h4>
+            <div id="lucky-info" class="lucky-info-display">-</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="lucky-footer">
+        <button id="copy-number-btn" class="btn btn-secondary">📋 คัดลอกหมายเลข</button>
+        <button id="close-lucky-footer-btn" class="btn btn-primary">ปิด</button>
+      </div>
+      
+      <div class="attribution">
+        <small>ระบบเลขศาสตร์ 5 ระดับ - Badge แสดงผลชัดเจน ✅</small>
+      </div>
+    </div>
+  </div>
+
+  <script src="lucky-number-system.js"></script>
+  <script>
+    let badgeCount = 0;
+    let barameeCount = 0;
+    
+    function testLuckyNumber(accountNumber, element) {
+      console.log('🏅 Testing badge visibility for:', accountNumber);
+      
+      // Add badge to main results with enhanced visibility
+      addBadgeToMainResults(accountNumber, element);
+      updateCounters();
+      
+      if (window.luckyNumberUI) {
+        window.luckyNumberUI.showLuckyPopup(accountNumber);
+      } else {
+        setTimeout(() => {
+          if (window.luckyNumberUI) {
+            window.luckyNumberUI.showLuckyPopup(accountNumber);
+          } else {
+            alert('ระบบยังไม่พร้อม กรุณาลองใหม่อีกครั้ง');
+          }
+        }, 500);
+      }
+    }
+    
+    function addBadgeToMainResults(accountNumber, element) {
+      if (window.luckyNumberUI && window.luckyNumberUI.analyzer) {
+        const analysis = window.luckyNumberUI.analyzer.analyzeNumber(accountNumber);
+        
+        console.log('Analysis for', accountNumber, ':', analysis.rating.level);
+        
+        if (analysis.rating.level === 'บารมี') {
+          barameeCount++;
+          
+          if (!element.querySelector('.main-result-badge')) {
+            // Ensure element has relative positioning
+            element.style.position = 'relative';
+            element.style.overflow = 'visible';
+            
+            // Create badge element with maximum visibility
+            const badge = document.createElement('span');
+            badge.className = 'main-result-badge';
+            badge.innerHTML = '🏅';
+            
+            // Apply all styles directly for maximum compatibility
+            badge.style.position = 'absolute';
+            badge.style.top = '-8px';
+            badge.style.right = '-8px';
+            badge.style.width = '24px';
+            badge.style.height = '24px';
+            badge.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
+            badge.style.borderRadius = '50%';
+            badge.style.display = 'flex';
+            badge.style.alignItems = 'center';
+            badge.style.justifyContent = 'center';
+            badge.style.fontSize = '1rem';
+            badge.style.zIndex = '100';
+            badge.style.boxShadow = '0 2px 8px rgba(255, 215, 0, 0.6)';
+            badge.style.border = '2px solid #fff';
+            badge.style.pointerEvents = 'none';
+            
+            element.appendChild(badge);
+            element.classList.add('premium-baramee');
+            
+            badgeCount++;
+            console.log('✅ Badge added successfully to:', accountNumber);
+          }
+        }
+      }
+    }
+    
+    function updateCounters() {
+      document.getElementById('badge-counter').textContent = badgeCount;
+      document.getElementById('baramee-counter').textContent = barameeCount;
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🏅 Badge Visibility Test Page Loaded');
+      
+      setTimeout(() => {
+        initializeMainResultsBadges();
+        updateCounters();
+      }, 1000);
+    });
+    
+    function initializeMainResultsBadges() {
+      const numberItems = document.querySelectorAll('.number-item.clickable');
+      console.log('🔍 Initializing badges for', numberItems.length, 'items');
+      
+      numberItems.forEach(element => {
+        const onclick = element.getAttribute('onclick');
+        if (onclick) {
+          const match = onclick.match(/testLuckyNumber\('([^']+)'/);
+          if (match) {
+            const accountNumber = match[1];
+            addBadgeToMainResults(accountNumber, element);
+          }
+        }
+      });
+      
+      updateCounters();
+      
+      // Show initial status
+      setTimeout(() => {
+        if (badgeCount > 0) {
+          console.log(`✅ SUCCESS: ${badgeCount} badges displayed out of ${barameeCount} บารมี numbers`);
+        } else {
+          console.log('❌ WARNING: No badges displayed');
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>

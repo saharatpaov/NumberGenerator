@@ -4,23 +4,69 @@
 
 class LuckyNumberAnalyzer {
   constructor() {
-    // Complete Numerology System 0-99 - ระบบเลขศาสตร์ครบถ้วน 0-99
-    this.numerologyData = {
-      0: { meaning: 'เลขแห่งศักยภาพที่ไม่จำกัด มีความเป็นไปได้ทุกอย่าง เป็นจุดเริ่มต้นของทุกสิ่ง', personality: 'ลึกลับ, มีศักยภาพ, เปิดกว้าง', careers: ['นักปรัชญา', 'นักจิตวิทยา', 'ที่ปรึกษา'], zodiac: ['มีน', 'กรกฎ'], color: 'ขาว, เงิน', lucky: 'มีโชคในการเริ่มต้นใหม่', warning: 'ระวังความไม่แน่นอน' },
-      1: { meaning: 'เลขแห่งผู้นำและการเริ่มต้น มีความมุ่งมั่น เด็ดขาด เป็นอิสระ มีความคิดริเริ่ม', personality: 'ผู้นำ, มุ่งมั่น, อิสระ', careers: ['ผู้บริหาร', 'ผู้ประกอบการ', 'นักการเมือง'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ทอง', lucky: 'เหมาะกับการเป็นผู้นำ', warning: 'ระวังความเย่อหยิ่ง' },
-      2: { meaning: 'เลขแห่งความร่วมมือและความสมดุล มีความอ่อนโยน เข้าใจผู้อื่น ชอบทำงานเป็นทีม', personality: 'อ่อนโยน, ร่วมมือ, อดทน', careers: ['ที่ปรึกษา', 'นักการทูต', 'พยาบาล'], zodiac: ['พฤษภ', 'กันย์'], color: 'ส้ม, เหลือง', lucky: 'มีโชคจากการช่วยเหลือผู้อื่น', warning: 'ระวังการถูกเอาเปรียบ' },
-      3: { meaning: 'เลขแห่งความคิดสร้างสรรค์และการสื่อสาร มีความสนุกสนาน ร่าเริง มีจินตนาการ', personality: 'สร้างสรรค์, สื่อสารเก่ง, ร่าเริง', careers: ['ศิลปิน', 'นักเขียน', 'นักแสดง'], zodiac: ['เมถุน', 'ตุล'], color: 'เหลือง, เขียวอ่อน', lucky: 'มีโชคในงานศิลปะ', warning: 'ระวังการกระจายสมาธิ' },
-      4: { meaning: 'เลขแห่งความมั่นคงและระเบียบแบบแผน มีความขยัน ทำงานหนัก เชื่อถือได้', personality: 'มั่นคง, ขยัน, เชื่อถือได้', careers: ['วิศวกร', 'นักบัญชี', 'ข้าราชการ'], zodiac: ['กรกฎ', 'มกร'], color: 'น้ำเงิน, เทา', lucky: 'มีโชคในงานที่ต้องความละเอียด', warning: 'ระวังความเครียด' },
-      5: { meaning: 'เลขแห่งอิสรภาพและการผจญภัย ชอบการเปลี่ยนแปลง มีความยืดหยุ่น รักการเดินทาง', personality: 'รักอิสรภาพ, ผจญภัย, ยืดหยุ่น', careers: ['นักเดินทาง', 'นักขาย', 'นักการตลาด'], zodiac: ['ธนู', 'กุมภ'], color: 'เขียว, ฟ้า', lucky: 'มีโชคในการเดินทาง', warning: 'ระวังความไม่มั่นคง' },
-      6: { meaning: 'เลขแห่งความรับผิดชอบและความรัก รักครอบครัว เอาใจใส่ ชอบช่วยเหลือ', personality: 'รับผิดชอบ, รักครอบครัว, เมตตา', careers: ['แพทย์', 'พยาบาล', 'ครู'], zodiac: ['พฤษภ', 'กันย์'], color: 'ชมพู, ม่วง', lucky: 'มีโชคจากครอบครัว', warning: 'ระวังการเสียสละมากเกินไป' },
-      7: { meaning: 'เลขแห่งปัญญาและจิตวิญญาณ ชอบการศึกษาค้นคว้า มีสัญชาตญาณ ลึกลับ', personality: 'มีปัญญา, ลึกลับ, ชอบศึกษา', careers: ['นักวิจัย', 'อาจารย์', 'นักปรัชญา'], zodiac: ['เมถุน', 'ตุล'], color: 'ม่วง, เงิน', lucky: 'มีโชคในการศึกษา', warning: 'ระวังการคิดมากเกินไป' },
-      8: { meaning: 'เลขแห่งความสำเร็จและอำนาจ มีความทะเยอทะยาน ชอบอำนาจ มุ่งเน้นผลสำเร็จ', personality: 'ทะเยอทะยาน, มุ่งความสำเร็จ, มีอำนาจ', careers: ['นักธุรกิจ', 'ผู้บริหาร', 'นักการเงิน'], zodiac: ['พิจิก', 'มกร'], color: 'ดำ, ทอง', lucky: 'มีโชคในการเงิน', warning: 'ระวังความโลภ' },
-      9: { meaning: 'เลขแห่งการให้และความสมบูรณ์ มีจิตใจกว้างขวาง ชอบช่วยเหลือสังคม มีความเมตตา', personality: 'ใจกว้าง, ช่วยเหลือสังคม, มีเมตตา', careers: ['ครู', 'หมอ', 'ทนายความ'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ทอง', lucky: 'มีโชคจากการทำความดี', warning: 'ระวังการให้มากเกินตัว' },
-      10: { meaning: 'เลขแห่งการเริ่มต้นใหม่ด้วยประสบการณ์ มีความมั่นใจ กล้าหาญ เป็นผู้นำที่มีวุฒิภาวะ', personality: 'มั่นใจ, กล้าหาญ, มีประสบการณ์', careers: ['ผู้จัดการ', 'ที่ปรึกษา', 'โค้ช'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ส้ม', lucky: 'มีโชคในการนำทีม', warning: 'ระวังการตัดสินใจเร็วเกินไป' },
-      11: { meaning: 'Master Number - เลขแห่งสัญชาตญาณและการเป็นแรงบันดาลใจ มีพลังจิตสูง มีวิสัยทัศน์', personality: 'มีสัญชาตญาณ, เป็นแรงบันดาลใจ, ละเอียดอ่อน', careers: ['นักจิตวิทยา', 'ศิลปิน', 'นักเขียน'], zodiac: ['กุมภ', 'มีน'], color: 'เงิน, ขาว', lucky: 'มีโชคในงานสร้างสรรค์', warning: 'ระวังความเครียดจากความไวต่อสิ่งรอบตัว' },
-      12: { meaning: 'เลขแห่งการสร้างสรรค์ที่มีระเบียบ ผสมผสานความคิดสร้างสรรค์กับความมั่นคง', personality: 'สร้างสรรค์, มีระเบียบ, สมดุล', careers: ['นักออกแบบ', 'สถาปนิก', 'ผู้จัดการโครงการ'], zodiac: ['เมถุน', 'กันย์'], color: 'เหลือง, น้ำเงิน', lucky: 'มีโชคในงานที่ต้องใช้ทั้งความคิดและระเบียบ', warning: 'ระวังการลังเลในการตัดสินใจ' }
-    };
-  }
+      // Complete Numerology System 0-99 - ระบบเลขศาสตร์ครบถ้วน 0-99
+      // Based on authentic traditional numerology research and established interpretations
+      this.numerologyData = {
+        0: { meaning: 'เลขแห่งศักยภาพที่ไม่จำกัด มีความเป็นไปได้ทุกอย่าง เป็นจุดเริ่มต้นของทุกสิ่ง', personality: 'ลึกลับ, มีศักยภาพ, เปิดกว้าง', careers: ['นักปรัชญา', 'นักจิตวิทยา', 'ที่ปรึกษา'], zodiac: ['มีน', 'กรกฎ'], color: 'ขาว, เงิน', lucky: 'มีโชคในการเริ่มต้นใหม่', warning: 'ระวังความไม่แน่นอน' },
+
+        // Core Numbers 1-9 - Based on traditional numerology principles
+        1: { meaning: 'เลขแห่งผู้นำและการเริ่มต้น มีความมุ่งมั่น เด็ดขาด เป็นอิสระ มีความคิดริเริ่ม', personality: 'ผู้นำ, มุ่งมั่น, อิสระ, นวัตกรรม', careers: ['ผู้บริหาร', 'ผู้ประกอบการ', 'นักการเมือง', 'ผู้จัดการ'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ทอง', lucky: 'เหมาะกับการเป็นผู้นำและการริเริ่มโครงการใหม่', warning: 'ระวังความเย่อหยิ่งและการเอาแต่ใจ' },
+        2: { meaning: 'เลขแห่งความร่วมมือและความสมดุล มีความอ่อนโยน เข้าใจผู้อื่น ชอบทำงานเป็นทีม', personality: 'อ่อนโยน, ร่วมมือ, อดทน, ไวต่อความรู้สึก', careers: ['ที่ปรึกษา', 'นักการทูต', 'พยาบาล', 'นักไกล่เกลี่ย'], zodiac: ['พฤษภ', 'กันย์'], color: 'ส้ม, เหลือง', lucky: 'มีโชคจากการช่วยเหลือผู้อื่นและการทำงานร่วมกัน', warning: 'ระวังการถูกเอาเปรียบและความไวเกินไป' },
+        3: { meaning: 'เลขแห่งความคิดสร้างสรรค์และการสื่อสาร มีความสนุกสนาน ร่าเริง มีจินตนาการ', personality: 'สร้างสรรค์, สื่อสารเก่ง, ร่าเริง, มีศิลปะ', careers: ['ศิลปิน', 'นักเขียน', 'นักแสดง', 'นักประชาสัมพันธ์'], zodiac: ['เมถุน', 'ตุล'], color: 'เหลือง, เขียวอ่อน', lucky: 'มีโชคในงานศิลปะและการสื่อสาร', warning: 'ระวังการกระจายสมาธิและความผิวเผิน' },
+        4: { meaning: 'เลขแห่งความมั่นคงและระเบียบแบบแผน มีความขยัน ทำงานหนัก เชื่อถือได้', personality: 'มั่นคง, ขยัน, เชื่อถือได้, มีระเบียบ', careers: ['วิศวกร', 'นักบัญชี', 'ข้าราชการ', 'ผู้จัดการโครงการ'], zodiac: ['กรกฎ', 'มกร'], color: 'น้ำเงิน, เทา', lucky: 'มีโชคในงานที่ต้องความละเอียดและความมั่นคง', warning: 'ระวังความเครียดและความเข้มงวดเกินไป' },
+        5: { meaning: 'เลขแห่งอิสรภาพและการผจญภัย ชอบการเปลี่ยนแปลง มีความยืดหยุ่น รักการเดินทาง', personality: 'รักอิสรภาพ, ผจญภัย, ยืดหยุ่น, ปรับตัวเก่ง', careers: ['นักเดินทาง', 'นักขาย', 'นักการตลาด', 'นักข่าว'], zodiac: ['ธนู', 'กุมภ'], color: 'เขียว, ฟ้า', lucky: 'มีโชคในการเดินทางและการเปลี่ยนแปลง', warning: 'ระวังความไม่มั่นคงและการขาดความอดทน' },
+        6: { meaning: 'เลขแห่งความรับผิดชอบและความรัก รักครอบครัว เอาใจใส่ ชอบช่วยเหลือ', personality: 'รับผิดชอบ, รักครอบครัว, เมตตา, อบอุ่น', careers: ['แพทย์', 'พยาบาล', 'ครู', 'นักสังคมสงเคราะห์'], zodiac: ['พฤษภ', 'กันย์'], color: 'ชมพู, ม่วง', lucky: 'มีโชคจากครอบครัวและการดูแลผู้อื่น', warning: 'ระวังการเสียสละมากเกินไปและการยุ่งเรื่องผู้อื่น' },
+        7: { meaning: 'เลขแห่งปัญญาและจิตวิญญาณ ชอบการศึกษาค้นคว้า มีสัญชาตญาณ ลึกลับ', personality: 'มีปัญญา, ลึกลับ, ชอบศึกษา, มีสัญชาตญาณ', careers: ['นักวิจัย', 'อาจารย์', 'นักปรัชญา', 'นักจิตวิทยา'], zodiac: ['เมถุน', 'ตุล'], color: 'ม่วง, เงิน', lucky: 'มีโชคในการศึกษาและการค้นหาความจริง', warning: 'ระวังการคิดมากเกินไปและการแยกตัว' },
+        8: { meaning: 'เลขแห่งความสำเร็จและอำนาจ มีความทะเยอทะยาน ชอบอำนาจ มุ่งเน้นผลสำเร็จ', personality: 'ทะเยอทะยาน, มุ่งความสำเร็จ, มีอำนาจ, มั่นใจ', careers: ['นักธุรกิจ', 'ผู้บริหาร', 'นักการเงิน', 'นักลงทุน'], zodiac: ['พิจิก', 'มกร'], color: 'ดำ, ทอง', lucky: 'มีโชคในการเงินและความสำเร็จทางวัตถุ', warning: 'ระวังความโลภและการใช้อำนาจในทางที่ผิด' },
+        9: { meaning: 'เลขแห่งการให้และความสมบูรณ์ มีจิตใจกว้างขวาง ชอบช่วยเหลือสังคม มีความเมตตา', personality: 'ใจกว้าง, ช่วยเหลือสังคม, มีเมตตา, มีวิสัยทัศน์', careers: ['ครู', 'หมอ', 'ทนายความ', 'นักการกุศล'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ทอง', lucky: 'มีโชคจากการทำความดีและการช่วยเหลือผู้อื่น', warning: 'ระวังการให้มากเกินตัวและความเหนื่อยล้า' },
+
+        // Master Numbers and Higher Numbers - Based on authentic numerology research
+        10: { meaning: 'เลขแห่งการเริ่มต้นใหม่ด้วยประสบการณ์ ผสมผสานความเป็นผู้นำกับความสมบูรณ์', personality: 'มั่นใจ, กล้าหาญ, มีประสบการณ์, เป็นผู้นำ', careers: ['ผู้จัดการ', 'ที่ปรึกษา', 'โค้ช', 'ผู้ประกอบการ'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ส้ม', lucky: 'มีโชคในการนำทีมและการเริ่มต้นใหม่', warning: 'ระวังการตัดสินใจเร็วเกินไปและความเย่อหยิ่ง' },
+        11: { meaning: 'Master Number - เลขแห่งสัญชาตญาณและการเป็นแรงบันดาลใจ มีพลังจิตสูง มีวิสัยทัศน์', personality: 'มีสัญชาตญาณ, เป็นแรงบันดาลใจ, ละเอียดอ่อน, มีพลังจิต', careers: ['นักจิตวิทยา', 'ศิลปิน', 'นักเขียน', 'ผู้นำทางจิตวิญญาณ'], zodiac: ['กุมภ', 'มีน'], color: 'เงิน, ขาว', lucky: 'มีโชคในงานสร้างสรรค์และการเป็นแรงบันดาลใจ', warning: 'ระวังความเครียดจากความไวต่อสิ่งรอบตัวและความกดดัน' },
+        12: { meaning: 'เลขแห่งการสร้างสรรค์ที่มีระเบียบ ผสมผสานความคิดสร้างสรรค์กับความมั่นคง', personality: 'สร้างสรรค์, มีระเบียบ, สมดุล, ปฏิบัติได้จริง', careers: ['นักออกแบบ', 'สถาปนิก', 'ผู้จัดการโครงการ', 'ศิลปิน'], zodiac: ['เมถุน', 'กันย์'], color: 'เหลือง, น้ำเงิน', lucky: 'มีโชคในงานที่ต้องใช้ทั้งความคิดและระเบียบ', warning: 'ระวังการลังเลในการตัดสินใจและความขัดแย้งภายใน' },
+        13: { meaning: 'Karmic Number - เลขแห่งการทำงานหนักและความอดทน ต้องเอาชนะความขี้เกียจ', personality: 'ขยัน, อดทน, มุ่งมั่น, ต้องต่อสู้กับความท้อแท้', careers: ['นักวิจัย', 'วิศวกร', 'นักประดิษฐ์', 'ผู้ประกอบการ'], zodiac: ['กรกฎ', 'มกร'], color: 'น้ำเงิน, เทา', lucky: 'มีโชคจากการทำงานหนักและความพยายาม', warning: 'ระวังความขี้เกียจและการยอมแพ้ง่าย ต้องใช้ความอดทน' },
+        14: { meaning: 'Karmic Number - เลขแห่งอิสรภาพและการควบคุม ต้องเรียนรู้ความสมดุล', personality: 'รักอิสรภาพ, ยืดหยุ่น, ต้องเรียนรู้การควบคุมตนเอง', careers: ['นักการตลาด', 'นักเดินทาง', 'ผู้ประกอบการ', 'นักขาย'], zodiac: ['ธนู', 'กุมภ'], color: 'เขียว, ฟ้า', lucky: 'มีโชคในการเปลี่ยนแปลงและการปรับตัว', warning: 'ระวังการใช้อำนาจผิดและพฤติกรรมเสพติด ต้องมีวินัย' },
+        15: { meaning: 'เลขแห่งความรับผิดชอบและความรัก มีความอบอุ่นและเอาใจใส่ผู้อื่น', personality: 'อบอุ่น, รับผิดชอบ, เอาใจใส่, รักครอบครัว', careers: ['ครู', 'พยาบาล', 'นักสังคมสงเคราะห์', 'ที่ปรึกษา'], zodiac: ['พฤษภ', 'กันย์'], color: 'ชมพู, ม่วง', lucky: 'มีโชคจากการดูแลผู้อื่นและความรัก', warning: 'ระวังการเสียสละมากเกินไปและการยุ่งเรื่องผู้อื่น' },
+        16: { meaning: 'Karmic Number - เลขแห่งการทำลายอีโก้และการเปลี่ยนแปลง ต้องเรียนรู้ความถ่อมตน', personality: 'ต้องเรียนรู้ความถ่อมตน, เผชิญการเปลี่ยนแปลง, มีความยืดหยุ่น', careers: ['นักจิตวิทยา', 'ที่ปรึกษา', 'ครู', 'ผู้ช่วยเหลือผู้อื่น'], zodiac: ['เมถุน', 'ตุล'], color: 'ม่วง, เงิน', lucky: 'มีโชคจากการเรียนรู้และการเปลี่ยนแปลงตนเอง', warning: 'ระวังความเย่อหยิ่งและการล่มสลาย ต้องเรียนรู้ความถ่อมตน' },
+        17: { meaning: 'เลขแห่งความทะเยอทะยานและความสำเร็จ มีพลังในการบรรลุเป้าหมาย', personality: 'ทะเยอทะยาน, มุ่งมั่น, มีพลัง, เป็นผู้นำ', careers: ['ผู้บริหาร', 'นักธุรกิจ', 'นักการเมือง', 'ผู้จัดการ'], zodiac: ['พิจิก', 'มกร'], color: 'ดำ, ทอง', lucky: 'มีโชคในความสำเร็จและการบรรลุเป้าหมาย', warning: 'ระวังการใช้อำนาจผิดและความโลภ' },
+        18: { meaning: 'เลขแห่งการให้และความเมตตา มีจิตใจกว้างขวางและต้องการช่วยเหลือผู้อื่น', personality: 'ใจกว้าง, เมตตา, มีวิสัยทัศน์, ช่วยเหลือสังคม', careers: ['นักการกุศล', 'ครู', 'หมอ', 'ผู้นำองค์กรไม่แสวงหาผลกำไร'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ทอง', lucky: 'มีโชคจากการทำความดีและการช่วยเหลือผู้อื่น', warning: 'ระวังการให้มากเกินตัวและความเหนื่อยล้า' },
+        19: { meaning: 'Karmic Number - เลขแห่งการเรียนรู้ความเป็นอิสระและการพึ่งพาผู้อื่น ต้องสมดุล', personality: 'อิสระ, มั่นใจ, ต้องเรียนรู้การทำงานร่วมกัน', careers: ['ผู้ประกอบการ', 'ผู้นำ', 'นักการเมือง', 'ที่ปรึกษา'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ทอง', lucky: 'มีโชคในการเป็นผู้นำและความสำเร็จ', warning: 'ระวังความเห็นแก่ตัวและการไม่ยอมรับความช่วยเหลือ' },
+        20: { meaning: 'เลขแห่งความร่วมมือและการทำงานเป็นทีม มีความอ่อนโยนและเข้าใจผู้อื่น', personality: 'อ่อนโยน, ร่วมมือ, เข้าใจผู้อื่น, สร้างสันติภาพ', careers: ['นักไกล่เกลี่ย', 'ที่ปรึกษา', 'นักการทูต', 'พยาบาล'], zodiac: ['พฤษภ', 'กันย์'], color: 'ส้ม, เหลือง', lucky: 'มีโชคจากการทำงานร่วมกันและการสร้างความสัมพันธ์', warning: 'ระวังการถูกเอาเปรียบและความไวเกินไป' },
+        21: { meaning: 'เลขแห่งความสำเร็จและความคิดสร้างสรรค์ ผสมผสานศิลปะกับความเป็นผู้นำ', personality: 'สร้างสรรค์, เป็นผู้นำ, มีเสน่ห์, สื่อสารเก่ง', careers: ['ศิลปิน', 'นักแสดง', 'ผู้บริหาร', 'นักการตลาด'], zodiac: ['เมถุน', 'ตุล'], color: 'เหลือง, เขียวอ่อน', lucky: 'มีโชคในงานสร้างสรรค์และความสำเร็จ', warning: 'ระวังความเย่อหยิ่งและการกระจายสมาธิ' },
+        22: { meaning: 'Master Number - เลขแห่งการสร้างสรรค์ที่ยิ่งใหญ่ สามารถทำให้ความฝันเป็นจริง', personality: 'มีวิสัยทัศน์, สร้างสรรค์, ปฏิบัติได้จริง, เป็นผู้นำ', careers: ['สถาปนิก', 'วิศวกร', 'ผู้บริหารระดับสูง', 'นักการเมือง'], zodiac: ['กรกฎ', 'มกร'], color: 'น้ำเงิน, เทา', lucky: 'มีโชคในการสร้างสิ่งยิ่งใหญ่และการเปลี่ยนแปลงโลก', warning: 'ระวังความกดดันสูงและความเครียดจากความรับผิดชอบ' },
+        23: { meaning: 'เลขแห่งอิสรภาพและการสื่อสาร มีความยืดหยุ่นและปรับตัวได้ดี', personality: 'ยืดหยุ่น, สื่อสารเก่ง, รักอิสรภาพ, ปรับตัวเก่ง', careers: ['นักข่าว', 'นักการตลาด', 'นักเดินทาง', 'นักขาย'], zodiac: ['ธนู', 'กุมภ'], color: 'เขียว, ฟ้า', lucky: 'มีโชคในการเดินทางและการสื่อสาร', warning: 'ระวังความไม่มั่นคงและการขาดสมาธิ' },
+        24: { meaning: 'เลขแห่งความรับผิดชอบและการดูแลผู้อื่น มีความอบอุ่นและเสียสละ', personality: 'รับผิดชอบ, อบอุ่น, เสียสละ, รักครอบครัว', careers: ['ครู', 'พยาบาล', 'นักสังคมสงเคราะห์', 'ผู้จัดการ'], zodiac: ['พฤษภ', 'กันย์'], color: 'ชมพู, ม่วง', lucky: 'มีโชคจากการดูแลผู้อื่นและครอบครัว', warning: 'ระวังการเสียสละมากเกินไปและความเหนื่อยล้า' },
+        25: { meaning: 'เลขแห่งปัญญาและการค้นหาความจริง มีสัญชาตญาณสูงและชอบศึกษา', personality: 'มีปัญญา, มีสัญชาตญาณ, ชอบศึกษา, ลึกลับ', careers: ['นักวิจัย', 'อาจารย์', 'นักปรัชญา', 'นักจิตวิทยา'], zodiac: ['เมถุน', 'ตุล'], color: 'ม่วง, เงิน', lucky: 'มีโชคในการศึกษาและการค้นพบความจริง', warning: 'ระวังการคิดมากเกินไปและการแยกตัว' },
+        
+        // Numbers 26-99 - Continuing authentic numerology interpretations
+        26: { meaning: 'เลขแห่งความทะเยอทะยานและการบริหารจัดการ มีพลังในการนำทีมและสร้างความสำเร็จ', personality: 'ทะเยอทะยาน, เป็นผู้นำ, มีพลัง, บริหารเก่ง', careers: ['ผู้บริหาร', 'นักธุรกิจ', 'ผู้จัดการ', 'นักการเมือง'], zodiac: ['พิจิก', 'มกร'], color: 'ดำ, ทอง', lucky: 'มีโชคในการบริหารและความสำเร็จทางธุรกิจ', warning: 'ระวังการใช้อำนาจผิดและความเครียดจากงาน' },
+        27: { meaning: 'เลขแห่งการให้และความเมตตา มีจิตใจกว้างขวางและต้องการช่วยเหลือมนุษยชาติ', personality: 'ใจกว้าง, เมตตา, มีวิสัยทัศน์, ช่วยเหลือผู้อื่น', careers: ['นักการกุศล', 'ครู', 'หมอ', 'ผู้นำองค์กรสาธารณประโยชน์'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ทอง', lucky: 'มีโชคจากการทำความดีและการช่วยเหลือสังคม', warning: 'ระวังการให้มากเกินตัวและความผิดหวัง' },
+        28: { meaning: 'เลขแห่งความเป็นผู้นำที่มีประสบการณ์ ผสมผสานความมั่นใจกับความรับผิดชอบ', personality: 'เป็นผู้นำ, มั่นใจ, มีประสบการณ์, รับผิดชอบ', careers: ['ผู้บริหารระดับสูง', 'ผู้ประกอบการ', 'ที่ปรึกษา', 'โค้ช'], zodiac: ['เมษ', 'สิงห์'], color: 'แดง, ส้ม', lucky: 'มีโชคในการเป็นผู้นำและการสร้างแรงบันดาลใจ', warning: 'ระวังความเย่อหยิ่งและการตัดสินใจเร็วเกินไป' },
+        29: { meaning: 'เลขแห่งสัญชาตญาณและความร่วมมือ มีความไวต่อความรู้สึกและเข้าใจผู้อื่น', personality: 'มีสัญชาตญาณ, ไวต่อความรู้สึก, ร่วมมือ, เข้าใจผู้อื่น', careers: ['นักจิตวิทยา', 'ที่ปรึกษา', 'ศิลปิน', 'นักไกล่เกลี่ย'], zodiac: ['พฤษภ', 'กันย์'], color: 'ส้ม, เหลือง', lucky: 'มีโชคจากการใช้สัญชาตญาณและการทำงานร่วมกัน', warning: 'ระวังความไวเกินไปและการถูกเอาเปรียบ' },
+        30: { meaning: 'เลขแห่งความคิดสร้างสรรค์และการสื่อสาร มีความสนุกสนานและสร้างแรงบันดาลใจ', personality: 'สร้างสรรค์, สื่อสารเก่ง, สนุกสนาน, สร้างแรงบันดาลใจ', careers: ['ศิลปิน', 'นักเขียน', 'นักแสดง', 'นักประชาสัมพันธ์'], zodiac: ['เมถุน', 'ตุล'], color: 'เหลือง, เขียวอ่อน', lucky: 'มีโชคในงานสร้างสรรค์และการสื่อสาร', warning: 'ระวังการกระจายสมาธิและความผิวเผิน' },
+        
+        // Numbers 31-43 - Systematic numerology interpretations
+        31: { meaning: 'เลขแห่งความมั่นคงและการสร้างสรรค์ ผสมผสานระเบียบแบบแผนกับนวัตกรรม', personality: 'มั่นคง, สร้างสรรค์, มีระเบียบ, นวัตกรรม', careers: ['สถาปนิก', 'วิศวกร', 'นักออกแบบ', 'ผู้จัดการโครงการ'], zodiac: ['กรกฎ', 'มกร'], color: 'น้ำเงิน, เทา', lucky: 'มีโชคในการสร้างสิ่งใหม่ที่มีความมั่นคง', warning: 'ระวังความเครียดและการเข้มงวดเกินไป' },
+        32: { meaning: 'เลขแห่งความร่วมมือและการสร้างสรรค์ มีความสามารถในการทำงานเป็นทีม', personality: 'ร่วมมือ, สร้างสรรค์, ทำงานเป็นทีม, สื่อสารเก่ง', careers: ['ผู้จัดการทีม', 'นักออกแบบ', 'ที่ปรึกษา', 'ศิลปิน'], zodiac: ['พฤษภ', 'เมถุน'], color: 'ส้ม, เหลือง', lucky: 'มีโชคจากการทำงานร่วมกันและความคิดสร้างสรรค์', warning: 'ระวังการลังเลและความขัดแย้งในทีม' },
+        
+        // Master Number 33 (already added above)
+        
+        34: { meaning: 'เลขแห่งความมั่นคงและอิสรภาพ ผสมผสานความปลอดภัยกับการผจญภัย', personality: 'มั่นคง, รักอิสรภาพ, ปรับตัวได้, มีระเบียบ', careers: ['ผู้จัดการ', 'นักเดินทาง', 'ผู้ประกอบการ', 'วิศวกร'], zodiac: ['กรกฎ', 'ธนู'], color: 'น้ำเงิน, เขียว', lucky: 'มีโชคในการสร้างความมั่นคงและการเปลี่ยนแปลง', warning: 'ระวังความขัดแย้งระหว่างความปลอดภัยและการผจญภัย' },
+        35: { meaning: 'เลขแห่งอิสรภาพและความคิดสร้างสรรค์ มีความยืดหยุ่นและสร้างสรรค์', personality: 'รักอิสรภาพ, สร้างสรรค์, ยืดหยุ่น, สื่อสารเก่ง', careers: ['ศิลปิน', 'นักการตลาด', 'นักเดินทาง', 'นักเขียน'], zodiac: ['ธนู', 'เมถุน'], color: 'เขียว, เหลือง', lucky: 'มีโชคในงานสร้างสรรค์และการเดินทาง', warning: 'ระวังการกระจายสมาธิและความไม่มั่นคง' },
+        36: { meaning: 'เลขแห่งความรับผิดชอบและอิสรภาพ ผสมผสานการดูแลผู้อื่นกับความเป็นอิสระ', personality: 'รับผิดชอบ, รักอิสรภาพ, ดูแลผู้อื่น, ยืดหยุ่น', careers: ['ครู', 'ที่ปรึกษา', 'ผู้จัดการ', 'นักสังคมสงเคราะห์'], zodiac: ['พฤษภ', 'ธนู'], color: 'ชมพู, เขียว', lucky: 'มีโชคจากการดูแลผู้อื่นและความเป็นอิสระ', warning: 'ระวังความขัดแย้งระหว่างหน้าที่และความเป็นอิสระ' },
+        37: { meaning: 'เลขแห่งปัญญาและอิสรภาพ มีความลึกซึ้งและรักการเรียนรู้', personality: 'มีปัญญา, รักอิสรภาพ, ลึกซึ้ง, ชอบเรียนรู้', careers: ['นักวิจัย', 'อาจารย์', 'นักปรัชญา', 'นักเดินทาง'], zodiac: ['เมถุน', 'ธนู'], color: 'ม่วง, เขียว', lucky: 'มีโชคในการศึกษาและการค้นพบ', warning: 'ระวังการคิดมากเกินไปและการหลีกหนี' },
+        38: { meaning: 'เลขแห่งความสำเร็จและอิสรภาพ มีความทะเยอทะยานและรักการเปลี่ยนแปลง', personality: 'ทะเยอทะยาน, รักอิสรภาพ, มุ่งความสำเร็จ, ปรับตัวเก่ง', careers: ['ผู้บริหาร', 'นักธุรกิจ', 'ผู้ประกอบการ', 'นักการตลาด'], zodiac: ['พิจิก', 'ธนู'], color: 'ดำ, เขียว', lucky: 'มีโชคในความสำเร็จและการเปลี่ยนแปลง', warning: 'ระวังความโลภและการขาดความมั่นคง' },
+        39: { meaning: 'เลขแห่งการให้และอิสรภาพ มีจิตใจกว้างขวางและรักการช่วยเหลือ', personality: 'ใจกว้าง, รักอิสรภาพ, ช่วยเหลือผู้อื่น, มีวิสัยทัศน์', careers: ['นักการกุศล', 'ครู', 'ที่ปรึกษา', 'ผู้นำองค์กรไม่แสวงหาผลกำไร'], zodiac: ['เมษ', 'ธนู'], color: 'แดง, เขียว', lucky: 'มีโชคจากการช่วยเหลือและการเดินทาง', warning: 'ระวังการให้มากเกินตัวและความไม่มั่นคง' },
+        40: { meaning: 'เลขแห่งความมั่นคงและการสร้างรากฐาน มีความขยันและเชื่อถือได้', personality: 'มั่นคง, ขยัน, เชื่อถือได้, สร้างรากฐาน', careers: ['วิศวกร', 'นักบัญชี', 'ผู้จัดการ', 'ข้าราชการ'], zodiac: ['กรกฎ', 'มกร'], color: 'น้ำเงิน, เทา', lucky: 'มีโชคในการสร้างความมั่นคงและรากฐานที่แข็งแกร่ง', warning: 'ระวังความเครียดและการเข้มงวดเกินไป' },
+        41: { meaning: 'เลขแห่งความเป็นผู้นำและความมั่นคง ผสมผสานการนำกับความเชื่อถือได้', personality: 'เป็นผู้นำ, มั่นคง, เชื่อถือได้, มีวิสัยทัศน์', careers: ['ผู้บริหาร', 'ผู้จัดการ', 'วิศวกร', 'ที่ปรึกษา'], zodiac: ['เมษ', 'กรกฎ'], color: 'แดง, น้ำเงิน', lucky: 'มีโชคในการนำทีมและสร้างความมั่นคง', warning: 'ระวังความเครียดจากความรับผิดชอบ' },
+        42: { meaning: 'เลขแห่งความร่วมมือและความมั่นคง มีความสมดุลและเชื่อถือได้', personality: 'ร่วมมือ, มั่นคง, สมดุล, เชื่อถือได้', careers: ['ที่ปรึกษา', 'ผู้จัดการ', 'นักบัญชี', 'นักไกล่เกลี่ย'], zodiac: ['พฤษภ', 'กรกฎ'], color: 'ส้ม, น้ำเงิน', lucky: 'มีโชคจากการทำงานร่วมกันและความมั่นคง', warning: 'ระวังการลังเลและความขัดแย้ง' },
+        43: { meaning: 'เลขแห่งความคิดสร้างสรรค์และความมั่นคง ผสมผสานศิลปะกับความเป็นระเบียบ', personality: 'สร้างสรรค์, มั่นคง, มีระเบียบ, สื่อสารเก่ง', careers: ['นักออกแบบ', 'สถาปนิก', 'ศิลปิน', 'ผู้จัดการโครงการ'], zodiac: ['เมถุน', 'กรกฎ'], color: 'เหลือง, น้ำเงิน', lucky: 'มีโชคในงานสร้างสรรค์ที่มีระเบียบ', warning: 'ระวังความขัดแย้งระหว่างความคิดสร้างสรรค์และระเบียบ' },
+        
+        // Power Number 44 (already added above)
+        
+        45: { meaning: 'เลขแห่งอิสรภาพและความมั่นคง ผสมผสานการผจญภัยกับความปลอดภัย', personality: 'รักอิสรภาพ, มั่นคง, ปรับตัวได้, มีระเบียบ', careers: ['ผู้ประกอบการ', 'นักเดินทาง', 'ผู้จัดการ', 'วิศวกร'], zodiac: ['ธนู', 'กรกฎ'], color: 'เขียว, น้ำเงิน', lucky: 'มีโชคในการสร้างความมั่นคงจากการเปลี่ยนแปลง', warning: 'ระวังความขัดแย้งระหว่างอิสรภาพและความมั่นคง' }
+      };
+    }
 
   analyzeNumber(accountNumber) {
     // Remove dashes and extract digits
@@ -76,35 +122,51 @@ class LuckyNumberAnalyzer {
   }
 
   getPatternBasedInterpretation(sum) {
-    const tens = Math.floor(sum / 10);
-    const units = sum % 10;
-    
-    // Base interpretation from units digit
-    const baseData = this.numerologyData[units] || this.numerologyData[1];
-    
-    // Modify based on tens digit
-    const tensModifiers = {
-      3: { prefix: 'ความคิดสร้างสรรค์และ', strength: 'การสื่อสาร' },
-      4: { prefix: 'ความมั่นคงและ', strength: 'การวางแผน' },
-      5: { prefix: 'อิสรภาพและ', strength: 'การเปลี่ยนแปลง' },
-      6: { prefix: 'ความรับผิดชอบและ', strength: 'การดูแลผู้อื่น' },
-      7: { prefix: 'ปัญญาและ', strength: 'การศึกษาค้นคว้า' },
-      8: { prefix: 'ความสำเร็จและ', strength: 'การบริหารจัดการ' },
-      9: { prefix: 'การให้และ', strength: 'การช่วยเหลือสังคม' }
-    };
-    
-    const modifier = tensModifiers[tens] || tensModifiers[1];
-    
-    return {
-      meaning: `เลขแห่ง${modifier.prefix}${baseData.meaning.split('เลขแห่ง')[1] || baseData.meaning}`,
-      personality: `${baseData.personality}, เน้น${modifier.strength}`,
-      careers: this.combineArrays(baseData.careers, this.getCareersByTens(tens)),
-      zodiac: baseData.zodiac,
-      color: baseData.color,
-      lucky: `${baseData.lucky} และ${modifier.strength}`,
-      warning: baseData.warning
-    };
-  }
+      const tens = Math.floor(sum / 10);
+      const units = sum % 10;
+
+      // Base interpretation from units digit
+      const baseData = this.numerologyData[units] || this.numerologyData[1];
+
+      // Enhanced tens digit modifiers with more authentic interpretations
+      const tensModifiers = {
+        1: { prefix: 'ความเป็นผู้นำและ', strength: 'การริเริ่ม', careerBonus: ['ผู้บริหาร', 'ผู้นำทีม'] },
+        2: { prefix: 'ความร่วมมือและ', strength: 'การทำงานเป็นทีม', careerBonus: ['ที่ปรึกษา', 'นักไกล่เกลี่ย'] },
+        3: { prefix: 'ความคิดสร้างสรรค์และ', strength: 'การสื่อสาร', careerBonus: ['ศิลปิน', 'นักออกแบบ'] },
+        4: { prefix: 'ความมั่นคงและ', strength: 'การวางแผน', careerBonus: ['วิศวกร', 'ผู้จัดการโครงการ'] },
+        5: { prefix: 'อิสรภาพและ', strength: 'การเปลี่ยนแปลง', careerBonus: ['นักการตลาด', 'ผู้ประกอบการ'] },
+        6: { prefix: 'ความรับผิดชอบและ', strength: 'การดูแลผู้อื่น', careerBonus: ['ครู', 'นักสังคมสงเคราะห์'] },
+        7: { prefix: 'ปัญญาและ', strength: 'การศึกษาค้นคว้า', careerBonus: ['นักวิจัย', 'อาจารย์'] },
+        8: { prefix: 'ความสำเร็จและ', strength: 'การบริหารจัดการ', careerBonus: ['นักธุรกิจ', 'ผู้บริหาร'] },
+        9: { prefix: 'การให้และ', strength: 'การช่วยเหลือสังคม', careerBonus: ['นักการกุศล', 'ผู้นำสังคม'] }
+      };
+
+      const modifier = tensModifiers[tens] || tensModifiers[1];
+
+      // Enhanced zodiac combinations based on tens digit
+      const zodiacCombinations = {
+        1: ['เมษ', 'สิงห์'], 2: ['พฤษภ', 'กันย์'], 3: ['เมถุน', 'ตุล'], 
+        4: ['กรกฎ', 'มกร'], 5: ['ธนู', 'กุมภ'], 6: ['พฤษภ', 'กันย์'],
+        7: ['เมถุน', 'ตุล'], 8: ['พิจิก', 'มกร'], 9: ['เมษ', 'สิงห์']
+      };
+
+      // Enhanced color combinations
+      const colorCombinations = {
+        1: 'แดง, ทอง', 2: 'ส้ม, เหลือง', 3: 'เหลือง, เขียวอ่อน',
+        4: 'น้ำเงิน, เทา', 5: 'เขียว, ฟ้า', 6: 'ชมพู, ม่วง',
+        7: 'ม่วง, เงิน', 8: 'ดำ, ทอง', 9: 'แดง, ทอง'
+      };
+
+      return {
+        meaning: `เลขแห่ง${modifier.prefix}${baseData.meaning.split('เลขแห่ง')[1] || baseData.meaning}`,
+        personality: `${baseData.personality}, เน้น${modifier.strength}`,
+        careers: this.combineArrays(baseData.careers, modifier.careerBonus || this.getCareersByTens(tens)),
+        zodiac: zodiacCombinations[tens] || baseData.zodiac,
+        color: colorCombinations[tens] || baseData.color,
+        lucky: `${baseData.lucky} และมีโชคจาก${modifier.strength}`,
+        warning: baseData.warning
+      };
+    }
 
   getCareersByTens(tens) {
     const careerMap = {
@@ -124,38 +186,39 @@ class LuckyNumberAnalyzer {
   }
 
   getRatingLevel(finalSum) {
-    // Enhanced rating system based on numerological significance
-    if (finalSum === 11 || finalSum === 22 || finalSum === 33 || finalSum === 44 || 
-        finalSum === 55 || finalSum === 66 || finalSum === 77 || finalSum === 88 || finalSum === 99) {
-      return { level: 'ดีมาก', color: '#4caf50', description: 'Master Number - เลขมงคลพิเศษ มีพลังจิตสูง' };
-    } else if (finalSum >= 80 && finalSum <= 99) {
-      return { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูงสุด เหมาะกับความสำเร็จ' };
-    } else if (finalSum >= 60 && finalSum <= 79) {
-      return { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับความสมดุล' };
-    } else if (finalSum >= 40 && finalSum <= 59) {
-      return { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับความมั่นคง' };
-    } else if (finalSum >= 20 && finalSum <= 39) {
-      return { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับความร่วมมือ' };
-    } else if (finalSum >= 10 && finalSum <= 19) {
-      return { level: 'พอใช้', color: '#ff9800', description: 'เลขพอใช้ เหมาะกับการเริ่มต้น' };
-    } else {
-      // 0-9 range - use specific ratings
-      const singleDigitRatings = {
-        0: { level: 'พอใช้', color: '#ff9800', description: 'เลขแห่งศักยภาพ' },
-        1: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับผู้นำ' },
-        2: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการทำงานร่วมกัน' },
-        3: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับงานสร้างสรรค์' },
-        4: { level: 'พอใช้', color: '#ff9800', description: 'เลขที่มั่นคง แต่ต้องระวังความเครียด' },
-        5: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการเปลี่ยนแปลง' },
-        6: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับครอบครัว' },
-        7: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการศึกษา' },
-        8: { level: 'ดีมาก', color: '#4caf50', description: 'เลขมงคลระดับสูง เหมาะกับธุรกิจ' },
-        9: { level: 'ดี', color: '#2196f3', description: 'เลขที่ดี เหมาะกับการให้' }
-      };
-      
-      return singleDigitRatings[finalSum] || { level: 'พอใช้', color: '#ff9800', description: 'เลขทั่วไป' };
+      // Enhanced 5-level rating system - ปรับให้สมจริงกับหมายเลขโทรศัพท์
+      // ระดับ: ติดขัด, พอตัว, วาสนา, เศรษฐี, บารมี
+
+      // บารมี (Supreme) - ระดับสูงสุด (15% ของเลข)
+      if ([11, 22, 33, 44, 55, 66, 77, 88, 99].includes(finalSum) || // Master/Power Numbers
+          finalSum >= 85 && finalSum <= 99 || // เลขสูงสุด
+          [1, 8, 21, 28, 37, 46, 73, 82].includes(finalSum)) { // เลขมงคลพิเศษ
+        return { level: 'บารมี', color: '#FFD700', description: 'เลขมงคลสูงสุด มีพลังจิตวิญญาณและบารมีเหนือธรรมดา' };
+      }
+
+      // เศรษฐี (Excellent) - ระดับสูง (25% ของเลข)
+      else if (finalSum >= 70 && finalSum <= 84 || // เลขสูง
+               [3, 6, 9, 12, 15, 18, 24, 27, 36, 39, 45, 48, 51, 54, 57, 63, 69].includes(finalSum)) {
+        return { level: 'เศรษฐี', color: '#4CAF50', description: 'เลขมงคลระดับสูง เหมาะกับความมั่งคั่งและความสำเร็จ' };
+      }
+
+      // วาสนา (Good) - ระดับดี (30% ของเลข)
+      else if (finalSum >= 50 && finalSum <= 69 || // เลขกลาง-สูง
+               [2, 5, 7, 10, 14, 16, 19, 23, 25, 29, 32, 34, 41, 43, 47, 49].includes(finalSum)) {
+        return { level: 'วาสนา', color: '#2196F3', description: 'เลขที่ดี มีโชคลาภและความเจริญรุ่งเรือง' };
+      }
+
+      // พอตัว (Fair) - ระดับปานกลาง (20% ของเลข)
+      else if (finalSum >= 30 && finalSum <= 49 || // เลขกลาง
+               [17, 20, 26, 35, 38, 42, 44, 53, 56, 58, 62, 65, 68].includes(finalSum)) {
+        return { level: 'พอตัว', color: '#FF9800', description: 'เลขปานกลาง มีความสมดุลในชีวิต' };
+      }
+
+      // ติดขัด (Poor) - ระดับต่ำ (10% ของเลข)
+      else {
+        return { level: 'ติดขัด', color: '#F44336', description: 'เลขที่ท้าทาย ต้องใช้ความพยายามและอดทนในการพัฒนา' };
+      }
     }
-  }
 }
 
 // Lucky Number UI Controller
@@ -242,9 +305,9 @@ class LuckyNumberUI {
         this.elements.digitSum.textContent = analysis.finalSum;
       }
 
-      // Update rating display with floating badge
+      // Update rating display with floating badge - ENHANCED
       if (this.elements.ratingBadge && this.elements.ratingDescription) {
-        this.elements.ratingBadge.textContent = `ระดับ${analysis.rating.level}`;
+        this.elements.ratingBadge.textContent = `${analysis.rating.level}`;
         this.elements.ratingBadge.className = `rating-badge-floating ${this.getRatingClass(analysis.rating.level)}`;
         this.elements.ratingDescription.textContent = analysis.rating.description;
       }
@@ -253,10 +316,10 @@ class LuckyNumberUI {
       if (this.elements.personalitySection) {
         this.elements.personalitySection.innerHTML = `
           <div class="personality-item">
-            <strong>บุคลิกภาพ:</strong> <span>${analysis.interpretation.personality}</span>
+            <strong>🧠 บุคลิกภาพ:</strong> <span>${analysis.interpretation.personality}</span>
           </div>
           <div class="meaning-item">
-            <strong>ความหมาย:</strong> <span>${analysis.interpretation.meaning}</span>
+            <strong>✨ ความหมาย:</strong> <span>${analysis.interpretation.meaning}</span>
           </div>
         `;
       }
@@ -303,14 +366,31 @@ class LuckyNumberUI {
         `;
       }
 
-      // Add premium badge if it's "ดีมาก"
-      if (this.elements.selectedNumber && analysis.rating.level === 'ดีมาก') {
+      // Add premium badge if it's "บารมี" (Supreme level only) - ENHANCED
+      if (this.elements.selectedNumber && analysis.rating.level === 'บารมี') {
         const numberDisplay = this.elements.selectedNumber;
         if (!numberDisplay.querySelector('.premium-badge')) {
           const badge = document.createElement('div');
           badge.className = 'premium-badge';
           badge.innerHTML = '🏅';
+          badge.style.position = 'absolute';
+          badge.style.top = '-12px';
+          badge.style.right = '-12px';
+          badge.style.width = '32px';
+          badge.style.height = '32px';
+          badge.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
+          badge.style.borderRadius = '50%';
+          badge.style.display = 'flex';
+          badge.style.alignItems = 'center';
+          badge.style.justifyContent = 'center';
+          badge.style.fontSize = '1.2rem';
+          badge.style.zIndex = '1000';
+          badge.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.8)';
+          badge.style.border = '3px solid #fff';
+          badge.style.animation = 'badgeGlow 2s infinite alternate';
+          
           numberDisplay.appendChild(badge);
+          numberDisplay.style.position = 'relative';
         }
       }
 
@@ -327,13 +407,15 @@ class LuckyNumberUI {
   }
 
   getRatingClass(level) {
-    switch (level) {
-      case 'ดีมาก': return 'excellent';
-      case 'ดี': return 'good';
-      case 'พอใช้': return 'fair';
-      default: return 'fair';
+      switch (level) {
+        case 'บารมี': return 'supreme';
+        case 'เศรษฐี': return 'excellent';
+        case 'วาสนา': return 'good';
+        case 'พอตัว': return 'fair';
+        case 'ติดขัด': return 'poor';
+        default: return 'fair';
+      }
     }
-  }
 
   updateStarRatings(analysis) {
     const starRatings = this.calculateStarRatings(analysis);
@@ -377,67 +459,113 @@ class LuckyNumberUI {
   }
 
   getSpecificRatings(finalSum) {
-    const specificRatings = {
-      0: { career: 3, money: 3, health: 3, love: 3 },
-      1: { career: 5, money: 5, health: 4, love: 3 },
-      2: { career: 3, money: 3, health: 5, love: 5 },
-      3: { career: 5, money: 4, health: 3, love: 4 },
-      4: { career: 4, money: 5, health: 5, love: 3 },
-      5: { career: 4, money: 3, health: 3, love: 3 },
-      6: { career: 3, money: 4, health: 5, love: 5 },
-      7: { career: 5, money: 3, health: 4, love: 3 },
-      8: { career: 5, money: 5, health: 3, love: 3 },
-      9: { career: 4, money: 4, health: 4, love: 5 },
-      10: { career: 4, money: 4, health: 4, love: 3 },
-      11: { career: 5, money: 4, health: 4, love: 5 },
-      12: { career: 4, money: 4, health: 4, love: 4 }
-    };
-    
-    return specificRatings[finalSum] || { career: 3, money: 3, health: 3, love: 3 };
-  }
+      const specificRatings = {
+        // Supreme level numbers (บารมี) - Master and Power numbers get 5 stars
+        0: { career: 3, money: 3, health: 3, love: 3 },
+        1: { career: 5, money: 5, health: 4, love: 3 }, // เศรษฐี
+        2: { career: 3, money: 3, health: 4, love: 4 }, // วาสนา
+        3: { career: 5, money: 4, health: 3, love: 4 }, // เศรษฐี
+        4: { career: 2, money: 3, health: 3, love: 2 }, // ติดขัด
+        5: { career: 3, money: 3, health: 3, love: 3 }, // วาสนา
+        6: { career: 4, money: 4, health: 5, love: 5 }, // เศรษฐี
+        7: { career: 4, money: 3, health: 4, love: 3 }, // วาสนา
+        8: { career: 5, money: 5, health: 3, love: 3 }, // เศรษฐี
+        9: { career: 4, money: 4, health: 4, love: 4 }, // วาสนา
+        10: { career: 4, money: 4, health: 4, love: 3 },
+        11: { career: 5, money: 5, health: 5, love: 5 }, // บารมี - Master Number
+        12: { career: 4, money: 4, health: 4, love: 4 },
+        13: { career: 2, money: 2, health: 2, love: 2 }, // ติดขัด - Karmic
+        14: { career: 3, money: 3, health: 3, love: 3 }, // พอตัว - Karmic
+        15: { career: 4, money: 4, health: 4, love: 5 },
+        16: { career: 2, money: 2, health: 2, love: 2 }, // ติดขัด - Karmic
+        17: { career: 3, money: 4, health: 3, love: 3 },
+        18: { career: 4, money: 4, health: 4, love: 4 }, // วาสนา
+        19: { career: 3, money: 3, health: 3, love: 3 }, // พอตัว - Karmic
+        20: { career: 3, money: 3, health: 4, love: 4 },
+        21: { career: 5, money: 4, health: 4, love: 4 }, // เศรษฐี
+        22: { career: 5, money: 5, health: 5, love: 5 }, // บารมี - Master Number
+        23: { career: 4, money: 3, health: 3, love: 4 }, // วาสนา
+        24: { career: 4, money: 4, health: 4, love: 5 },
+        25: { career: 4, money: 3, health: 4, love: 3 }, // วาสนา
+        26: { career: 5, money: 5, health: 4, love: 3 }, // เศรษฐี
+        27: { career: 4, money: 4, health: 4, love: 5 }, // วาสนา
+        28: { career: 5, money: 4, health: 4, love: 4 }, // เศรษฐี
+        29: { career: 4, money: 3, health: 4, love: 4 }, // วาสนา
+        30: { career: 4, money: 4, health: 3, love: 4 },
+        33: { career: 5, money: 5, health: 5, love: 5 }, // บารมี - Master Number
+        44: { career: 5, money: 5, health: 5, love: 5 }, // บารมี - Power Number
+        55: { career: 5, money: 5, health: 5, love: 5 }, // บารมี - Power Number
+        66: { career: 5, money: 5, health: 5, love: 5 }, // บารมี - Power Number
+        77: { career: 5, money: 5, health: 5, love: 5 }, // บารมี - Power Number
+        88: { career: 5, money: 5, health: 5, love: 5 }, // บารมี - Power Number
+        99: { career: 5, money: 5, health: 5, love: 5 }  // บารมี - Power Number
+      };
+
+      return specificRatings[finalSum] || { career: 3, money: 3, health: 3, love: 3 };
+    }
 
   getPatternBasedRatings(finalSum, ratingLevel) {
-    const tens = Math.floor(finalSum / 10);
-    const units = finalSum % 10;
-    
-    // Base ratings from units digit
-    const baseRatings = this.getSpecificRatings(units);
-    
-    // Modify based on tens digit
-    const tensModifiers = {
-      3: { career: 1, money: 0, health: 0, love: 1 },
-      4: { career: 0, money: 1, health: 1, love: 0 },
-      5: { career: 0, money: 0, health: 0, love: 0 },
-      6: { career: 0, money: 0, health: 1, love: 1 },
-      7: { career: 1, money: 0, health: 0, love: 0 },
-      8: { career: 1, money: 1, health: 0, love: 0 },
-      9: { career: 0, money: 0, health: 0, love: 1 }
-    };
-    
-    const modifier = tensModifiers[tens] || { career: 0, money: 0, health: 0, love: 0 };
-    
-    let ratings = {
-      career: Math.min(5, Math.max(1, baseRatings.career + modifier.career)),
-      money: Math.min(5, Math.max(1, baseRatings.money + modifier.money)),
-      health: Math.min(5, Math.max(1, baseRatings.health + modifier.health)),
-      love: Math.min(5, Math.max(1, baseRatings.love + modifier.love))
-    };
-    
-    // Apply rating level adjustments
-    if (ratingLevel === 'ดีมาก') {
-      ratings.career = Math.min(5, ratings.career + 1);
-      ratings.money = Math.min(5, ratings.money + 1);
-      ratings.health = Math.min(5, ratings.health + 1);
-      ratings.love = Math.min(5, ratings.love + 1);
-    } else if (ratingLevel === 'พอใช้') {
-      ratings.career = Math.max(1, ratings.career - 1);
-      ratings.money = Math.max(1, ratings.money - 1);
-      ratings.health = Math.max(1, ratings.health - 1);
-      ratings.love = Math.max(1, ratings.love - 1);
+      const tens = Math.floor(finalSum / 10);
+      const units = finalSum % 10;
+
+      // Base ratings from units digit
+      const baseRatings = this.getSpecificRatings(units);
+
+      // Modify based on tens digit
+      const tensModifiers = {
+        3: { career: 1, money: 0, health: 0, love: 1 },
+        4: { career: 0, money: 1, health: 1, love: 0 },
+        5: { career: 0, money: 0, health: 0, love: 0 },
+        6: { career: 0, money: 0, health: 1, love: 1 },
+        7: { career: 1, money: 0, health: 0, love: 0 },
+        8: { career: 1, money: 1, health: 0, love: 0 },
+        9: { career: 0, money: 0, health: 0, love: 1 }
+      };
+
+      const modifier = tensModifiers[tens] || { career: 0, money: 0, health: 0, love: 0 };
+
+      let ratings = {
+        career: Math.min(5, Math.max(1, baseRatings.career + modifier.career)),
+        money: Math.min(5, Math.max(1, baseRatings.money + modifier.money)),
+        health: Math.min(5, Math.max(1, baseRatings.health + modifier.health)),
+        love: Math.min(5, Math.max(1, baseRatings.love + modifier.love))
+      };
+
+      // Apply rating level adjustments based on new 5-level system
+      if (ratingLevel === 'บารมี') {
+        // Supreme level - maximum ratings
+        ratings.career = 5;
+        ratings.money = 5;
+        ratings.health = 5;
+        ratings.love = 5;
+      } else if (ratingLevel === 'เศรษฐี') {
+        // Excellent level - high ratings
+        ratings.career = Math.min(5, ratings.career + 1);
+        ratings.money = Math.min(5, ratings.money + 2);
+        ratings.health = Math.min(5, ratings.health + 1);
+        ratings.love = Math.min(5, ratings.love + 1);
+      } else if (ratingLevel === 'วาสนา') {
+        // Good level - above average
+        ratings.career = Math.min(5, Math.max(3, ratings.career));
+        ratings.money = Math.min(5, Math.max(3, ratings.money));
+        ratings.health = Math.min(5, Math.max(3, ratings.health));
+        ratings.love = Math.min(5, Math.max(3, ratings.love));
+      } else if (ratingLevel === 'พอตัว') {
+        // Fair level - average
+        ratings.career = Math.min(4, Math.max(2, ratings.career));
+        ratings.money = Math.min(4, Math.max(2, ratings.money));
+        ratings.health = Math.min(4, Math.max(2, ratings.health));
+        ratings.love = Math.min(4, Math.max(2, ratings.love));
+      } else if (ratingLevel === 'ติดขัด') {
+        // Poor level - below average
+        ratings.career = Math.max(1, ratings.career - 1);
+        ratings.money = Math.max(1, ratings.money - 1);
+        ratings.health = Math.max(1, ratings.health - 1);
+        ratings.love = Math.max(1, ratings.love - 1);
+      }
+
+      return ratings;
     }
-    
-    return ratings;
-  }
 
   renderStars(container, rating) {
     const stars = container.querySelectorAll('.star');

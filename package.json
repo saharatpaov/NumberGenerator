@@ -1,0 +1,24 @@
+{
+  "name": "numbergenerator",
+  "version": "1.0.0",
+  "description": "A sophisticated web application that generates account numbers based on various patterns and provides lucky number analysis using **Traditional Numerology System** (ระบบเลขศาสตร์แบบดั้งเดิม).",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saharatpaov/NumberGenerator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/saharatpaov/NumberGenerator/issues"
+  },
+  "homepage": "https://github.com/saharatpaov/NumberGenerator#readme",
+  "dependencies": {
+    "jsdom": "^28.1.0"
+  }
+}

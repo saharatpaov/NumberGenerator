@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทดสอบการแก้ไข UI</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    .pass { background-color: #d4edda; border-color: #c3e6cb; }
+    .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 ทดสอบการแก้ไข UI Issues</h1>
+    
+    <div class="test-categories">
+      <h2>ทดสอบ Badge และ Gold Color</h2>
+      
+      <div class="category-section">
+        <h3>🏅 ทดสอบระดับ "บารมี" (ควรมี Badge และสีทอง)</h3>
+        <div class="numbers-grid">
+          <span class="number-item clickable" onclick="testLuckyNumber('999-999-9999', this)">
+            999-999-9999 (90)
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('888-888-8888', this)">
+            888-888-8888 (88)
+          </span>
+          <span class="number-item clickable" onclick="testLuckyNumber('100-000-0000', this)">
+            100-000-0000 (1)
+          </span>
+        </div>
+      </div>
+      
+      <div id="test-results">
+        <h3>ผลการทดสอบ:</h3>
+        <div id="main-badge-test" class="test-result">
+          <strong>Main Results Badge:</strong> <span id="main-badge-status">รอการทดสอบ...</span>
+        </div>
+        <div id="popup-badge-test" class="test-result">
+          <strong>Popup Badge:</strong> <span id="popup-badge-status">รอการทดสอบ...</span>
+        </div>
+        <div id="gold-color-test" class="test-result">
+          <strong>Gold Color:</strong> <span id="gold-color-status">รอการทดสอบ...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+    <!-- Lucky Number Analysis Popup -->
+    <div id="lucky-overlay" class="lucky-overlay">
+      <div class="lucky-popup">
+        <div class="lucky-header">
+          <h3>🔮 ผลรวมเลขมงคล</h3>
+          <button id="close-lucky-btn" class="close-btn">&times;</button>
+        </div>
+        
+        <div class="lucky-body">
+          <div class="selected-number">
+            <label>หมายเลขบัญชีที่เลือก:</label>
+            <div id="selected-account-number" class="account-number-display">-</div>
+          </div>
+          
+          <div class="lucky-analysis">
+            <div class="sum-section">
+              <div class="circular-badge-container">
+                <div id="circular-badge" class="circular-badge">
+                  <div class="badge-label">ผลรวม</div>
+                  <div id="digit-sum" class="digit-sum-large">-</div>
+                </div>
+                <div id="rating-badge" class="rating-badge-floating">-</div>
+              </div>
+              <div class="rating-description-center">
+                <div id="rating-description" class="rating-description">-</div>
+              </div>
+            </div>
+            
+            <div class="personality-section">
+              <h4>👤 บุคลิกภาพและความหมาย</h4>
+              <div id="personality-section" class="personality-display">-</div>
+            </div>
+            
+            <div class="star-ratings-section">
+              <h4>⭐ คะแนนดาวในแต่ละด้าน</h4>
+              <div class="star-ratings-grid">
+                <div class="rating-category">
+                  <div class="category-label">การงาน</div>
+                  <div id="career-stars" class="stars-container">
+                    <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-category">
+                  <div class="category-label">การเงิน</div>
+                  <div id="money-stars" class="stars-container">
+                    <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-category">
+                  <div class="category-label">สุขภาพ</div>
+                  <div id="health-stars" class="stars-container">
+                    <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                  </div>
+                </div>
+                <div class="rating-category">
+                  <div class="category-label">ความรัก</div>
+                  <div id="love-stars" class="stars-container">
+                    <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="zodiac-section">
+              <h4>♈ ราศีที่เข้ากัน</h4>
+              <div id="compatible-zodiac" class="zodiac-display">-</div>
+            </div>
+            
+            <div class="career-section">
+              <h4>💼 อาชีพที่เหมาะสม</h4>
+              <div id="suitable-careers" class="career-display">-</div>
+            </div>
+            
+            <div class="lucky-info-section">
+              <h4>🍀 ข้อมูลเพิ่มเติม</h4>
+              <div id="lucky-info" class="lucky-info-display">-</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="lucky-footer">
+          <button id="copy-number-btn" class="btn btn-secondary">📋 คัดลอกหมายเลข</button>
+          <button id="close-lucky-footer-btn" class="btn btn-primary">ปิด</button>
+        </div>
+        
+        <div class="attribution">
+          <small>ระบบเลขศาสตร์ 5 ระดับ (ปรับปรุงใหม่): ติดขัด, พอตัว, วาสนา, เศรษฐี, บารมี</small>
+        </div>
+      </div>
+    </div>
+
+  <script src="lucky-number-system.js"></script>
+  <script>
+    function testLuckyNumber(accountNumber, element) {
+      console.log('Testing UI fixes for:', accountNumber);
+      
+      // Test 1: Main Results Badge
+      addBadgeToMainResults(accountNumber, element);
+      checkMainResultsBadge(accountNumber, element);
+      
+      // Test 2 & 3: Popup Badge and Gold Color (tested when popup opens)
+      if (window.luckyNumberUI) {
+        window.luckyNumberUI.showLuckyPopup(accountNumber);
+        
+        // Check popup features after a short delay
+        setTimeout(() => {
+          checkPopupBadge(accountNumber);
+          checkGoldColor(accountNumber);
+        }, 500);
+      }
+    }
+    
+    function addBadgeToMainResults(accountNumber, element) {
+      if (window.luckyNumberUI && window.luckyNumberUI.analyzer) {
+        const analysis = window.luckyNumberUI.analyzer.analyzeNumber(accountNumber);
+        
+        if (analysis.rating.level === 'บารมี' && !element.querySelector('.main-result-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'main-result-badge';
+          badge.innerHTML = '🏅';
+          element.appendChild(badge);
+          
+          element.classList.add('premium-baramee');
+        }
+      }
+    }
+    
+    function checkMainResultsBadge(accountNumber, element) {
+      const analysis = window.luckyNumberUI.analyzer.analyzeNumber(accountNumber);
+      const hasBadge = element.querySelector('.main-result-badge');
+      const statusElement = document.getElementById('main-badge-status');
+      const testElement = document.getElementById('main-badge-test');
+      
+      if (analysis.rating.level === 'บารมี' && hasBadge) {
+        statusElement.textContent = '✅ PASS - Badge แสดงในหน้าจอหลัก';
+        testElement.className = 'test-result pass';
+      } else if (analysis.rating.level === 'บารมี' && !hasBadge) {
+        statusElement.textContent = '❌ FAIL - Badge ไม่แสดงในหน้าจอหลัก';
+        testElement.className = 'test-result fail';
+      } else {
+        statusElement.textContent = '⚪ N/A - ไม่ใช่ระดับบารมี';
+        testElement.className = 'test-result';
+      }
+    }
+    
+    function checkPopupBadge(accountNumber) {
+      const analysis = window.luckyNumberUI.analyzer.analyzeNumber(accountNumber);
+      const selectedNumber = document.getElementById('selected-account-number');
+      const hasBadge = selectedNumber && selectedNumber.querySelector('.premium-badge');
+      const statusElement = document.getElementById('popup-badge-status');
+      const testElement = document.getElementById('popup-badge-test');
+      
+      if (analysis.rating.level === 'บารมี' && hasBadge) {
+        statusElement.textContent = '✅ PASS - Badge แสดงใน popup';
+        testElement.className = 'test-result pass';
+      } else if (analysis.rating.level === 'บารมี' && !hasBadge) {
+        statusElement.textContent = '❌ FAIL - Badge ไม่แสดงใน popup';
+        testElement.className = 'test-result fail';
+      } else {
+        statusElement.textContent = '⚪ N/A - ไม่ใช่ระดับบารมี';
+        testElement.className = 'test-result';
+      }
+    }
+    
+    function checkGoldColor(accountNumber) {
+      const analysis = window.luckyNumberUI.analyzer.analyzeNumber(accountNumber);
+      const ratingBadge = document.getElementById('rating-badge');
+      const statusElement = document.getElementById('gold-color-status');
+      const testElement = document.getElementById('gold-color-test');
+      
+      if (analysis.rating.level === 'บารมี' && ratingBadge) {
+        const computedStyle = window.getComputedStyle(ratingBadge);
+        const color = computedStyle.color;
+        const isGold = color.includes('255, 215, 0') || ratingBadge.style.color === '#FFD700' || ratingBadge.style.color === 'rgb(255, 215, 0)';
+        
+        if (isGold) {
+          statusElement.textContent = '✅ PASS - ข้อความเป็นสีทอง';
+          testElement.className = 'test-result pass';
+        } else {
+          statusElement.textContent = `❌ FAIL - ข้อความไม่เป็นสีทอง (${color})`;
+          testElement.className = 'test-result fail';
+        }
+      } else {
+        statusElement.textContent = '⚪ N/A - ไม่ใช่ระดับบารมี';
+        testElement.className = 'test-result';
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🔧 UI Fixes Test Page Loaded');
+      
+      setTimeout(() => {
+        initializeMainResultsBadges();
+      }, 1000);
+    });
+    
+    function initializeMainResultsBadges() {
+      const numberItems = document.querySelectorAll('.number-item.clickable');
+      
+      numberItems.forEach(element => {
+        const onclick = element.getAttribute('onclick');
+        if (onclick) {
+          const match = onclick.match(/testLuckyNumber\('([^']+)'/);
+          if (match) {
+            const accountNumber = match[1];
+            addBadgeToMainResults(accountNumber, element);
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
